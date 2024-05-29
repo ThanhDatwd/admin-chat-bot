@@ -1,13 +1,39 @@
 import { Button, Card, CardContent, CardHeader, Container, Divider, useTheme } from '@mui/material';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PlaceholderBox from 'src/components/base/placeholder-box';
+import { useParams } from 'react-router';
+import { embedBot } from 'src/api/embed';
 import { ButtonLight } from 'src/components/base/styles/button';
 import { CardActionsLight, CardHeaderLight, DividerLight } from 'src/components/base/styles/card';
 import DocumentsUploadList from './documents-upload-list';
 
-const EmbeddingSection = () => {
+const EmbeddingSection = ({ onEmbed }) => {
   const theme = useTheme();
   const { t } = useTranslation();
+  const [files, setFiles] = useState([]);
+  const [uploadFiles, setUploadFiles] = useState([]);
+  const { id } = useParams();
+  const handleEmbedBot = async () => {
+    try {
+      const data = {
+        botId: id,
+        sitemapUrls: [],
+        sourceUrls: [],
+        fileIds: uploadFiles,
+      };
+
+      console.log(data);
+
+      const response = await embedBot(data);
+      console.log('Embed bot response:', response);
+      setFiles([]);
+      setUploadFiles([]);
+      onEmbed();
+    } catch (error) {
+      console.error('Error embedding bot:', error);
+    }
+  };
+
   return (
     <Card
       sx={{
@@ -26,7 +52,11 @@ const EmbeddingSection = () => {
           py: 3,
         }}
       >
-        <DocumentsUploadList />
+        <DocumentsUploadList
+          files={files}
+          setFiles={setFiles}
+          setUploadFiles={setUploadFiles}
+        />
       </CardContent>
       <Divider />
       <CardActionsLight
@@ -40,8 +70,9 @@ const EmbeddingSection = () => {
         <Button
           variant="contained"
           color="success"
+          onClick={() => handleEmbedBot()}
         >
-          Save
+          Embed
         </Button>
       </CardActionsLight>
     </Card>

@@ -48,7 +48,7 @@ const formSchema = z.object({
   status: z.enum(['Hoạt động', 'Không hoạt động']).default('Hoạt động'),
 });
 
-const CreateChatbotDialog = ({ open, onClose, onUpdate }) => {
+const EditChatbotDialog = ({ open, onClose, onUpdate }) => {
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const { knowledges } = useSelector((state) => state.knowledge);
@@ -345,10 +345,10 @@ const CreateChatbotDialog = ({ open, onClose, onUpdate }) => {
   );
 };
 
-CreateChatbotDialog.propTypes = {
+EditChatbotDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onUpdate: PropTypes.func,
   open: PropTypes.bool.isRequired,
 };
 
-export default CreateChatbotDialog;
+export default EditChatbotDialog;

@@ -16,10 +16,9 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { botsApi } from 'src/api/bots';
-import { Helmet } from 'src/components/base/helmet';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import { CreateChatbotDialog } from 'src/components/chatbot/create-chatbot-dialog';
+import CreateChatbotDialog from 'src/components/chatbot/create-chatbot-dialog';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 import ChatbotSection from '../components/chatbot/chatbot-section';
@@ -31,6 +30,7 @@ const Chatbot = () => {
   const customization = useCustomization();
   const [bots, setBots] = useState([]);
   const [open, setOpen] = useState(false);
+
   const handleDialogOpen = () => {
     setOpen(true);
   };
@@ -128,6 +128,7 @@ const Chatbot = () => {
       <CreateChatbotDialog
         open={open}
         onClose={handleDialogClose}
+        onUpdate={getBots}
       />
     </>
   );

@@ -214,7 +214,7 @@ const BulkDelete = () => {
             fullWidth={!smUp}
             onClick={handleClose}
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             color="error"
@@ -223,7 +223,7 @@ const BulkDelete = () => {
             autoFocus
             fullWidth={!smUp}
           >
-            Delete
+            Xóa
           </Button>
         </DialogActions>
       </Dialog>

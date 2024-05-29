@@ -1,3 +1,4 @@
+import ArrowForwardTwoToneIcon from '@mui/icons-material/ArrowForwardTwoTone';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import GridViewTwoToneIcon from '@mui/icons-material/GridViewTwoTone';
@@ -10,6 +11,7 @@ import {
   alpha,
   Avatar,
   Box,
+  Button,
   Card,
   Checkbox,
   Chip,
@@ -46,9 +48,10 @@ import { knowledgesApi } from 'src/api/knowledges';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { TabsShadow } from 'src/components/base/styles/tabs';
 import { useRouter } from 'src/hooks/use-router';
-import knowledgeSlice, { getKnowledge, setKnowledge } from 'src/slices/knowledge';
+import { getKnowledge, setKnowledge } from 'src/slices/knowledge';
 import { useDispatch } from 'src/store';
 import BulkDelete from '../common/bulk-delete';
+import ChatbotFooterDropdown from './chatbot-footer-dropdown';
 
 export const CardWrapper = styled(Card)(
   ({ theme }) => `
@@ -122,6 +125,7 @@ const ChatbotSection = ({ bots }) => {
 
     return (
       <Chip
+        style={{ maxWidth: '80%' }}
         color={'info'}
         label={labelName}
       />
@@ -189,8 +193,8 @@ const ChatbotSection = ({ bots }) => {
   useEffect(() => {
     const fetchKnowledgeData = async () => {
       try {
-        const data = await knowledgesApi.getKnowledges({ pageNumber: 0, pageSize: 20 });
-        dispatch(setKnowledge(data));
+        let data = [];
+        data = await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
         const knowledgeCounts = bots.reduce((acc, item) => {
           acc[item.knowId] = (acc[item.knowId] || 0) + 1;
           return acc;
@@ -216,7 +220,7 @@ const ChatbotSection = ({ bots }) => {
       }
     };
 
-    fetchKnowledgeData();
+    if (bots.length) fetchKnowledgeData();
   }, [bots]);
 
   return (
@@ -577,7 +581,6 @@ const ChatbotSection = ({ bots }) => {
                           sm={6}
                           lg={4}
                           key={bot.botId}
-                          onClick={() => router.push(`/chatbot/${bot.botId}`)}
                         >
                           <CardWrapper
                             className={clsx({
@@ -598,14 +601,7 @@ const ChatbotSection = ({ bots }) => {
                                 justifyContent="space-between"
                               >
                                 {getBotRoleLabel(bot.knowId)}
-                                <IconButton
-                                  color="primary"
-                                  sx={{
-                                    p: 0.5,
-                                  }}
-                                >
-                                  <MoreVertTwoToneIcon />
-                                </IconButton>
+                                <ChatbotFooterDropdown />
                               </Box>
                               <Box
                                 p={2}
@@ -648,22 +644,21 @@ const ChatbotSection = ({ bots }) => {
                                     </Typography>
                                   </Box>
                                   <Typography
+                                    style={{
+                                      height: 44,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: 2,
+                                      WebkitBoxOrient: 'vertical',
+                                    }}
                                     sx={{
                                       pt: 0.3,
                                     }}
                                     variant="subtitle2"
                                   >
-                                    {bot.jobtitle}
+                                    {bot.botDescription}
                                   </Typography>
-                                  {/* <Typography
-                                    sx={{
-                                      pt: 1,
-                                    }}
-                                    variant="h6"
-                                    fontWeight={500}
-                                  >
-                                    {bot.email}
-                                  </Typography> */}
                                 </Box>
                               </Box>
                               <Divider />
@@ -675,7 +670,13 @@ const ChatbotSection = ({ bots }) => {
                                 alignItems="center"
                                 justifyContent="space-between"
                               >
-                                <Typography>{bot.botDescription}</Typography>
+                                <Button
+                                  variant="contained"
+                                  onClick={() => router.push(`/chatbot/${bot.botId}`)}
+                                  endIcon={<ArrowForwardTwoToneIcon />}
+                                >
+                                  {t('Xem chi tiết bot')}
+                                </Button>
                                 <Checkbox
                                   checked={isBotSelected}
                                   onChange={(event) => handleSelectOneBot(event, bot.botId)}

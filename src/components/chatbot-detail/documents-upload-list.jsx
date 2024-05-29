@@ -1,12 +1,8 @@
 import { UploadFileRounded } from '@mui/icons-material';
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import DescriptionTwoToneIcon from '@mui/icons-material/DescriptionTwoTone';
 import DoDisturbAltRoundedIcon from '@mui/icons-material/DoDisturbAltRounded';
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
-import ImageTwoToneIcon from '@mui/icons-material/ImageTwoTone';
-import InsertDriveFileTwoToneIcon from '@mui/icons-material/InsertDriveFileTwoTone';
-import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfTwoTone';
 import {
   Box,
   Button,
@@ -22,18 +18,16 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { id } from 'date-fns/locale';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useParams } from 'react-router';
+import { uploadFile } from 'src/api/upload';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { CardAddActionDashed } from 'src/components/base/styles/card';
+import fileIcon from '../base/fileIcon';
 
-const fileIcon = (fileName) => {
-  if (fileName.endsWith('.pdf')) return <PictureAsPdfTwoToneIcon />;
-  if (fileName.match(/\.(doc|docx)$/)) return <DescriptionTwoToneIcon />;
-  if (fileName.match(/\.(jpeg|jpg|png|gif)$/)) return <ImageTwoToneIcon />;
-  return <InsertDriveFileTwoToneIcon />;
-};
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -42,9 +36,11 @@ const formatBytes = (bytes, decimals = 2) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
-const DocumentsUploadList = () => {
-  const [files, setFiles] = useState([]);
+
+const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
   const [uploadProgress, setUploadProgress] = useState({});
+  const { id } = useParams();
+
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       setUploadProgress((prevProgress) => ({
@@ -62,7 +58,6 @@ const DocumentsUploadList = () => {
       })),
     ]);
     acceptedFiles.forEach((file) => {
-      // Simulate file upload progress
       const simulateProgress = (file) => {
         const progressInterval = setInterval(() => {
           setUploadProgress((prevProgress) => {
@@ -74,6 +69,7 @@ const DocumentsUploadList = () => {
             const nextProgress = Math.min(currentProgress + 10, 100);
             if (nextProgress === 100) {
               clearInterval(progressInterval);
+              handleUploadFile(file);
             }
             return {
               ...prevProgress,
@@ -87,6 +83,24 @@ const DocumentsUploadList = () => {
       simulateProgress(file);
     });
   }, []);
+
+  const handleUploadFile = async (file) => {
+    try {
+      const uploadResponse = await uploadFile({
+        file: file,
+        botId: id,
+        userId: 'ac140002-8f4e-1c14-818f-58c164f6000a',
+        isPublic: false,
+      });
+
+      delete uploadResponse.fileLink;
+
+      setUploadFiles((prevUploadFiles) => [...prevUploadFiles, uploadResponse]);
+    } catch (error) {
+      console.error('Error upload file:', error);
+    }
+  };
+
   const { getRootProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     onDrop,
     accept: {
@@ -99,6 +113,7 @@ const DocumentsUploadList = () => {
     },
     maxFiles: 10,
   });
+
   const removeFile = (fileName) => {
     setFiles((prevFiles) => prevFiles.filter(({ file }) => file.name !== fileName));
     setUploadProgress((prevProgress) => {
@@ -112,6 +127,7 @@ const DocumentsUploadList = () => {
       URL.revokeObjectURL(uploadProgress[fileName].url);
     }
   };
+
   return (
     <>
       <CardAddActionDashed
@@ -333,4 +349,5 @@ const DocumentsUploadList = () => {
     </>
   );
 };
+
 export default DocumentsUploadList;

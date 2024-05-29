@@ -11,20 +11,32 @@ import {
 } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { uploadFile } from 'src/api/upload';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 
-const UploadIconChatbot = () => {
+const UploadIconChatbot = ({ onUpload }) => {
   const [avatar, setAvatar] = useState('');
   const [loading, setLoading] = useState(false);
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback(async (acceptedFiles) => {
     setLoading(true);
     const file = acceptedFiles[0];
     if (file) {
-      setTimeout(() => {
+      try {
+        const response = await uploadFile({
+          file,
+          userId: 'ac140002-8f4e-1c14-818f-58c164f6000a',
+          isPublic: true,
+        });
+        console.log('File uploaded successfully:', response);
+
         setAvatar(URL.createObjectURL(file));
+        onUpload(response?.fileName);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+      } finally {
         setLoading(false);
-      }, 2000);
+      }
     }
   }, []);
   const { getRootProps, getInputProps } = useDropzone({

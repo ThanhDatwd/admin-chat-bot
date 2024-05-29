@@ -19,24 +19,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import { botsApi } from 'src/api/bots';
-import { Helmet } from 'src/components/base/helmet';
-import PageHeading from 'src/components/base/page-heading';
-import PlaceholderBox from 'src/components/base/placeholder-box';
-import { AvatarState } from 'src/components/base/styles/avatar';
+import { fetchUserFiles } from 'src/api/files';
 import BotInfo from 'src/components/chatbot-detail/bot-info';
 import EmbeddingHistory from 'src/components/chatbot-detail/embedding-history';
 import EmbeddingSection from 'src/components/chatbot-detail/embedding-section';
-import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
-import Results from '../components/chatbot/chatbot-section';
 
 const ChatbotDetail = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const isMountedRef = useRefMounted();
-  const customization = useCustomization();
   const { id } = useParams();
   const [botData, setBotData] = useState({});
+  const [tableData, setTableData] = useState([]);
   const getBots = useCallback(async () => {
     try {
       const response = await botsApi.getBot({ botId: id });
@@ -51,6 +46,22 @@ const ChatbotDetail = () => {
   useEffect(() => {
     getBots();
   }, [getBots]);
+
+  const loadUserFilesData = async () => {
+    try {
+      const data = await fetchUserFiles({
+        botId: id,
+        userId: 'ac140002-8f4e-1c14-818f-58c164f6000a',
+      });
+      setTableData(data);
+    } catch (error) {
+      console.error('Error fetching user files:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadUserFilesData();
+  }, [id]);
 
   return (
     <>
@@ -84,7 +95,7 @@ const ChatbotDetail = () => {
               }}
             >
               <BotInfo data={botData} />
-              <EmbeddingHistory />
+              <EmbeddingHistory tableData={tableData} />
             </Stack>
           </Box>
           <Box
@@ -103,7 +114,7 @@ const ChatbotDetail = () => {
                 sm: 'row',
               }}
             >
-              <EmbeddingSection />
+              <EmbeddingSection onEmbed={() => loadUserFilesData()} />
             </Stack>
           </Box>
         </Container>

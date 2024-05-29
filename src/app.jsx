@@ -9,8 +9,10 @@ import { createTheme } from 'src/theme';
 import 'src/i18n/i18n';
 import 'src/global.css';
 import { Helmet } from 'react-helmet-async';
+import { Provider as ReduxProvider } from 'react-redux';
 import { SidebarProvider, useSidebarContext } from 'src/contexts/sidebar-context';
 import { routesOutlets } from 'src/router';
+import { store } from 'src/store';
 
 export const App = () => {
   useNprogress();
@@ -23,42 +25,44 @@ export const App = () => {
     return router;
   };
   return (
-    <SidebarProvider>
-      <CustomizationProvider>
-        <CustomizationConsumer>
-          {(settings) => {
-            if (!settings.isInitialized) {
-              // return null
-            }
-            const theme = createTheme({
-              colorPreset: settings.colorPreset,
-              direction: settings.direction,
-              paletteMode: settings.paletteMode,
-              layout: settings.layout,
-            });
-            return (
-              <ThemeProvider theme={theme}>
-                <Helmet>
-                  <meta
-                    name="color-scheme"
-                    content={settings.paletteMode}
-                  />
-                  <meta
-                    name="theme-color"
-                    content={theme.palette.primary.main}
-                  />
-                </Helmet>
-                <RtlDirection direction={settings.direction}>
-                  <CssBaseline />
-                  <RenderComponent />
-                  <Toastr />
-                </RtlDirection>
-              </ThemeProvider>
-            );
-          }}
-        </CustomizationConsumer>
-      </CustomizationProvider>
-    </SidebarProvider>
+    <ReduxProvider store={store}>
+      <SidebarProvider>
+        <CustomizationProvider>
+          <CustomizationConsumer>
+            {(settings) => {
+              if (!settings.isInitialized) {
+                // return null
+              }
+              const theme = createTheme({
+                colorPreset: settings.colorPreset,
+                direction: settings.direction,
+                paletteMode: settings.paletteMode,
+                layout: settings.layout,
+              });
+              return (
+                <ThemeProvider theme={theme}>
+                  <Helmet>
+                    <meta
+                      name="color-scheme"
+                      content={settings.paletteMode}
+                    />
+                    <meta
+                      name="theme-color"
+                      content={theme.palette.primary.main}
+                    />
+                  </Helmet>
+                  <RtlDirection direction={settings.direction}>
+                    <CssBaseline />
+                    <RenderComponent />
+                    <Toastr />
+                  </RtlDirection>
+                </ThemeProvider>
+              );
+            }}
+          </CustomizationConsumer>
+        </CustomizationProvider>
+      </SidebarProvider>
+    </ReduxProvider>
   );
 };
 export default App;

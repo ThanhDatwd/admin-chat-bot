@@ -1,41 +1,62 @@
 import ArchiveTwoToneIcon from '@mui/icons-material/ArchiveTwoTone';
+import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
-import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfTwoTone';
 import TextSnippetTwoToneIcon from '@mui/icons-material/TextSnippetTwoTone';
 import {
   alpha,
   Avatar,
   Box,
+  Button,
   Card,
+  CardActions,
   CardContent,
   CardHeader,
   Divider,
   IconButton,
   Link,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   Tooltip,
   Typography,
+  useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { formatDistance, subDays } from 'date-fns';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { fetchUserFiles } from 'src/api/files';
+import fileIcon from '../base/fileIcon';
+import { ButtonIcon } from '../base/styles/button-icon';
 
-const EmbeddingHistory = () => {
+const EmbeddingHistory = ({ tableData }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const [sortConfig, setSortConfig] = useState({
     key: 'dateCreated',
     direction: 'ascending',
   });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(3);
+
+  const handleChangePage = (_event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const sortData = (data, config) => {
     return [...data].sort((a, b) => {
       if (a[config.key] < b[config.key]) {
@@ -47,17 +68,18 @@ const EmbeddingHistory = () => {
       return 0;
     });
   };
+
   const requestSort = (key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending';
     }
-    //@ts-ignore
     setSortConfig({
       key,
       direction,
     });
   };
+
   const renderSortIcon = (columnName) => {
     if (sortConfig.key !== columnName) return null;
     return sortConfig.direction === 'ascending' ? (
@@ -76,54 +98,10 @@ const EmbeddingHistory = () => {
       />
     );
   };
-  const tableData = [
-    {
-      id: '1',
-      icon: <PictureAsPdfTwoToneIcon />,
-      filename: 'PresentationDeck.pdf',
-      owner: 'You',
-      dateCreated: subDays(new Date(), 54),
-    },
-    {
-      id: '2',
-      filename: '2021Screenshot.jpg',
-      owner: 'Kitty Herbert',
-      avatarUrl: '/avatars/3.png',
-      dateCreated: subDays(new Date(), 15),
-    },
-    {
-      id: '3',
-      icon: <TextSnippetTwoToneIcon />,
-      filename: 'FileTransfer.txt',
-      owner: 'Ash Carleton',
-      avatarUrl: '/avatars/4.png',
-      dateCreated: subDays(new Date(), 32),
-    },
-    {
-      id: '4',
-      icon: <ArchiveTwoToneIcon />,
-      filename: 'HolidayPictures.zip',
-      owner: 'You',
-      dateCreated: subDays(new Date(), 19),
-    },
-    {
-      id: '5',
-      icon: <TextSnippetTwoToneIcon />,
-      filename: 'AnnualReport.docx',
-      owner: 'Morgan Freeman',
-      avatarUrl: '/avatars/5.png',
-      dateCreated: subDays(new Date(), 10),
-    },
-    {
-      id: '6',
-      icon: <TextSnippetTwoToneIcon />,
-      filename: 'Budget_Planning.xlsx',
-      owner: 'Jennifer Dunn',
-      avatarUrl: '/avatars/1.png',
-      dateCreated: subDays(new Date(), 25),
-    },
-  ];
+
   const sortedData = sortData(tableData, sortConfig);
+  const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
     <Card
       sx={{
@@ -150,7 +128,7 @@ const EmbeddingHistory = () => {
                     display="flex"
                     alignItems="center"
                   >
-                    {t('Filename')} {renderSortIcon('filename')}
+                    {t('Tên file')} {renderSortIcon('filename')}
                   </Box>
                 </TableCell>
                 <TableCell onClick={() => requestSort('owner')}>
@@ -161,7 +139,7 @@ const EmbeddingHistory = () => {
                     display="flex"
                     alignItems="center"
                   >
-                    {t('Owner')} {renderSortIcon('owner')}
+                    {t('Người training')} {renderSortIcon('owner')}
                   </Box>
                 </TableCell>
                 <TableCell onClick={() => requestSort('dateCreated')}>
@@ -172,14 +150,14 @@ const EmbeddingHistory = () => {
                     display="flex"
                     alignItems="center"
                   >
-                    {t('Date Created')} {renderSortIcon('dateCreated')}
+                    {t('Ngày tạo')} {renderSortIcon('dateCreated')}
                   </Box>
                 </TableCell>
                 <TableCell align="right">{t('Actions')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedData.map((row) => (
+              {paginatedData.map((row) => (
                 <TableRow
                   key={row.id}
                   hover
@@ -189,14 +167,14 @@ const EmbeddingHistory = () => {
                       display="flex"
                       alignItems="center"
                     >
-                      {row.icon}
+                      {fileIcon(row.fileName)}
                       <Typography
                         sx={{
                           pl: 1,
                         }}
                         variant="h6"
                       >
-                        {row.filename}
+                        {row.fileName}
                       </Typography>
                     </Box>
                   </TableCell>
@@ -223,7 +201,7 @@ const EmbeddingHistory = () => {
                         noWrap
                         fontWeight={500}
                       >
-                        {row.owner}
+                        {row.userId}
                       </Link>
                     </Box>
                   </TableCell>
@@ -233,7 +211,7 @@ const EmbeddingHistory = () => {
                       fontWeight={400}
                       noWrap
                     >
-                      {formatDistance(row.dateCreated, new Date(), {
+                      {formatDistance(new Date(row.createDate), new Date(), {
                         addSuffix: true,
                       })}
                     </Typography>
@@ -245,7 +223,7 @@ const EmbeddingHistory = () => {
                     align="right"
                   >
                     <Tooltip
-                      title={t('View')}
+                      title={t('Xem')}
                       arrow
                     >
                       <IconButton
@@ -262,7 +240,7 @@ const EmbeddingHistory = () => {
                       </IconButton>
                     </Tooltip>
                     <Tooltip
-                      title={t('Delete')}
+                      title={t('Xóa')}
                       arrow
                     >
                       <IconButton
@@ -284,8 +262,92 @@ const EmbeddingHistory = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <CardActions
+          sx={{
+            p: 2,
+            '.MuiTablePagination-toolbar': {
+              justifyContent: 'space-between',
+            },
+            '.MuiTablePagination-spacer': {
+              display: 'none',
+            },
+          }}
+        >
+          <TablePagination
+            component="div"
+            count={tableData.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[3]}
+            ActionsComponent={PaginationActions}
+          />
+        </CardActions>
       </CardContent>
     </Card>
   );
 };
+
+export const PaginationActions = ({ count, page, onPageChange }) => {
+  const handleBackButtonClick = (event) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event) => {
+    onPageChange(event, page + 1);
+  };
+
+  const smUp = useMediaQuery((theme) => theme.breakpoints.up('sm'));
+
+  return (
+    <Stack
+      direction="row"
+      spacing={1}
+    >
+      {smUp ? (
+        <>
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="small"
+            onClick={handleBackButtonClick}
+            disabled={page === 0}
+          >
+            Trang trước
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="small"
+            onClick={handleNextButtonClick}
+            disabled={page >= Math.ceil(count / 3) - 1}
+          >
+            Trang sau
+          </Button>
+        </>
+      ) : (
+        <>
+          <ButtonIcon
+            variant="outlined"
+            color="secondary"
+            size="small"
+            onClick={handleBackButtonClick}
+            disabled={page === 0}
+            startIcon={<ChevronLeftRoundedIcon />}
+          />
+          <ButtonIcon
+            variant="outlined"
+            color="secondary"
+            size="small"
+            onClick={handleNextButtonClick}
+            disabled={page >= Math.ceil(count / 3) - 1}
+            startIcon={<ChevronRightRoundedIcon />}
+          />
+        </>
+      )}
+    </Stack>
+  );
+};
+
 export default EmbeddingHistory;
