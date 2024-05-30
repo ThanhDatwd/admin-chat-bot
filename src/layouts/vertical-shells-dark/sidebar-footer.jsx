@@ -1,13 +1,18 @@
 import EventTwoToneIcon from '@mui/icons-material/EventTwoTone';
 import PowerSettingsNewTwoToneIcon from '@mui/icons-material/PowerSettingsNewTwoTone';
 import SmsTwoToneIcon from '@mui/icons-material/SmsTwoTone';
-import { alpha, IconButton, Stack } from '@mui/material';
+import { alpha, Box, IconButton, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router';
+import api from 'src/api/axios';
 import { TooltipLight } from 'src/components/base/styles/tooltips';
+import { logOut } from 'src/slices/auth';
 import { neutral } from 'src/theme/colors';
 
 const FooterButton = ({ icon, tooltipText }) => {
   const { t } = useTranslation();
+
   return (
     <TooltipLight
       placement="top"
@@ -34,7 +39,24 @@ const FooterButton = ({ icon, tooltipText }) => {
     </TooltipLight>
   );
 };
+
 const SidebarFooter = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await api.post(import.meta.env.VITE_API_AUTH_URL_8080 + 'auth/logout');
+      dispatch(logOut());
+
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
+  };
   return (
     <Stack
       direction="row"
@@ -55,7 +77,12 @@ const SidebarFooter = () => {
         tooltipText="Messenger"
       />
       <FooterButton
-        icon={<PowerSettingsNewTwoToneIcon fontSize="small" />}
+        icon={
+          <PowerSettingsNewTwoToneIcon
+            onClick={() => handleLogout()}
+            fontSize="small"
+          />
+        }
         tooltipText="Logout"
       />
     </Stack>
