@@ -5,7 +5,7 @@ const initialState = {
   knowledges: [],
 };
 
-const knowledgeSlice = createSlice({
+const slice = createSlice({
   name: 'knowledge',
   initialState,
   reducers: {
@@ -14,15 +14,12 @@ const knowledgeSlice = createSlice({
     },
   },
 });
-export const { setKnowledge } = knowledgeSlice.actions;
-export const { reducer } = knowledgeSlice;
-
+export const { setKnowledge } = slice.actions;
+export const { reducer } = slice;
 export const getKnowledge =
   ({ pageNumber, pageSize }) =>
   async (dispatch) => {
     const response = await knowledgesApi.getKnowledges({ pageNumber, pageSize });
-    console.log(response);
-    dispatch(setKnowledge(response));
+    dispatch(slice.actions.setKnowledge(response));
+    return response;
   };
-
-export default knowledgeSlice;

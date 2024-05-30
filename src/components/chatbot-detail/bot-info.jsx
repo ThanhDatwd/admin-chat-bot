@@ -34,7 +34,7 @@ const BotInfo = ({ data }) => {
           <Tooltip
             arrow
             placement="top"
-            title={t('Get in touch via email')}
+            title={t('Sửa thông tin bot')}
           >
             <ButtonIcon color="primary">
               <EditOutlinedIcon />
@@ -59,11 +59,11 @@ const BotInfo = ({ data }) => {
             width: 94,
             height: 94,
           }}
-          src="/avatars/2.png"
+          src={data?.icon}
         />
         <Chip
           color="success"
-          label={data.botStatus}
+          label={data?.botStatus}
         />
         <Typography
           sx={{
@@ -71,13 +71,13 @@ const BotInfo = ({ data }) => {
           }}
           variant="h3"
         >
-          {data.botName}
+          {data?.botName}
         </Typography>
         <Typography
           variant="subtitle1"
           color="text.secondary"
         >
-          {data.knowId}
+          {data?.knowId}
         </Typography>
         <Typography
           sx={{
@@ -86,7 +86,7 @@ const BotInfo = ({ data }) => {
           style={{ fontSize: 16 }}
           color="text.secondary"
         >
-          {data.botDescription}
+          {data?.botDescription}
         </Typography>
       </Box>
     </Card>
