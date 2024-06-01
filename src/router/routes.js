@@ -4,4 +4,6 @@ export const routes = {
   pageExample: '/page-example',
   chatbot: '/chatbot',
   user: '/user',
+  customer: '/customer',
+  createAccountAdmin: '/create-account',
 };

@@ -5,10 +5,14 @@ import LoginPage from 'src/pages/auth/login';
 import RegisterPage from 'src/pages/auth/register';
 import AuthLayout from 'src/layouts/AuthLayout';
 import RecoverPasswordPage from 'src/pages/auth/recover-password';
+import CustomerDetail from 'src/pages/customer-detail';
+import CreateAccountAdminPage from 'src/pages/create-account';
+
+// import { Layout as LayoutBase } from "src/layouts/base";
 
 const HomePage = lazy(() => import('src/pages/index'));
 const PageExample = lazy(() => import('src/pages/page-example'));
-const User = lazy(() => import('src/pages/user'));
+const CustomerPage = lazy(() => import('src/pages/customer'));
 const Chatbot = lazy(() => import('src/pages/chatbot'));
 const ChatbotDetail = lazy(() => import('src/pages/chatbot-detail'));
 const Error404Page = lazy(() => import('src/pages/404'));
@@ -57,8 +61,16 @@ export const routesOutlets = [
         element: <ChatbotDetail />,
       },
       {
-        path: 'user',
-        element: <User />,
+        path: 'customer',
+        element: <CustomerPage />,
+      },
+      {
+        path: 'customer/:id',
+        element: <CustomerDetail />,
+      },
+      {
+        path: 'create-account',
+        element: <CreateAccountAdminPage />,
       },
     ],
   },

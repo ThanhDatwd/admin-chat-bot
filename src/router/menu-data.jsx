@@ -4,6 +4,7 @@ import ReportIcon from '@heroicons/react/24/outline/FlagIcon';
 import HomeIcon from '@heroicons/react/24/outline/HomeIcon';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import { Box } from '@mui/material';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +54,7 @@ export const useMenuItems = () => {
             route: routes.chatbot,
           },
           {
-            title: 'Users',
+            title: 'Customers',
             icon: (
               <Box
                 width={24}
@@ -62,7 +63,19 @@ export const useMenuItems = () => {
                 <PersonOutlineOutlinedIcon />
               </Box>
             ),
-            route: routes.user,
+            route: routes.customer,
+          },
+          {
+            title: 'Create account admin',
+            icon: (
+              <Box
+                width={24}
+                height={24}
+              >
+                <AddBoxOutlinedIcon />
+              </Box>
+            ),
+            route: routes.createAccountAdmin,
           },
           {
             title: 'Dropdown menu',

@@ -1,36 +1,30 @@
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import {
   Box,
-  Button,
-  Card,
-  CardContent,
   Container,
-  Divider,
-  Typography,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { botsApi } from 'src/api/bots';
-import { Helmet } from 'src/components/base/helmet';
+import { customersApi } from 'src/api/customer';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import { useCustomization } from 'src/hooks/use-customization';
+import CreateAdminAccountForm from 'src/components/customer/create-admin-account-form';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
-import Results from '../components/chatbot/chatbot-section';
 
-const User = () => {
+const CreateAccountAdminPage = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const isMountedRef = useRefMounted();
-  const customization = useCustomization();
-  const [users, setUsers] = useState([]);
-  const getBots = useCallback(async () => {
+  const [customers, setCustomers] = useState([]);
+
+
+  
+  const geCustomers = useCallback(async () => {
     try {
-      const response = await botsApi.getBots({ pageNumber: 0, pageSize: 20 });
+      const response = await customersApi.getCustomers({ pageNumber: 0, pageSize: 20 });
       if (isMountedRef()) {
-        setUsers(response);
+        setCustomers(response);
       }
     } catch (err) {
       console.error(err);
@@ -38,8 +32,8 @@ const User = () => {
   }, [isMountedRef]);
 
   useEffect(() => {
-    getBots();
-  }, [getBots]);
+    geCustomers();
+  }, [geCustomers]);
 
   return (
     <>
@@ -71,24 +65,8 @@ const User = () => {
               sx={{
                 px: 0,
               }}
-              title={t('User')}
-              description={t('Quản lý User')}
-              actions={
-                <>
-                  <Button
-                    sx={{
-                      mt: {
-                        xs: 2,
-                        md: 0,
-                      },
-                    }}
-                    variant="contained"
-                    startIcon={<AddOutlinedIcon fontSize="small" />}
-                  >
-                    {t('Tạo user')}
-                  </Button>
-                </>
-              }
+              title={t('Tạo tài khoản quản trị')}
+             
               iconBox={
                 <AvatarState
                   isSoft
@@ -109,10 +87,13 @@ const User = () => {
               }
             />
           </Box>
-          <Results users={users} />
+          <CreateAdminAccountForm organizations={customers.map(customer=>{
+            return {...customer,label:customer.customerName, value:customer.customerId}
+          })}/>
         </Container>
       </Box>
+      
     </>
   );
 };
-export default User;
+export default CreateAccountAdminPage;
