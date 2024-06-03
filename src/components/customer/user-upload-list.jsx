@@ -21,7 +21,7 @@ import {
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useParams } from 'react-router';
-import { uploadFile } from 'src/api/upload';
+import { uploadFile } from 'src/api/files';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { CardAddActionDashed } from 'src/components/base/styles/card';

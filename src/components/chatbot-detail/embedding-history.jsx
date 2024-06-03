@@ -34,7 +34,7 @@ import {
 import { formatDistance, subDays } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { fetchUserFiles } from 'src/api/files';
+import { downloadFile, fetchUserFiles } from 'src/api/files';
 import fileIcon from '../base/fileIcon';
 import { ButtonIcon } from '../base/styles/button-icon';
 
@@ -101,6 +101,19 @@ const EmbeddingHistory = ({ tableData }) => {
 
   const sortedData = sortData(tableData, sortConfig);
   const paginatedData = sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  const handleDownload = async ({ fileKey, fileName }) => {
+    try {
+      await downloadFile({
+        fileKey,
+        fileName,
+      });
+    } catch (error) {
+      console.error('Error fetching user files:', error);
+    }
+  };
+
+  const handleDelete = () => {};
 
   return (
     <Card
@@ -235,6 +248,9 @@ const EmbeddingHistory = ({ tableData }) => {
                         }}
                         color="inherit"
                         size="small"
+                        onClick={() =>
+                          handleDownload({ fileKey: row?.objectId, fileName: row?.fileName })
+                        }
                       >
                         <LaunchTwoToneIcon fontSize="small" />
                       </IconButton>
@@ -252,6 +268,7 @@ const EmbeddingHistory = ({ tableData }) => {
                         }}
                         color="inherit"
                         size="small"
+                        onClick={() => handleDelete()}
                       >
                         <DeleteTwoToneIcon fontSize="small" />
                       </IconButton>

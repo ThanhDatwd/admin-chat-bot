@@ -185,7 +185,12 @@ const BulkDelete = () => {
         }}
       >
         <DialogContent>
-          <AlertDialogContent />
+          <AlertDialogContent
+            title={'Xác nhận xóa'}
+            description={
+              'Bạn có chắc chắn muốn xóa mục này không? Hành động này không thể hoàn tác.'
+            }
+          />
         </DialogContent>
         <DialogActions
           sx={{

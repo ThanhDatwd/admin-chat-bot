@@ -22,7 +22,7 @@ import { id } from 'date-fns/locale';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useParams } from 'react-router';
-import { uploadFile } from 'src/api/upload';
+import { uploadFile } from 'src/api/files';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { CardAddActionDashed } from 'src/components/base/styles/card';
@@ -199,9 +199,9 @@ const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
                       isDragAccept ? 'success.main' : isDragReject ? 'error.main' : 'primary.main'
                     }
                   >
-                    Click to upload
+                    Nhấp để tải lên
                   </Typography>{' '}
-                  or drag and drop documents here. Max. 10 files
+                  hoặc kéo và thả tài liệu vào đây. Tối đa 10 tệp
                 </Typography>
               </Box>
             </Stack>
@@ -316,13 +316,13 @@ const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
               variant="h5"
               color="text.primary"
             >
-              No files added
+              Không có tệp nào được thêm vào
             </Typography>
             <Typography
               color="text.secondary"
               fontWeight={400}
             >
-              Please upload the necessary documents
+              Vui lòng tải lên các tài liệu cần thiết
             </Typography>
           </Box>
           <Box width="100%">
@@ -342,7 +342,7 @@ const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
             size="small"
             {...getRootProps()}
           >
-            Add files
+            Thêm tệp
           </Button>
         </Stack>
       )}

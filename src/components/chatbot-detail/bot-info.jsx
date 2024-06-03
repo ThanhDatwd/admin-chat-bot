@@ -13,11 +13,13 @@ import {
   useTheme,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { ButtonIcon } from '../base/styles/button-icon';
 
 const BotInfo = ({ data }) => {
   const theme = useTheme();
   const { t } = useTranslation();
+  const { knowledges } = useSelector((state) => state.knowledge);
 
   return (
     <Card
@@ -77,7 +79,7 @@ const BotInfo = ({ data }) => {
           variant="subtitle1"
           color="text.secondary"
         >
-          {data?.knowId}
+          {knowledges.find((item) => item.knowId === data?.knowId)?.knowName}
         </Typography>
         <Typography
           sx={{

@@ -95,7 +95,7 @@ const ChatbotDetail = () => {
               }}
             >
               <BotInfo data={botData} />
-              <EmbeddingHistory tableData={tableData} />
+              <EmbeddingSection onEmbed={() => loadUserFilesData()} />
             </Stack>
           </Box>
           <Box
@@ -114,7 +114,7 @@ const ChatbotDetail = () => {
                 sm: 'row',
               }}
             >
-              <EmbeddingSection onEmbed={() => loadUserFilesData()} />
+              <EmbeddingHistory tableData={tableData} />
             </Stack>
           </Box>
         </Container>

@@ -1,5 +1,7 @@
+import AddModeratorOutlinedIcon from '@mui/icons-material/AddModeratorOutlined';
 import ArrowForwardTwoToneIcon from '@mui/icons-material/ArrowForwardTwoTone';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import GridViewTwoToneIcon from '@mui/icons-material/GridViewTwoTone';
 import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded';
@@ -44,6 +46,7 @@ import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { knowledgesApi } from 'src/api/knowledges';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { TabsShadow } from 'src/components/base/styles/tabs';
@@ -51,6 +54,7 @@ import { useRouter } from 'src/hooks/use-router';
 import { getKnowledge, setKnowledge } from 'src/slices/knowledge';
 import { useDispatch } from 'src/store';
 import BulkDelete from '../common/bulk-delete';
+import AuthorizeChatbotQuery from './authorize-chatbot-query';
 import ChatbotFooterDropdown from './chatbot-footer-dropdown';
 
 export const CardWrapper = styled(Card)(
@@ -107,13 +111,14 @@ const applyPagination = (bots, page, limit) => {
   return bots.slice(page * limit, page * limit + limit);
 };
 const ChatbotSection = ({ bots }) => {
-  const [selectedItems, setSelectedBots] = useState([]);
+  const [selectedBot, setSelectedBot] = useState({});
+  const [selectedItems, setSelectedItems] = useState([]);
   const [knowledges, setKnowledges] = useState([]);
   const { t } = useTranslation();
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(6);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({
     knowId: null,
@@ -141,7 +146,7 @@ const ChatbotSection = ({ bots }) => {
       ...prevFilters,
       knowId: value,
     }));
-    setSelectedBots([]);
+    setSelectedItems([]);
   };
 
   const handleSelectChange = (event) => {
@@ -150,7 +155,7 @@ const ChatbotSection = ({ bots }) => {
       ...prevFilters,
       knowId: selectedValue === 'all' ? null : selectedValue,
     }));
-    setSelectedBots([]);
+    setSelectedItems([]);
   };
 
   const handleQueryChange = (event) => {
@@ -159,14 +164,14 @@ const ChatbotSection = ({ bots }) => {
   };
 
   const handleSelectAllBots = (event) => {
-    setSelectedBots(event.target.checked ? bots.map((bot) => bot.botId) : []);
+    setSelectedItems(event.target.checked ? bots.map((bot) => bot.botId) : []);
   };
 
   const handleSelectOneBot = (_event, botId) => {
     if (!selectedItems.includes(botId)) {
-      setSelectedBots((prevSelected) => [...prevSelected, botId]);
+      setSelectedItems((prevSelected) => [...prevSelected, botId]);
     } else {
-      setSelectedBots((prevSelected) => prevSelected.filter((id) => id !== botId));
+      setSelectedItems((prevSelected) => prevSelected.filter((id) => id !== botId));
     }
   };
 
@@ -189,12 +194,12 @@ const ChatbotSection = ({ bots }) => {
   };
   const router = useRouter();
   const dispatch = useDispatch();
+  const { knowledges: knowledgeData } = useSelector((state) => state.knowledge);
+  const [openAuthorizeChatbotQuery, setOpenAuthorizeChatbotQuery] = useState(false);
 
   useEffect(() => {
     const fetchKnowledgeData = async () => {
       try {
-        let data = [];
-        data = await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
         const knowledgeCounts = bots.reduce((acc, item) => {
           acc[item.knowId] = (acc[item.knowId] || 0) + 1;
           return acc;
@@ -207,7 +212,7 @@ const ChatbotSection = ({ bots }) => {
             count: bots.length,
           },
           // eslint-disable-next-line no-unsafe-optional-chaining
-          ...data?.map((item) => ({
+          ...knowledgeData?.map((item) => ({
             value: item.knowId,
             label: t(item.knowName),
             count: knowledgeCounts[item.knowId],
@@ -220,8 +225,8 @@ const ChatbotSection = ({ bots }) => {
       }
     };
 
-    if (bots.length) fetchKnowledgeData();
-  }, [bots]);
+    if (bots.length && knowledgeData) fetchKnowledgeData();
+  }, [bots, knowledgeData]);
 
   return (
     <>
@@ -493,6 +498,20 @@ const ChatbotSection = ({ bots }) => {
                             <TableCell align="center">
                               <Typography noWrap>
                                 <Tooltip
+                                  title={t('Gán người dùng cho bot')}
+                                  arrow
+                                >
+                                  <IconButton
+                                    onClick={() => {
+                                      setSelectedBot(bot);
+                                      setOpenAuthorizeChatbotQuery(true);
+                                    }}
+                                    color="secondary"
+                                  >
+                                    <AddModeratorOutlinedIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip
                                   title={t('View')}
                                   arrow
                                 >
@@ -532,7 +551,7 @@ const ChatbotSection = ({ bots }) => {
                   onRowsPerPageChange={handleLimitChange}
                   page={page}
                   rowsPerPage={limit}
-                  rowsPerPageOptions={[5, 10, 15]}
+                  rowsPerPageOptions={[6, 9, 15]}
                   slotProps={{
                     select: {
                       variant: 'outlined',
@@ -601,7 +620,10 @@ const ChatbotSection = ({ bots }) => {
                                 justifyContent="space-between"
                               >
                                 {getBotRoleLabel(bot.knowId)}
-                                <ChatbotFooterDropdown />
+                                <ChatbotFooterDropdown
+                                  onSelect={() => setSelectedBot(bot)}
+                                  setOpenAuthorizeChatbotQuery={setOpenAuthorizeChatbotQuery}
+                                />
                               </Box>
                               <Box
                                 p={2}
@@ -719,7 +741,7 @@ const ChatbotSection = ({ bots }) => {
                       page={page}
                       rowsPerPage={limit}
                       labelRowsPerPage=""
-                      rowsPerPageOptions={[5, 10, 15]}
+                      rowsPerPageOptions={[6, 9, 15]}
                       slotProps={{
                         select: {
                           variant: 'outlined',
@@ -763,6 +785,11 @@ const ChatbotSection = ({ bots }) => {
               </Typography>
             </Box>
           )}
+          <AuthorizeChatbotQuery
+            botName={selectedBot?.botName}
+            open={openAuthorizeChatbotQuery}
+            setOpen={setOpenAuthorizeChatbotQuery}
+          />
         </>
       )}
     </>
