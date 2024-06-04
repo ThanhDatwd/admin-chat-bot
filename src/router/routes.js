@@ -5,5 +5,7 @@ export const routes = {
   chatbot: '/chatbot',
   user: '/user',
   customer: '/customer',
+  servicesPackage: '/services-package',
   createAccountAdmin: '/create-account',
+  invoices: '/invoices',
 };

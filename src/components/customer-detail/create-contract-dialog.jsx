@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { format, parseISO } from 'date-fns';
-import dayjs from 'dayjs';
 import { t } from 'i18next';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';

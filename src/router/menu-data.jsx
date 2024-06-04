@@ -2,9 +2,10 @@ import ArchiveIcon from '@heroicons/react/24/outline/ArchiveBoxIcon';
 import DocumentIcon from '@heroicons/react/24/outline/DocumentMagnifyingGlassIcon';
 import ReportIcon from '@heroicons/react/24/outline/FlagIcon';
 import HomeIcon from '@heroicons/react/24/outline/HomeIcon';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import { Box } from '@mui/material';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,7 +49,7 @@ export const useMenuItems = () => {
                 width={24}
                 height={24}
               >
-                <SmartToyOutlinedIcon />
+                <FileDownloadOutlinedIcon />
               </Box>
             ),
             route: routes.chatbot,
@@ -88,6 +89,30 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.createAccountAdmin,
+          },
+          {
+            title: 'Gói dịch vụ',
+            icon: (
+              <Box
+                width={24}
+                height={24}
+              >
+                <FileDownloadOutlinedIcon />
+              </Box>
+            ),
+            route: routes.servicesPackage,
+          },
+          {
+            title: 'Hóa đơn',
+            icon: (
+              <Box
+                width={24}
+                height={24}
+              >
+                <ReceiptOutlinedIcon />
+              </Box>
+            ),
+            route: routes.invoices,
           },
           {
             title: 'Dropdown menu',

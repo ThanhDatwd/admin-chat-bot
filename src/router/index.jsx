@@ -1,12 +1,12 @@
 import { lazy, Suspense } from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { Layout } from 'src/layouts';
-import LoginPage from 'src/pages/auth/login';
-import RegisterPage from 'src/pages/auth/register';
 import AuthLayout from 'src/layouts/AuthLayout';
+import LoginPage from 'src/pages/auth/login';
 import RecoverPasswordPage from 'src/pages/auth/recover-password';
-import CustomerDetail from 'src/pages/customer-detail';
+import RegisterPage from 'src/pages/auth/register';
 import CreateAccountAdminPage from 'src/pages/create-account';
+import CustomerDetail from 'src/pages/customer-detail';
 import UserPage from 'src/pages/user';
 
 // import { Layout as LayoutBase } from "src/layouts/base";
@@ -16,9 +16,9 @@ const PageExample = lazy(() => import('src/pages/page-example'));
 const CustomerPage = lazy(() => import('src/pages/customer'));
 const Chatbot = lazy(() => import('src/pages/chatbot'));
 const ChatbotDetail = lazy(() => import('src/pages/chatbot-detail'));
+const ServicesPackage = lazy(() => import('src/pages/services-package'));
+const Invoices = lazy(() => import('src/pages/invoices'));
 const Error404Page = lazy(() => import('src/pages/404'));
-
-
 
 export const routesOutlets = [
   {
@@ -80,6 +80,14 @@ export const routesOutlets = [
       {
         path: 'create-account',
         element: <CreateAccountAdminPage />,
+      },
+      {
+        path: 'services-package',
+        element: <ServicesPackage />,
+      },
+      {
+        path: 'invoices',
+        element: <Invoices />,
       },
     ],
   },
