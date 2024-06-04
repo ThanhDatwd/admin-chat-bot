@@ -1,37 +1,13 @@
-import ChartBarIcon from '@heroicons/react/24/outline/ChartBarIcon';
-import CogIcon from '@heroicons/react/24/outline/CogIcon';
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Container,
-  Divider,
-  Grid,
-  Stack,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, Container, Grid, Stack, useTheme } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
-import { botsApi } from 'src/api/bots';
-import { Helmet } from 'src/components/base/helmet';
-import PageHeading from 'src/components/base/page-heading';
-import PlaceholderBox from 'src/components/base/placeholder-box';
-import { AvatarState } from 'src/components/base/styles/avatar';
-import BotInfo from 'src/components/chatbot-detail/bot-info';
-import EmbeddingHistory from 'src/components/chatbot-detail/embedding-history';
-import EmbeddingSection from 'src/components/chatbot-detail/embedding-section';
+import { customersApi } from 'src/api/customer';
+import CustomerConfigSection from 'src/components/customer-detail/customer-config-section';
+import CustomerContractSection from 'src/components/customer-detail/customer-contract-section';
+import CustomerInfo from 'src/components/customer-detail/user-info';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
-import Results from '../components/chatbot/chatbot-section';
-import CardUser from 'src/components/user-detail/profile-progress';
-import CustomerInfo from 'src/components/user-detail/user-info';
-import { customersApi } from 'src/api/customer';
 
 const CustomerDetail = () => {
   const theme = useTheme();
@@ -40,12 +16,39 @@ const CustomerDetail = () => {
   const customization = useCustomization();
   const { id } = useParams();
   const [customerData, setCustomerData] = useState({});
+  const [contractData, setContractData] = useState();
+  const [configData, setConfigData] = useState();
+
   const getCustomer = useCallback(async () => {
     try {
       const response = await customersApi.getCustomer({ customerId: id });
       if (isMountedRef()) {
-        console.log('this is data customer',response);
         setCustomerData(response);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [isMountedRef]);
+  const getCustomerContract = useCallback(async () => {
+    try {
+      const response = await customersApi.getCustomerContract({
+        customerId: '540ca8ce-9937-4c92-9b86-095393b13c54',
+        
+      });
+      if (isMountedRef()) {
+        setContractData(response.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [isMountedRef]);
+  const getCustomerConfig = useCallback(async () => {
+    try {
+      const response = await customersApi.getCustomerConfig(
+        id,{ pageNumber: 0, pageSize: 20 }
+      );
+      if (isMountedRef()) {
+        setConfigData(response.data[response.data.length-1]);
       }
     } catch (err) {
       console.error(err);
@@ -54,11 +57,14 @@ const CustomerDetail = () => {
 
   useEffect(() => {
     getCustomer();
+    getCustomerContract();
+    getCustomerConfig()
   }, [getCustomer]);
 
   return (
     <>
       <Box
+        mb={3}
         px={{
           xs: 2,
           sm: 3,
@@ -78,18 +84,31 @@ const CustomerDetail = () => {
         >
           <Box>
             <Stack
-              spacing={{
-                xs: 2,
-                sm: 3,
-              }}
               direction={{
                 xs: 'column',
                 sm: 'row',
               }}
             >
-              {/* <BotInfo data={botData} />
-              <EmbeddingHistory /> */}
-              <CustomerInfo customer = {customerData}/>
+              <Grid
+                container
+                spacing={{ xs: 2, md: 2 }}
+              >
+                <Grid
+                  item
+                  xs={12}
+                  md={8}
+                >
+                  <CustomerInfo customer={customerData} />
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  md={4}
+                >
+                  <CustomerConfigSection customer={customerData}
+                   config={configData} />
+                </Grid>
+              </Grid>
             </Stack>
           </Box>
           <Box
@@ -101,14 +120,17 @@ const CustomerDetail = () => {
             <Stack
               spacing={{
                 xs: 2,
-                sm: 3,
+                sm: 2,
               }}
               direction={{
                 xs: 'column',
                 sm: 'row',
               }}
             >
-              {/* <EmbeddingSection /> */}
+              <CustomerContractSection
+                customer={customerData}
+                contract={contractData}
+              />
             </Stack>
           </Box>
         </Container>

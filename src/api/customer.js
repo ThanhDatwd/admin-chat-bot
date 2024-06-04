@@ -15,6 +15,22 @@ class CustomerApi {
     const response = await api.post(import.meta.env.VITE_API_URL_8086 + 'customer', data);
     return response;
   }
+  async createCustomerContract(data) {
+    const response = await api.post(import.meta.env.VITE_API_URL_8086 + 'contract', data);
+    return response;
+  }
+  async createCustomerConfig(data) {
+    const response = await api.post(import.meta.env.VITE_API_URL_8086 + 'customer/configuration', data);
+    return response;
+  }
+  async getCustomerContract({ customerId }) {
+    const response = await api.get(import.meta.env.VITE_API_URL_8086 + `contract/detail/${customerId}`);
+    return response;
+  }
+  async getCustomerConfig(customerId , pagination) {
+    const response = await api.get(import.meta.env.VITE_API_URL_8086 + `customer/configuration?customerId=${customerId}&?&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}`);
+    return response;
+  }
 
   async deleteCustomer(customerId) {
     const response = await api.delete(import.meta.env.VITE_API_URL_8086 + `customer/${customerId}`);

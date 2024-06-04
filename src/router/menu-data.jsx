@@ -18,7 +18,7 @@ export const useMenuItems = () => {
         title: 'Dashboard',
         subMenu: [
           {
-            title: 'Home',
+            title: t('Trang chủ'),
             icon: (
               <Box
                 width={24}
@@ -54,7 +54,7 @@ export const useMenuItems = () => {
             route: routes.chatbot,
           },
           {
-            title: 'Customers',
+            title: t('Khách hàng tổ chức'),
             icon: (
               <Box
                 width={24}
@@ -66,7 +66,19 @@ export const useMenuItems = () => {
             route: routes.customer,
           },
           {
-            title: 'Create account admin',
+            title: t('Người dùng'),
+            icon: (
+              <Box
+                width={24}
+                height={24}
+              >
+                <PersonOutlineOutlinedIcon />
+              </Box>
+            ),
+            route: routes.user,
+          },
+          {
+            title: t('Tạo tài khoản quản trị'),
             icon: (
               <Box
                 width={24}

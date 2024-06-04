@@ -25,7 +25,7 @@ const CardActions = styled(Box)(({ theme }) => ({
   top: theme.spacing(1.5),
   zIndex: 7,
 }));
-function CardUser() {
+function CustomerInfo() {
   const { t } = useTranslation();
   const theme = useTheme();
   return (
@@ -211,4 +211,4 @@ function CardUser() {
     </Card>
   );
 }
-export default CardUser;
+export default CustomerInfo;

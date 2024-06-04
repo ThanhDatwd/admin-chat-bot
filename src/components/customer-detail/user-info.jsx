@@ -27,14 +27,14 @@ const CardActions = styled(Box)(({ theme }) => ({
   zIndex: 7,
 }));
 function CustomerInfo(props) {
-  const {customer} = props 
+  const { customer } = props;
   const { t } = useTranslation();
   const theme = useTheme();
   return (
     <Card
       sx={{
         position: 'relative',
-        width:'100%',
+        width: '100%',
         p: {
           xs: 2,
           sm: 3,
@@ -54,19 +54,17 @@ function CustomerInfo(props) {
         display="flex"
         alignItems="center"
       >
-          <Avatar
-            variant="rounded"
-            sx={{
-              fontSize: theme.typography.pxToRem(16),
-              background: theme.palette.common.black,
-              color: theme.palette.common.white,
-              borderRadius: theme.shape.borderRadius,
-              width: 95,
-              height: 95,
-            }}
-          >
-            
-          </Avatar>
+        <Avatar
+          variant="rounded"
+          sx={{
+            fontSize: theme.typography.pxToRem(16),
+            background: theme.palette.common.black,
+            color: theme.palette.common.white,
+            borderRadius: theme.shape.borderRadius,
+            width: 95,
+            height: 95,
+          }}
+        ></Avatar>
         <Box
           sx={{
             width: '100%',
@@ -89,7 +87,7 @@ function CustomerInfo(props) {
           >
             {customer?.customerName}
           </Link>
-          
+
           <Box
             display="flex"
             alignItems="center"
@@ -100,10 +98,10 @@ function CustomerInfo(props) {
             }}
           >
             <Chip
-        style={{ maxWidth: '80%' }}
-        color={'info'}
-        label= {`Người Đại diện:  ${customer?.representative} `}
-      />
+              style={{ maxWidth: '80%' }}
+              color={'info'}
+              label={`Người Đại diện:  ${customer?.representative} `}
+            />
           </Box>
         </Box>
       </Box>
@@ -118,7 +116,7 @@ function CustomerInfo(props) {
           my: 1.5,
         }}
       >
-      <ListItem disableGutters>
+        <ListItem disableGutters>
           <ListItemText
             primaryTypographyProps={{
               variant: 'subtitle2',
@@ -151,7 +149,7 @@ function CustomerInfo(props) {
           />
           <Typography variant="subtitle2">{customer.taxCode}</Typography>
         </ListItem>
-        
+
         <ListItem disableGutters>
           <ListItemText
             primaryTypographyProps={{
@@ -183,12 +181,11 @@ function CustomerInfo(props) {
             }}
             primary={t('Địa chỉ') + ':'}
           />
-          <Typography variant="subtitle2">{customer.custHouseNumber} {customer?.address}</Typography>
+          <Typography variant="subtitle2">
+            {customer.custHouseNumber} {customer?.address}
+          </Typography>
         </ListItem>
-        
-       
       </List>
-
     </Card>
   );
 }

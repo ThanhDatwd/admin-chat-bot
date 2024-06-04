@@ -1,15 +1,12 @@
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import ArrowForwardTwoToneIcon from '@mui/icons-material/ArrowForwardTwoTone';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import GridViewTwoToneIcon from '@mui/icons-material/GridViewTwoTone';
 import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded';
 import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
-import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
 import {
-  alpha,
   Avatar,
   Box,
   Button,
@@ -21,12 +18,9 @@ import {
   IconButton,
   InputAdornment,
   Link,
-  MenuItem,
-  Select,
   Stack,
   styled,
   Switch,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -40,25 +34,22 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { customersApi } from 'src/api/customer';
-import { knowledgesApi } from 'src/api/knowledges';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
-import { TabsShadow } from 'src/components/base/styles/tabs';
 import { useRouter } from 'src/hooks/use-router';
-import { getKnowledge, setKnowledge } from 'src/slices/knowledge';
+import { getKnowledge } from 'src/slices/knowledge';
 import { useDispatch } from 'src/store';
 import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
-import CreateAdminOrgDialog from './create-admin-org-dialog';
-import CustomerFooterDropdown from './customer-footer-dropdown';
+// import CustomerFooterDropdown from './customer-footer-dropdown';
 
 // import ChatuserFooterDropdown from './user-footer-dropdown';
 
@@ -115,7 +106,7 @@ const applyFilters = (users, query, filters) => {
 const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
-const CustomerSection = ({ users, setIsRefresh }) => {
+const UserSection = ({ users ,setIsRefresh }) => {
   const [selectedItems, setSelectedUsers] = useState([]);
   const [knowledges, setKnowledges] = useState([]);
   const { t } = useTranslation();
@@ -128,8 +119,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
     knowId: null,
   });
   const navigate = useNavigate();
-  const [currentCustomer, setCurrentCustomer] = useState();
-  const [openDialogCreateAdminAccount, setOpenDialogCreateAdminAccount] = useState(false);
+  const [openDialogDelete, setOpenDialogDelete] = useState(false);
 
   const getUserRoleLabel = (knowId) => {
     const knowledgeItem = knowledges.find((item) => item.value === knowId);
@@ -171,14 +161,14 @@ const CustomerSection = ({ users, setIsRefresh }) => {
   };
 
   const handleSelectAllUsers = (event) => {
-    setSelectedUsers(event.target.checked ? users.map((user) => user.customerId) : []);
+    setSelectedUsers(event.target.checked ? users.map((user) => user.userId) : []);
   };
 
-  const handleSelectOneUser = (_event, customerId) => {
-    if (!selectedItems.includes(customerId)) {
-      setSelectedUsers((prevSelected) => [...prevSelected, customerId]);
+  const handleSelectOneUser = (_event, userId) => {
+    if (!selectedItems.includes(userId)) {
+      setSelectedUsers((prevSelected) => [...prevSelected, userId]);
     } else {
-      setSelectedUsers((prevSelected) => prevSelected.filter((id) => id !== customerId));
+      setSelectedUsers((prevSelected) => prevSelected.filter((id) => id !== userId));
     }
   };
 
@@ -235,12 +225,13 @@ const CustomerSection = ({ users, setIsRefresh }) => {
     if (users.length) fetchKnowledgeData();
   }, [users]);
 
-  const handleDeleteCustomer = async (customerId) => {
+  const handleDeleteCustomer = async (userId) => {
     try {
-      const response = await customersApi.deleteCustomer(customerId);
-
+      const response = await customersApi.deleteCustomer(userId);
+      
       toast.success(t(response.data));
-      setIsRefresh((preState) => !preState);
+      setIsRefresh((preState)=>!preState)
+
     } catch (error) {
       toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.log(error);
@@ -454,17 +445,15 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                           />
                         </TableCell>
                         <TableCell>{t('Ảnh đại diện')}</TableCell>
-                        <TableCell>{t('Tên tổ chức')}</TableCell>
-                        <TableCell>{t('Người đại diện')}</TableCell>
+                        <TableCell>{t('Tên người dùng')}</TableCell>
                         <TableCell>{t('Email/Số điện thoại')}</TableCell>
-                        <TableCell>{t('Mã số thuế')}</TableCell>
-                        <TableCell align="center">{t('Trạng thái ')}</TableCell>
+                        <TableCell>{t('Trạng thái ')}</TableCell>
                         <TableCell align="center">{t('Hành động')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {paginatedUsers.map((user, index) => {
-                        const isUserSelected = selectedItems.includes(user.customerId);
+                        const isUserSelected = selectedItems.includes(user.userId);
                         return (
                           <TableRow
                             hover
@@ -474,7 +463,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                             <TableCell padding="checkbox">
                               <Checkbox
                                 checked={isUserSelected}
-                                onChange={(event) => handleSelectOneUser(event, user.customerId)}
+                                onChange={(event) => handleSelectOneUser(event, user.userId)}
                                 value={isUserSelected}
                               />
                             </TableCell>
@@ -494,19 +483,13 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                             </TableCell>
                             <TableCell>
                               {' '}
-                              <Typography fontWeight={600}>{user.customerName}</Typography>
+                              <Typography fontWeight={600}>{user.username}</Typography>
                             </TableCell>
-                            <TableCell>
-                              <Chip
-                                color={'info'}
-                                label={user?.representative}
-                              />
-                            </TableCell>
+                            
                             <TableCell>
                               <Typography fontWeight={600}>{user.email}</Typography>
                               <Typography fontWeight={600}>{user.phoneNumber}</Typography>
                             </TableCell>
-                            <TableCell></TableCell>
                             <TableCell align="center">
                               <Switch
                                 checked={true}
@@ -516,45 +499,39 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                             </TableCell>
                             <TableCell align="center">
                               <Typography noWrap>
-                                <Tooltip
-                                  title={t('Tạo tài khoản quản trị')}
+                                {/* <Tooltip
+                                  title={t('Tạo mới')}
                                   arrow
                                 >
-                                  <IconButton
-                                    color="secondary"
-                                    onClick={() => {
-                                      setCurrentCustomer(user);
-                                      setOpenDialogCreateAdminAccount(true);
-                                    }}
-                                  >
+                                  <IconButton color="secondary">
                                     <AddCircleOutlineOutlinedIcon fontSize="small" />
                                   </IconButton>
-                                </Tooltip>
+                                </Tooltip> */}
                                 <Tooltip
                                   title={t('Xem chi tiết')}
                                   arrow
                                 >
                                   <IconButton
                                     onClick={() => {
-                                      navigate(`/customer/${user.customerId}`);
+                                      navigate(`/user/${user.userId}`);
                                     }}
                                     color="secondary"
                                   >
                                     <LaunchTwoToneIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
-                                <Tooltip
-                                  title={t('Xoá')}
-                                  arrow
+                                <DialogConfirmDelete
+                                  onConfirm={() => handleDeleteCustomer(user?.userId)}
                                 >
-                                  <IconButton color="secondary">
-                                    <DialogConfirmDelete
-                                      onConfirm={() => handleDeleteCustomer(user?.customerId)}
-                                    >
+                                  <Tooltip
+                                    title={t('Xoá')}
+                                    arrow
+                                  >
+                                    <IconButton color="secondary">
                                       <DeleteTwoToneIcon fontSize="small" />
-                                    </DialogConfirmDelete>
-                                  </IconButton>
-                                </Tooltip>
+                                    </IconButton>
+                                  </Tooltip>
+                                </DialogConfirmDelete>
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -621,13 +598,13 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                     }}
                   >
                     {paginatedUsers.map((user) => {
-                      const isUserSelected = selectedItems.includes(user.customerId);
+                      const isUserSelected = selectedItems.includes(user.userId);
                       return (
                         <Grid
                           xs={12}
                           sm={6}
                           lg={4}
-                          key={user.customerId}
+                          key={user.userId}
                         >
                           <CardWrapper
                             className={clsx({
@@ -648,13 +625,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                                 justifyContent="space-between"
                               >
                                 {getUserRoleLabel(user.knowId)}
-                                <CustomerFooterDropdown
-                                  onDelete={() => handleDeleteCustomer(user.customerId)}
-                                  onCreate={() => {
-                                    setCurrentCustomer(user);
-                                    setOpenDialogCreateAdminAccount(true);
-                                  }}
-                                />
+                                {/* <CustomerFooterDropdown customer={user} /> */}
                               </Box>
                               <Box
                                 p={2}
@@ -739,14 +710,14 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                               >
                                 <Button
                                   variant="contained"
-                                  onClick={() => router.push(`/customer/${user.customerId}`)}
+                                  onClick={() => router.push(`/user/${user.userId}`)}
                                   endIcon={<ArrowForwardTwoToneIcon />}
                                 >
                                   {t('Xem chi tiết ')}
                                 </Button>
                                 <Checkbox
                                   checked={isUserSelected}
-                                  onChange={(event) => handleSelectOneUser(event, user.customerId)}
+                                  onChange={(event) => handleSelectOneUser(event, user.userId)}
                                   value={isUserSelected}
                                 />
                               </Box>
@@ -832,20 +803,13 @@ const CustomerSection = ({ users, setIsRefresh }) => {
           )}
         </>
       )}
-      {currentCustomer && (
-        <CreateAdminOrgDialog
-          customer={currentCustomer}
-          open={openDialogCreateAdminAccount}
-          onClose={() => setOpenDialogCreateAdminAccount(false)}
-        />
-      )}
     </>
   );
 };
-CustomerSection.propTypes = {
+UserSection.propTypes = {
   users: PropTypes.array.isRequired,
 };
-CustomerSection.defaultProps = {
+UserSection.defaultProps = {
   users: [],
 };
-export default CustomerSection;
+export default UserSection;

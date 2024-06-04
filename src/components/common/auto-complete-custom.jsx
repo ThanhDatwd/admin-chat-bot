@@ -24,7 +24,7 @@ export default function AutocompleteCustom(props) {
         disablePortal
         id="combo-box-demo"
         onChange={(event, newValue) => onChange(newValue)}
-        value={value}
+        // value={[...options].find((item) => item.value === value)?.label}
         options={options}
         sx={{ width: '100%' }}
         renderInput={(params) => (

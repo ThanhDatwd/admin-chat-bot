@@ -140,7 +140,7 @@ const DialogConfirmDelete = (props) => {
   return (
     <>
       <Box
-        sx={{ width: 'auto', display: 'inline-block' }}
+        sx={{ width: '100%', display: 'inline-block' }}
         onClick={() => setOpen(true)}
       >
         {children}

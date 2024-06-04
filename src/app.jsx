@@ -13,6 +13,9 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { SidebarProvider, useSidebarContext } from 'src/contexts/sidebar-context';
 import { routesOutlets } from 'src/router';
 import { store } from 'src/store';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
 
 export const App = () => {
   useNprogress();
@@ -26,6 +29,8 @@ export const App = () => {
   };
   return (
     <ReduxProvider store={store}>
+     <LocalizationProvider dateAdapter={AdapterDateFns}>
+
       <SidebarProvider>
         <CustomizationProvider>
           <CustomizationConsumer>
@@ -62,6 +67,7 @@ export const App = () => {
           </CustomizationConsumer>
         </CustomizationProvider>
       </SidebarProvider>
+     </LocalizationProvider>
     </ReduxProvider>
   );
 };

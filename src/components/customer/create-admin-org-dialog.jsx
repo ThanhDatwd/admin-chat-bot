@@ -1,101 +1,73 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined';
 import {
   Box,
   Button,
+  CircularProgress,
   Grid,
+  InputAdornment,
   Stack,
   Typography,
-  useTheme
+  useTheme,
 } from '@mui/material';
+import { t } from 'i18next';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from 'src/api/axios';
-import {
-  OPTION_CUSTOMER,
-  OPTION_DISTRICT,
-  OPTION_ORGANIZATION,
-  OPTION_PROVINCE,
-  OPTION_VILLAGE,
-} from 'src/constans/user';
-import  userBaseSchema, { userOrganizationSchema } from 'src/schemas/user-schema';
-import AutocompleteCustom from '../common/auto-complete-custom';
+import { userOrganizationSchema } from 'src/schemas/user-schema';
 import { DialogCustom } from '../common/dialog-custom';
 import { InputOutline } from '../common/input-outline';
-import { SelectCustom } from '../common/select-custom';
-import TableGroupUser from './table-group-customer';
-import UploadAvatarUser from './upload-avatar-customer';
-import { t } from 'i18next';
-import { z } from 'zod';
 
-const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
-  const [selectedOrganization, setSelectedOrganization] = useState(null);
-  const [listProvince, setListProvince] = useState(OPTION_PROVINCE);
-  const [listDistrict, setListDistrict] = useState([]);
-  const [listVillage, setListVillage] = useState([]);
-  const [isloading, setIsLoading] = useState(false);
-  const [selectedGroupUser, setSelectedGroupUser] = useState([]);
+const CreateAdminOrgDialog = ({ open, onClose, onUpdate, customer }) => {
+  const [isLoading, setIsLoading] = useState(false);
 
   const theme = useTheme();
   const {
     control,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(userBaseSchema),
+    resolver: zodResolver(userOrganizationSchema),
     defaultValues: {
-      userType: OPTION_CUSTOMER[1].value,
+      customerId: '',
       email: '',
-      customerName: '',
-      password: '',
-      fullName: '',
+      username: '',
+      firstname: '',
+      lastname: '',
       phoneNumber: '',
-      houseNumber: '',
-      address: '',
-      province: 0,
-      district: 0,
-      village: 0,
-      role:'',
-      taxCode:'',
-      representative:''
     },
   });
 
-
-  const organization = useWatch({ control, name: 'organization' });
-  const typeUser =  useWatch({ control, name: 'userType' });
-  const province = useWatch({ control, name: 'province' });
-  const district = useWatch({ control, name: 'district' });
   const onSubmit = async (data) => {
-    // try {
-    //   setIsLoading(true);
-    //   const res = await api.post(import.meta.env.VITE_API_URL_8086 + 'customer', {
-    //     customerName: data.fullName,
-    //     address: data.address,
-    //     phoneNumber: data.phoneNumber,
-    //     email: data.email,
-    //     website: data.website,
-    //     provinceId: data.province,
-    //     districtId: data.district,
-    //     villageId: data.village,
-    //     custHouseNumber: data.houseNumber,
-    //     taxCode: 'TAX123456',
-    //     representative: 'Jane Smith',
-    //   });
-    //   console.log('resposnce', res);
-    //   if (res.metadata.message === 'OK') {
-    //     toast.success('Tạo mới người dùng thành công');
-    //   }
-    //   onUpdate?.(data);
-    //   reset();
-    //   onClose();
-    // } catch (error) {
-    //   console.error('Error creating bot:', error);
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    try {
+      setIsLoading(true);
+      const res = await api.post(import.meta.env.VITE_API_AUTH_URL_8080 + 'users/customer-ad', {
+        customerId: customer.customerId,
+        user: {
+          firstname: data.firstname,
+          lastname: data.lastname,
+          phoneNumber: data.phoneNumber,
+          email: data.email,
+          username: data.username,
+        },
+      });
+      if (res.metadata.message === 'OK') {
+        toast.success(t('Tạo tài khoản thành công'));
+      }
+      onUpdate?.(data);
+      reset();
+      onClose();
+    } catch (error) {
+      console.error('Error creating bot:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   useEffect(() => {
     if (!open) {
@@ -104,15 +76,10 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
   }, [open]);
 
   useEffect(() => {
-    setSelectedOrganization(OPTION_ORGANIZATION.find((org) => org.value === organization));
-  }, [organization]);
-  useEffect(() => {
-    setListDistrict(OPTION_DISTRICT[province]);
-  }, [province]);
-  useEffect(() => {
-    setListVillage(OPTION_VILLAGE[district]);
-  }, [district]);
-
+    if (customer) {
+      setValue('customerId', customer.customerId);
+    }
+  }, [customer]);
 
   return (
     <>
@@ -131,13 +98,39 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
                 color="secondary"
                 onClick={() => onClose()}
               >
-                Cancel
+                Huỷ
               </Button>
               <Button
                 variant="contained"
+                type="submit"
+                size="large"
+                fullWidth
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '16px',
+                }}
                 onClick={handleSubmit(onSubmit)}
               >
-                Save
+                {t('Tạo tài khoản')}
+                {isLoading && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '16px',
+                    }}
+                    color="common.white"
+                  >
+                    {' '}
+                    <CircularProgress
+                      style={{ height: '20px', width: '20px' }}
+                      color={'inherit'}
+                    />
+                  </Box>
+                )}
               </Button>
             </Stack>
           </>
@@ -149,110 +142,152 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
               container
               spacing={{ xs: 2, md: 3 }}
             >
-              
-                <>
+              <>
                 <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                        Tên tổ chức:
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                        {customer?.customerName}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                        Người đại diện:
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                        {customer?.representative}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                       Số điện thoại : 
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                        {customer?.phoneNumber}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                        Mã số thuế:
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        fontWeight={500}
-                      >
-                        {customer?.taxCode}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </>
+                  item
+                  xs={12}
+                  md={6}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      Tên tổ chức:
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      {customer?.customerName}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid
+                  item
+                  xs={12}
+                  md={6}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      Người đại diện:
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      {customer?.representative}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      Số điện thoại :
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      {customer?.phoneNumber}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      Mã số thuế:
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="label"
+                      fontWeight={500}
+                    >
+                      {customer?.taxCode}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </>
               <Grid
                 item
                 xs={12}
                 md={6}
+              >
+                <Controller
+                  name="firstname"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <InputOutline
+                        {...field}
+                        label={'Họ'}
+                        error={!!errors.firstname}
+                      />
+                      {errors.firstname && (
+                        <Typography color="error">{errors.firstname.message}</Typography>
+                      )}
+                    </>
+                  )}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                md={6}
+              >
+                <Controller
+                  name="lastname"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <InputOutline
+                        {...field}
+                        label={'Tên'}
+                        error={!!errors.lastname}
+                      />
+                      {errors.lastname && (
+                        <Typography color="error">{errors.lastname.message}</Typography>
+                      )}
+                    </>
+                  )}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
               >
                 <Controller
                   name="username"
@@ -262,7 +297,13 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
                       <InputOutline
                         {...field}
                         label={'Tài khoản'}
+                        placeholder={''}
                         error={!!errors.username}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <PersonOutlineOutlinedIcon fontSize="small" />
+                          </InputAdornment>
+                        }
                       />
                       {errors.username && (
                         <Typography color="error">{errors.username.message}</Typography>
@@ -271,55 +312,10 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
                   )}
                 />
               </Grid>
+
               <Grid
                 item
                 xs={12}
-                md={6}
-              >
-                <Controller
-                  name="password"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <InputOutline
-                        {...field}
-                        type={'password'}
-                        error={!!errors.password}
-                        label={'Mật khẩu'}
-                      />
-                      {errors.password && (
-                        <Typography color="error">{errors.password.message}</Typography>
-                      )}
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={6}
-              >
-                <Controller
-                  name="fullName"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <InputOutline
-                        {...field}
-                        label={'Họ và tên'}
-                        error={!!errors.fullName}
-                      />
-                      {errors.fullName && (
-                        <Typography color="error">{errors.fullName.message}</Typography>
-                      )}
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={6}
               >
                 <Controller
                   name="phoneNumber"
@@ -330,6 +326,11 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
                         {...field}
                         label={'Số điện thoại'}
                         error={!!errors.phoneNumber}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <PhoneAndroidOutlinedIcon fontSize="small" />
+                          </InputAdornment>
+                        }
                       />
                       {errors.phoneNumber && (
                         <Typography color="error">{errors.phoneNumber.message}</Typography>
@@ -341,7 +342,6 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
               <Grid
                 item
                 xs={12}
-                md={6}
               >
                 <Controller
                   name="email"
@@ -352,143 +352,15 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate , customer}) => {
                         {...field}
                         label={'Email'}
                         error={!!errors.email}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <MailOutlineRoundedIcon fontSize="small" />
+                          </InputAdornment>
+                        }
                       />
                       {errors.email && (
                         <Typography color="error">{errors.email.message}</Typography>
                       )}
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={6}
-              >
-                <Controller
-                  name="website"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <InputOutline
-                        {...field}
-                        label={'Website'}
-                        error={!!errors.website}
-                      />
-                      {errors.website && (
-                        <Typography color="error">{errors.website.message}</Typography>
-                      )}
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={6}
-              >
-                <Controller
-                  name="houseNumber"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <InputOutline
-                        {...field}
-                        label={'Số nhà'}
-                        error={!!errors.houseNumber}
-                      />
-                      {errors.houseNumber && (
-                        <Typography color="error">{errors.houseNumber.message}</Typography>
-                      )}
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={6}
-              >
-                <Controller
-                  name="address"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <InputOutline
-                        {...field}
-                        label={'Địa chỉ'}
-                        error={!!errors.address}
-                      />
-                      {errors.address && (
-                        <Typography color="error">{errors.address.message}</Typography>
-                      )}
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={4}
-              >
-                <Controller
-                  name="province"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <SelectCustom
-                        label={'Tỉnh / Thành phố'}
-                        options={OPTION_PROVINCE}
-                        value={field.value}
-                        onChange={field.onChange}
-                        error={!!errors.province}
-                        errorMessage={errors.province ? errors.province.message : ''}
-                      />
-                    </>
-                  )}
-                />
-              </Grid>
-
-              <Grid
-                item
-                xs={12}
-                md={4}
-              >
-                <Controller
-                  name="district"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <SelectCustom
-                        label={'Quận / Huyện'}
-                        options={listDistrict}
-                        value={field.value}
-                        onChange={field.onChange}
-                        error={!!errors.district}
-                        errorMessage={errors.district ? errors.district.message : ''}
-                      />
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                md={4}
-              >
-                <Controller
-                  name="village"
-                  control={control}
-                  render={({ field }) => (
-                    <>
-                      <SelectCustom
-                        label={'Xã / Phường'}
-                        options={listVillage}
-                        value={field.value}
-                        onChange={field.onChange}
-                        error={!!errors.village}
-                        errorMessage={errors.village ? errors.village.message : ''}
-                      />
                     </>
                   )}
                 />

@@ -7,6 +7,7 @@ import AuthLayout from 'src/layouts/AuthLayout';
 import RecoverPasswordPage from 'src/pages/auth/recover-password';
 import CustomerDetail from 'src/pages/customer-detail';
 import CreateAccountAdminPage from 'src/pages/create-account';
+import UserPage from 'src/pages/user';
 
 // import { Layout as LayoutBase } from "src/layouts/base";
 
@@ -66,6 +67,14 @@ export const routesOutlets = [
       },
       {
         path: 'customer/:id',
+        element: <CustomerDetail />,
+      },
+      {
+        path: 'user',
+        element: <UserPage />,
+      },
+      {
+        path: 'user/:id',
         element: <CustomerDetail />,
       },
       {
