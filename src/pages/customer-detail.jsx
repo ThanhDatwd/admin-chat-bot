@@ -109,7 +109,6 @@ const CustomerDetail = () => {
                 </Grid>
               </Grid>
             </Stack>
-
           </Box>
           <Box
             pt={{
