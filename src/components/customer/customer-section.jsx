@@ -468,7 +468,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
                                     <DialogConfirmDelete
                                       onConfirm={() => handleDeleteCustomer(user?.customerId)}
                                     >
-                                      <DeleteTwoToneIcon fontSize="small" />
+                                     <DeleteTwoToneIcon fontSize="small" />
                                     </DialogConfirmDelete>
                                   </IconButton>
                                 </Tooltip>
