@@ -1,8 +1,5 @@
-import ChartBarIcon from '@heroicons/react/24/outline/ChartBarIcon';
-import CogIcon from '@heroicons/react/24/outline/CogIcon';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import FolderTwoToneIcon from '@mui/icons-material/FolderTwoTone';
 import SnippetFolderOutlinedIcon from '@mui/icons-material/SnippetFolderOutlined';
 import {
   Box,
@@ -181,7 +178,7 @@ const ServicesPackage = () => {
                     },
                   }}
                 >
-                  <FileDownloadOutlinedIcon />
+                  <FolderTwoToneIcon />
                 </AvatarState>
               }
             />

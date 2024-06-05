@@ -1,49 +1,104 @@
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import CorporateFareTwoToneIcon from '@mui/icons-material/CorporateFareTwoTone';
+import HandshakeTwoToneIcon from '@mui/icons-material/HandshakeTwoTone';
+import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import { Box, Button, Container, useTheme } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { customersApi } from 'src/api/customer';
+import { botsApi } from 'src/api/bots';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import CreateCustomerByAdminDialog from 'src/components/customer/create-customer-dialog-by-admin';
-import CustomerSection from 'src/components/customer/customer-section';
+import CreateChatbotDialog from 'src/components/chatbot/create-chatbot-dialog';
+import PartnerTable from 'src/components/partner/partner-table';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 
-const CustomerPage = () => {
+const partners = [
+  {
+    id: 1,
+    name: 'Đối tác A',
+    email: 'partnerA@example.com',
+    phoneNumber: '0123456789',
+    contractNumber: 'CON-001',
+    field: 'Lĩnh vực A',
+    botCount: 3,
+    accountStatus: 'init',
+    creationDate: '2024-06-01',
+  },
+  {
+    id: 2,
+    name: 'Đối tác B',
+    email: 'partnerB@example.com',
+    phoneNumber: '0123456789',
+    contractNumber: 'CON-002',
+    field: 'Lĩnh vực B',
+    botCount: 5,
+    accountStatus: 'pending',
+    creationDate: '2024-05-20',
+  },
+  {
+    id: 3,
+    name: 'Đối tác C',
+    email: 'partnerC@example.com',
+    phoneNumber: '0123456789',
+    contractNumber: 'CON-003',
+    field: 'Lĩnh vực C',
+    botCount: 2,
+    accountStatus: 'approved',
+    creationDate: '2024-06-03',
+  },
+  {
+    id: 4,
+    name: 'Đối tác D',
+    email: 'partnerD@example.com',
+    phoneNumber: '0123456789',
+    contractNumber: 'CON-004',
+    field: 'Lĩnh vực D',
+    botCount: 7,
+    accountStatus: 'embedded',
+    creationDate: '2024-06-03',
+  },
+  {
+    id: 5,
+    name: 'Đối tác E',
+    email: 'partnerE@example.com',
+    phoneNumber: '0123456789',
+    contractNumber: 'CON-005',
+    field: 'Lĩnh vực E',
+    botCount: 1,
+    accountStatus: 'locked',
+    creationDate: '2024-06-03',
+  },
+];
+
+const Ranking = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const isMountedRef = useRefMounted();
   const customization = useCustomization();
-  const [customers, setCustomers] = useState([]);
+  const [bots, setBots] = useState([]);
   const [open, setOpen] = useState(false);
-  const [isRefresh, setIsRefresh] = useState(false);
 
-  // HANDLE OPEN CREATE USER DIALOG
   const handleDialogOpen = () => {
     setOpen(true);
   };
-
-  // HANDLE CLOSE CREATE USER DIALOG
   const handleDialogClose = () => {
     setOpen(false);
   };
 
-  const geCustomers = useCallback(async () => {
+  const getBots = useCallback(async () => {
     try {
-      const response = await customersApi.getCustomers({ pageNumber: 0, pageSize: 20 });
+      const response = await botsApi.getBots({ pageNumber: 0, pageSize: 20 });
       if (isMountedRef()) {
-        setCustomers(response);
+        setBots(response);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [isMountedRef, isRefresh]);
+  }, [isMountedRef]);
 
   useEffect(() => {
-    geCustomers();
-  }, [geCustomers]);
+    getBots();
+  }, [getBots]);
 
   return (
     <>
@@ -75,10 +130,10 @@ const CustomerPage = () => {
               sx={{
                 px: 0,
               }}
-              title={t('Khách hàng tổ chức')}
-              description={t('Quản lý tổ chức')}
+              title={t('Đối tác')}
+              description={t('Quản lý đối tác')}
               actions={
-                <>
+                <div>
                   <Button
                     sx={{
                       mt: {
@@ -90,9 +145,9 @@ const CustomerPage = () => {
                     onClick={handleDialogOpen}
                     startIcon={<AddOutlinedIcon fontSize="small" />}
                   >
-                    {t('Tạo tổ chức')}
+                    {t('Thêm đối tác')}
                   </Button>
-                </>
+                </div>
               }
               iconBox={
                 <AvatarState
@@ -109,29 +164,21 @@ const CustomerPage = () => {
                     },
                   }}
                 >
-                  <CorporateFareTwoToneIcon />
+                  <HandshakeTwoToneIcon />
                 </AvatarState>
               }
             />
           </Box>
-          <CustomerSection
-            users={customers}
-            setIsRefresh={setIsRefresh}
-          />
+          <PartnerTable partners={partners} />
         </Container>
       </Box>
-      {/* <CreateUserByOrganizationDialog 
-         open={open}
-        onClose={handleDialogClose}
-        
-      /> */}
-      <CreateCustomerByAdminDialog
-        organizations={customers}
+      <CreateChatbotDialog
         open={open}
         onClose={handleDialogClose}
-        onUpdate={(data) => setCustomers((prevCustomer) => [...prevCustomer, data])}
+        onUpdate={getBots}
       />
     </>
   );
 };
-export default CustomerPage;
+
+export default Ranking;

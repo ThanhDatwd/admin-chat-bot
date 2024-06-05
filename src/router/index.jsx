@@ -18,6 +18,8 @@ const Chatbot = lazy(() => import('src/pages/chatbot'));
 const ChatbotDetail = lazy(() => import('src/pages/chatbot-detail'));
 const ServicesPackage = lazy(() => import('src/pages/services-package'));
 const Invoices = lazy(() => import('src/pages/invoices'));
+const Ranking = lazy(() => import('src/pages/ranking'));
+const Partner = lazy(() => import('src/pages/partner'));
 const Error404Page = lazy(() => import('src/pages/404'));
 
 export const routesOutlets = [
@@ -88,6 +90,14 @@ export const routesOutlets = [
       {
         path: 'invoices',
         element: <Invoices />,
+      },
+      {
+        path: 'ranking',
+        element: <Ranking />,
+      },
+      {
+        path: 'partner',
+        element: <Partner />,
       },
     ],
   },

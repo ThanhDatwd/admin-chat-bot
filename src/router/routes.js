@@ -8,4 +8,6 @@ export const routes = {
   servicesPackage: '/services-package',
   createAccountAdmin: '/create-account',
   invoices: '/invoices',
+  ranking: '/ranking',
+  partner: '/partner',
 };

@@ -1,49 +1,69 @@
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import CorporateFareTwoToneIcon from '@mui/icons-material/CorporateFareTwoTone';
+import LeaderboardTwoToneIcon from '@mui/icons-material/LeaderboardTwoTone';
 import { Box, Button, Container, useTheme } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { customersApi } from 'src/api/customer';
+import { botsApi } from 'src/api/bots';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import CreateCustomerByAdminDialog from 'src/components/customer/create-customer-dialog-by-admin';
-import CustomerSection from 'src/components/customer/customer-section';
+import CreateChatbotDialog from 'src/components/chatbot/create-chatbot-dialog';
+import RankingTable from 'src/components/ranking/ranking-table';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 
-const CustomerPage = () => {
+const rankings = [
+  {
+    id: 1,
+    name: 'Rank A',
+    startingPoints: 100,
+    status: 'Active',
+    creationDate: '2024-06-05',
+  },
+  {
+    id: 2,
+    name: 'Rank B',
+    startingPoints: 200,
+    status: 'Inactive',
+    creationDate: '2024-06-04',
+  },
+  {
+    id: 3,
+    name: 'Rank C',
+    startingPoints: 300,
+    status: 'Active',
+    creationDate: '2024-06-03',
+  },
+];
+
+const Ranking = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const isMountedRef = useRefMounted();
   const customization = useCustomization();
-  const [customers, setCustomers] = useState([]);
+  const [bots, setBots] = useState([]);
   const [open, setOpen] = useState(false);
-  const [isRefresh, setIsRefresh] = useState(false);
 
-  // HANDLE OPEN CREATE USER DIALOG
   const handleDialogOpen = () => {
     setOpen(true);
   };
-
-  // HANDLE CLOSE CREATE USER DIALOG
   const handleDialogClose = () => {
     setOpen(false);
   };
 
-  const geCustomers = useCallback(async () => {
+  const getBots = useCallback(async () => {
     try {
-      const response = await customersApi.getCustomers({ pageNumber: 0, pageSize: 20 });
+      const response = await botsApi.getBots({ pageNumber: 0, pageSize: 20 });
       if (isMountedRef()) {
-        setCustomers(response);
+        setBots(response);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [isMountedRef, isRefresh]);
+  }, [isMountedRef]);
 
   useEffect(() => {
-    geCustomers();
-  }, [geCustomers]);
+    getBots();
+  }, [getBots]);
 
   return (
     <>
@@ -75,10 +95,10 @@ const CustomerPage = () => {
               sx={{
                 px: 0,
               }}
-              title={t('Khách hàng tổ chức')}
-              description={t('Quản lý tổ chức')}
+              title={t('Xếp hạng')}
+              description={t('Quản lý xếp hạng')}
               actions={
-                <>
+                <div>
                   <Button
                     sx={{
                       mt: {
@@ -90,9 +110,9 @@ const CustomerPage = () => {
                     onClick={handleDialogOpen}
                     startIcon={<AddOutlinedIcon fontSize="small" />}
                   >
-                    {t('Tạo tổ chức')}
+                    {t('Thêm rank')}
                   </Button>
-                </>
+                </div>
               }
               iconBox={
                 <AvatarState
@@ -109,29 +129,21 @@ const CustomerPage = () => {
                     },
                   }}
                 >
-                  <CorporateFareTwoToneIcon />
+                  <LeaderboardTwoToneIcon />
                 </AvatarState>
               }
             />
           </Box>
-          <CustomerSection
-            users={customers}
-            setIsRefresh={setIsRefresh}
-          />
+          <RankingTable rankings={rankings} />
         </Container>
       </Box>
-      {/* <CreateUserByOrganizationDialog 
-         open={open}
-        onClose={handleDialogClose}
-        
-      /> */}
-      <CreateCustomerByAdminDialog
-        organizations={customers}
+      <CreateChatbotDialog
         open={open}
         onClose={handleDialogClose}
-        onUpdate={(data) => setCustomers((prevCustomer) => [...prevCustomer, data])}
+        onUpdate={getBots}
       />
     </>
   );
 };
-export default CustomerPage;
+
+export default Ranking;

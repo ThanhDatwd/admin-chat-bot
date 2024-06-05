@@ -82,7 +82,7 @@ const applyPagination = (packages, page, limit) => {
   return packages.slice(page * limit, page * limit + limit);
 };
 
-const Results = ({ packages }) => {
+const ServicesPackageTable = ({ packages }) => {
   const [selectedItems, setSelectedPackages] = useState([]);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
@@ -449,12 +449,12 @@ const Results = ({ packages }) => {
   );
 };
 
-Results.propTypes = {
+ServicesPackageTable.propTypes = {
   packages: PropTypes.array.isRequired,
 };
 
-Results.defaultProps = {
+ServicesPackageTable.defaultProps = {
   packages: [],
 };
 
-export default Results;
+export default ServicesPackageTable;
