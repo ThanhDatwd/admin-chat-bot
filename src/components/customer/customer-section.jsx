@@ -16,6 +16,7 @@ import {
   Card,
   Checkbox,
   Chip,
+  CircularProgress,
   Divider,
   Unstable_Grid2 as Grid,
   IconButton,
@@ -47,14 +48,17 @@ import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { customersApi } from 'src/api/customer';
 import { knowledgesApi } from 'src/api/knowledges';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { TabsShadow } from 'src/components/base/styles/tabs';
 import { useRouter } from 'src/hooks/use-router';
+import { setRefresh } from 'src/slices/common';
 import { getKnowledge, setKnowledge } from 'src/slices/knowledge';
 import { useDispatch } from 'src/store';
+import { debounce } from 'src/utils';
 import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
 import CreateAdminOrgDialog from './create-admin-org-dialog';
@@ -89,7 +93,7 @@ const applyFilters = (users, query, filters) => {
   return users.filter((user) => {
     let matches = true;
     if (query) {
-      const properties = ['userId', 'userName'];
+      const properties = ['customerName', 'customerId'];
       let containsQuery = false;
       properties.forEach((property) => {
         if (user[property].toLowerCase().includes(query.toLowerCase())) {
@@ -115,7 +119,7 @@ const applyFilters = (users, query, filters) => {
 const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
-const CustomerSection = ({ users, setIsRefresh }) => {
+const CustomerSection = ({ users, fetchData, totalCount }) => {
   const [selectedItems, setSelectedUsers] = useState([]);
   const [knowledges, setKnowledges] = useState([]);
   const { t } = useTranslation();
@@ -124,36 +128,25 @@ const CustomerSection = ({ users, setIsRefresh }) => {
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState({
-    knowId: null,
-  });
-  const navigate = useNavigate();
+  const [filters, setFilters] = useState();
+  const [searchByNameValue, setSearchByNameValue] = useState('');
   const [currentCustomer, setCurrentCustomer] = useState();
   const [openDialogCreateAdminAccount, setOpenDialogCreateAdminAccount] = useState(false);
 
-  const getUserRoleLabel = (knowId) => {
-    const knowledgeItem = knowledges.find((item) => item.value === knowId);
-    const labelName = knowledgeItem ? knowledgeItem.label : 'Unknown';
+  const paginatedUsers = applyPagination(users, page, limit);
+  const selectedBulkActions = selectedItems.length > 0;
+  const selectedSomeUsers = selectedItems.length > 0 && selectedItems.length < users.length;
+  const selectedAllUsers = selectedItems.length === users.length;
+  const [toggleView, setToggleView] = useState('grid_view');
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
 
-    return (
-      <Chip
-        style={{ maxWidth: '80%' }}
-        color={'info'}
-        label={labelName}
-      />
-    );
-  };
+  const navigate = useNavigate();
+  const router = useRouter();
+  const dispatch = useDispatch();
 
-  const handleTabsChange = (_event, tabsValue) => {
-    let value = null;
-    if (tabsValue !== 'all') {
-      value = tabsValue;
-    }
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      knowId: value,
-    }));
-    setSelectedUsers([]);
+  const handleViewOrientation = (_event, newValue) => {
+    setToggleView(newValue);
   };
 
   const handleSelectChange = (event) => {
@@ -184,133 +177,49 @@ const CustomerSection = ({ users, setIsRefresh }) => {
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
+    fetchData({ pageNumber: newPage, pageSize: limit });
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
+    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) });
   };
+  const handleChangeFilter = (data) => {
+    let newFilter = { ...filters, ...data };
 
-  const filteredUsers = applyFilters(users, query, filters);
-  const paginatedUsers = applyPagination(filteredUsers, page, limit);
-  const selectedBulkActions = selectedItems.length > 0;
-  const selectedSomeUsers = selectedItems.length > 0 && selectedItems.length < users.length;
-  const selectedAllUsers = selectedItems.length === users.length;
-  const [toggleView, setToggleView] = useState('grid_view');
-  const handleViewOrientation = (_event, newValue) => {
-    setToggleView(newValue);
-  };
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const fetchKnowledgeData = async () => {
-      try {
-        let data = [];
-        data = await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
-        const knowledgeCounts = users.reduce((acc, item) => {
-          acc[item.knowId] = (acc[item.knowId] || 0) + 1;
-          return acc;
-        }, {});
-
-        const convertedKnowledges = [
-          {
-            value: 'all',
-            label: t('All users'),
-            count: users.length,
-          },
-          // eslint-disable-next-line no-unsafe-optional-chaining
-          ...data?.map((item) => ({
-            value: item.knowId,
-            label: t(item.knowName),
-            count: knowledgeCounts[item.knowId],
-          })),
-        ];
-
-        setKnowledges(convertedKnowledges);
-      } catch (error) {
-        console.error('Error fetching knowledge data:', error);
+    for (const key in newFilter) {
+      if (newFilter[key] === '' || newFilter[key] === undefined) {
+        delete newFilter[key];
       }
-    };
+    }
 
-    if (users.length) fetchKnowledgeData();
-  }, [users]);
+    setFilters(newFilter);
 
+    // const queryParams = qs.stringify(newFilter);
+    // window.history.pushState(null, "", `?${queryParams.toString()}`);
+  };
+  const handleSearchByName = async (value) => {
+    handleChangeFilter({ customerName: value });
+  };
+  const debounceHandleSearch = debounce(handleSearchByName, 900);
   const handleDeleteCustomer = async (customerId) => {
     try {
       const response = await customersApi.deleteCustomer(customerId);
 
       toast.success(t(response.data));
-      setIsRefresh((preState) => !preState);
+      dispatch(setRefresh(!isRefresh));
     } catch (error) {
       toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    fetchData({ pageNumber: page, pageSize: limit });
+  }, [isRefresh]);
+  
   return (
     <>
-      {/* {mdUp ? (
-        <TabsShadow
-          sx={{
-            '& .MuiTab-root': {
-              flexDirection: 'row',
-              pr: 1,
-              '& .MuiChip-root': {
-                ml: 1,
-                transition: theme.transitions.create(['background', 'color'], {
-                  duration: theme.transitions.duration.complex,
-                }),
-              },
-              '&.Mui-selected': {
-                '& .MuiChip-root': {
-                  backgroundColor: alpha(theme.palette.primary.contrastText, 0.12),
-                  color: 'primary.contrastText',
-                },
-              },
-              '&:first-child': {
-                ml: 0,
-              },
-            },
-          }}
-          onChange={handleTabsChange}
-          scrollButtons="auto"
-          textColor="secondary"
-          value={filters.knowId || 'all'}
-          variant="scrollable"
-        >
-          {knowledges.map((tab) => (
-            <Tab
-              key={tab.value}
-              value={tab.value}
-              label={
-                <>
-                  {tab.label}
-                  <Chip
-                    label={tab.count}
-                    size="small"
-                  />
-                </>
-              }
-            />
-          ))}
-        </TabsShadow>
-      ) : (
-        <Select
-          value={filters.knowId || 'all'}
-          //@ts-ignore
-          onChange={handleSelectChange}
-          fullWidth
-        >
-          {knowledges.map((tab) => (
-            <MenuItem
-              key={tab.value}
-              value={tab.value}
-            >
-              {tab.label}
-            </MenuItem>
-          ))}
-        </Select>
-      )} */}
-
       <Box
         display="flex"
         justifyContent="space-between"
@@ -392,9 +301,12 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                   </InputAdornment>
                 ),
               }}
-              onChange={handleQueryChange}
+              onChange={(event) => {
+                debounceHandleSearch(event.target.value);
+                setSearchByNameValue(event.target.value);
+              }}
               placeholder={t('Filter results')}
-              value={query}
+              value={searchByNameValue}
               size="small"
               variant="outlined"
             />
@@ -418,7 +330,21 @@ const CustomerSection = ({ users, setIsRefresh }) => {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
-      {paginatedUsers.length === 0 ? (
+      {isLoading ? (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px',
+            height: '50vh',
+          }}
+          color="common.white"
+        >
+          {' '}
+          <CircularProgress style={{ height: '30px', width: '30px' }} />
+        </Box>
+      ) : users.length === 0 ? (
         <>
           <Typography
             sx={{
@@ -463,7 +389,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {paginatedUsers.map((user, index) => {
+                      {users.map((user, index) => {
                         const isUserSelected = selectedItems.includes(user.customerId);
                         return (
                           <TableRow
@@ -521,7 +447,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                                   arrow
                                 >
                                   <IconButton
-                                    color="secondary"
+                                    color="success"
                                     onClick={() => {
                                       setCurrentCustomer(user);
                                       setOpenDialogCreateAdminAccount(true);
@@ -538,7 +464,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                                     onClick={() => {
                                       navigate(`/customer/${user.customerId}`);
                                     }}
-                                    color="secondary"
+                                    color="primary"
                                   >
                                     <LaunchTwoToneIcon fontSize="small" />
                                   </IconButton>
@@ -547,7 +473,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                                   title={t('Xoá')}
                                   arrow
                                 >
-                                  <IconButton color="secondary">
+                                  <IconButton color="error">
                                     <DialogConfirmDelete
                                       onConfirm={() => handleDeleteCustomer(user?.customerId)}
                                     >
@@ -564,38 +490,11 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                   </Table>
                 </TableContainer>
               </Card>
-              <Box
-                pt={2}
-                sx={{
-                  '.MuiTablePagination-select': {
-                    py: 0.55,
-                  },
-                }}
-              >
-                <TablePagination
-                  component="div"
-                  count={filteredUsers.length}
-                  onPageChange={handlePageChange}
-                  onRowsPerPageChange={handleLimitChange}
-                  page={page}
-                  rowsPerPage={limit}
-                  rowsPerPageOptions={[5, 10, 15]}
-                  slotProps={{
-                    select: {
-                      variant: 'outlined',
-                      size: 'small',
-                      sx: {
-                        p: 0,
-                      },
-                    },
-                  }}
-                />
-              </Box>
             </>
           )}
           {toggleView === 'grid_view' && (
             <>
-              {paginatedUsers.length === 0 ? (
+              {users.length === 0 ? (
                 <Typography
                   sx={{
                     py: {
@@ -620,7 +519,7 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                       sm: 3,
                     }}
                   >
-                    {paginatedUsers.map((user) => {
+                    {users.map((user) => {
                       const isUserSelected = selectedItems.includes(user.customerId);
                       return (
                         <Grid
@@ -647,7 +546,11 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                                 alignItems="flex-start"
                                 justifyContent="space-between"
                               >
-                                {getUserRoleLabel(user.knowId)}
+                                <Chip
+                                  style={{ maxWidth: '80%' }}
+                                  color={'info'}
+                                  label={user.customerName}
+                                />
                                 <CustomerFooterDropdown
                                   onDelete={() => handleDeleteCustomer(user.customerId)}
                                   onCreate={() => {
@@ -756,48 +659,6 @@ const CustomerSection = ({ users, setIsRefresh }) => {
                       );
                     })}
                   </Grid>
-                  <Card
-                    sx={{
-                      p: 2,
-                      mt: 3,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      '.MuiTablePagination-select': {
-                        py: 0.55,
-                      },
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        component="span"
-                        variant="subtitle1"
-                      >
-                        {t('Showing')}
-                      </Typography>{' '}
-                      <b>{Math.min(limit, filteredUsers.length)}</b> {t('of')}{' '}
-                      <b>{filteredUsers.length}</b> <b>{t('users')}</b>
-                    </Box>
-                    <TablePagination
-                      component="div"
-                      count={filteredUsers.length}
-                      onPageChange={handlePageChange}
-                      onRowsPerPageChange={handleLimitChange}
-                      page={page}
-                      rowsPerPage={limit}
-                      labelRowsPerPage=""
-                      rowsPerPageOptions={[5, 10, 15]}
-                      slotProps={{
-                        select: {
-                          variant: 'outlined',
-                          size: 'small',
-                          sx: {
-                            p: 0,
-                          },
-                        },
-                      }}
-                    />
-                  </Card>
                 </>
               )}
             </>
@@ -832,6 +693,33 @@ const CustomerSection = ({ users, setIsRefresh }) => {
           )}
         </>
       )}
+      <Box
+        pt={2}
+        sx={{
+          '.MuiTablePagination-select': {
+            py: 0.55,
+          },
+        }}
+      >
+        <TablePagination
+          component="div"
+          count={totalCount}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleLimitChange}
+          page={page}
+          rowsPerPage={limit}
+          rowsPerPageOptions={[5, 10, 15]}
+          slotProps={{
+            select: {
+              variant: 'outlined',
+              size: 'small',
+              sx: {
+                p: 0,
+              },
+            },
+          }}
+        />
+      </Box>
       {currentCustomer && (
         <CreateAdminOrgDialog
           customer={currentCustomer}

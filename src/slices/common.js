@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   loading: false,
+  refresh:false,
 };
 
 const commonSlice = createSlice({
@@ -11,9 +12,12 @@ const commonSlice = createSlice({
     setLoading(state, action) {
       state.loading = action.payload;
     },
+    setRefresh(state, action) {
+      state.refresh = action.payload;
+    },
   },
 });
-export const { setLoading } = commonSlice.actions;
+export const { setLoading,setRefresh } = commonSlice.actions;
 export const { reducer } = commonSlice;
 
 export default commonSlice;

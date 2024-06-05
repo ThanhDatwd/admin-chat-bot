@@ -10,7 +10,9 @@ const customerSchema = z.object({
     .string()
     .min(1, 'Email là bắt buộc')
     .email({ message: 'Địa chỉ email không hợp lệ' })
-    .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/, { message: 'Địa chỉ email không hợp lệ' })
+    .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
+      message: 'Địa chỉ email không hợp lệ',
+    })
     .transform((val) => val.trim())
     .refine((val) => val !== '', { message: 'Địa chỉ email không hợp lệ' }),
   website: z.string().optional(),
@@ -30,6 +32,5 @@ const customerSchema = z.object({
     .transform((val) => val.trim())
     .refine((val) => val !== '', { message: 'Mã số thuế không hợp lệ' }),
 });
-
 
 export default customerSchema;

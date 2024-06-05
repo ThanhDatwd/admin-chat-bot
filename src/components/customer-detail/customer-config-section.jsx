@@ -53,7 +53,7 @@ const CustomerConfigSection = ({ customer, config }) => {
                   variant="contained"
                   onClick={handleDialogOpen}
                 >
-                  Chỉnh sửa
+                  Cập nhật
                 </Button>
               )}
             </Stack>

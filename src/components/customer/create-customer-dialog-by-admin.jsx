@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import CorporateFareOutlinedIcon from '@mui/icons-material/CorporateFareOutlined';
 import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
@@ -18,33 +17,24 @@ import {
 import { t } from 'i18next';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import api from 'src/api/axios';
+import { useDispatch, useSelector } from 'react-redux';
 import { customersApi } from 'src/api/customer';
-import {
-  OPTION_CUSTOMER,
-  OPTION_DISTRICT,
-  OPTION_ORGANIZATION,
-  OPTION_PROVINCE,
-  OPTION_VILLAGE,
-} from 'src/constants/user';
-import userBaseSchema, { userOrganizationSchema } from 'src/schemas/user-schema';
-import { z } from 'zod';
-import AutocompleteCustom from '../common/auto-complete-custom';
+import customerSchema from 'src/schemas/customer-schema';
+import { setLoading, setRefresh } from 'src/slices/common';
 import { DialogCustom } from '../common/dialog-custom';
 import { InputOutline } from '../common/input-outline';
-import { SelectCustom } from '../common/select-custom';
-import TableGroupUser from './table-group-customer';
-import UploadAvatarUser from './upload-avatar-customer';
-import customerSchema from 'src/schemas/customer-schema';
 
-const CreateCustomerByAdminDialog = ({ open, onClose, onUpdate, organizations }) => {
-  const [isLoading, setIsLoading] = useState(false);
+const CreateCustomerByAdminDialog = ({ open, onClose, onUpdate, customer }) => {
+  const dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
 
   const theme = useTheme();
   const {
     control,
+    setValue,
     handleSubmit,
     reset,
     formState: { errors },
@@ -61,26 +51,37 @@ const CreateCustomerByAdminDialog = ({ open, onClose, onUpdate, organizations })
 
   const onSubmit = async (data) => {
     try {
-      setIsLoading(true);
-      const res = await customersApi.createCustomer({
+      dispatch(setLoading(true));
+
+      const dataRequest = {
         customerName: data.customerName,
         phoneNumber: data.phoneNumber,
         email: data.email,
         website: data.website,
         taxCode: data.taxCode,
         representative: data.representative,
-      });
-      console.log('ress', res);
-      if (res.metadata.message === 'OK') {
+      };
+
+      let res = null;
+      if (customer) {
+        await customersApi.updateCustomer({ ...dataRequest, customerId: customer.customerId });
+
+        toast.success(t('Cập nhật thành công'));
+        dispatch(setRefresh(!isRefresh));
+      } else {
+        res = await customersApi.createCustomer(dataRequest);
+        
         toast.success(t('Tạo mới thành công'));
+        dispatch(setRefresh(!isRefresh));
       }
+
       onUpdate?.(data);
       reset();
       onClose();
     } catch (error) {
       console.error('Error creating bot:', error);
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
   useEffect(() => {
@@ -89,12 +90,23 @@ const CreateCustomerByAdminDialog = ({ open, onClose, onUpdate, organizations })
     }
   }, [open]);
 
+  useEffect(() => {
+    if (customer) {
+      setValue('customerName', customer.customerName);
+      setValue('phoneNumber', customer.phoneNumber);
+      setValue('email', customer.email);
+      setValue('website', customer.website);
+      setValue('taxCode', customer.taxCode);
+      setValue('representative', customer.representative);
+    }
+  }, [customer, open]);
+
   return (
     <>
       <DialogCustom
         open={open}
         onClose={onClose}
-        title={t('Tạo tổ chức mới ')}
+        title={customer ? t('Cập nhật tổ chức') : t('Tạo tổ chức mới ')}
         actions={
           <>
             <Stack
@@ -121,7 +133,7 @@ const CreateCustomerByAdminDialog = ({ open, onClose, onUpdate, organizations })
                 }}
                 onClick={handleSubmit(onSubmit)}
               >
-                {t('Tạo mới')}
+                {customer ? t('Cập nhật') : t('Tạo mới')}
                 {isLoading && (
                   <Box
                     sx={{

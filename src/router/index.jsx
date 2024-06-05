@@ -7,6 +7,7 @@ import RecoverPasswordPage from 'src/pages/auth/recover-password';
 import RegisterPage from 'src/pages/auth/register';
 import CreateAccountAdminPage from 'src/pages/create-account';
 import CustomerDetail from 'src/pages/customer-detail';
+import FieldPage from 'src/pages/field';
 import UserPage from 'src/pages/user';
 
 // import { Layout as LayoutBase } from "src/layouts/base";
@@ -98,6 +99,10 @@ export const routesOutlets = [
       {
         path: 'partner',
         element: <Partner />,
+      },
+      {
+        path: 'field',
+        element: <FieldPage />,
       },
     ],
   },

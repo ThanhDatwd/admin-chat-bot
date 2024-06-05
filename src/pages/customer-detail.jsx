@@ -1,11 +1,12 @@
 import { Box, Container, Grid, Stack, useTheme } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import { customersApi } from 'src/api/customer';
 import CustomerConfigSection from 'src/components/customer-detail/customer-config-section';
 import CustomerContractSection from 'src/components/customer-detail/customer-contract-section';
-import CustomerInfo from 'src/components/customer-detail/user-info';
+import CustomerInfo from 'src/components/customer-detail/customer-info';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 
@@ -18,6 +19,7 @@ const CustomerDetail = () => {
   const [customerData, setCustomerData] = useState({});
   const [contractData, setContractData] = useState();
   const [configData, setConfigData] = useState();
+  const refresh = useSelector(state=>state.common.refresh)
 
   const getCustomer = useCallback(async () => {
     try {
@@ -31,12 +33,9 @@ const CustomerDetail = () => {
   }, [isMountedRef]);
   const getCustomerContract = useCallback(async () => {
     try {
-      const response = await customersApi.getCustomerContract({
-        customerId: '540ca8ce-9937-4c92-9b86-095393b13c54',
-        
-      });
+      const response = await customersApi.getCustomerContract(id,{ pageNumber: 0, pageSize: 20 });
       if (isMountedRef()) {
-        setContractData(response.data);
+        setContractData(response.data[response.data.length-1]??null);
       }
     } catch (err) {
       console.error(err);
@@ -48,7 +47,7 @@ const CustomerDetail = () => {
         id,{ pageNumber: 0, pageSize: 20 }
       );
       if (isMountedRef()) {
-        setConfigData(response.data[response.data.length-1]);
+        setConfigData(response.data[response.data.length-1]??null);
       }
     } catch (err) {
       console.error(err);
@@ -59,7 +58,7 @@ const CustomerDetail = () => {
     getCustomer();
     getCustomerContract();
     getCustomerConfig()
-  }, [getCustomer]);
+  }, [getCustomer,refresh]);
 
   return (
     <>

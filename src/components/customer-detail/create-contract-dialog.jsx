@@ -20,14 +20,20 @@ import { customersApi } from 'src/api/customer';
 import contractSchema from 'src/schemas/contract-schema';
 import { DialogCustom } from '../common/dialog-custom';
 import { InputOutline } from '../common/input-outline';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { setLoading, setRefresh } from 'src/slices/common';
+import { el } from 'date-fns/locale';
 
 const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contract }) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [selectedSignDate, setSelectedSignDate] = useState(null);
   const [selectedEffectiveDate, setSelectedEffectiveDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const dispatch = useDispatch();
 
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
   const theme = useTheme();
   const {
     control,
@@ -51,8 +57,8 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
 
   const onSubmit = async (data) => {
     try {
-      setIsLoading(true);
-      const res = await customersApi.createCustomerContract({
+      dispatch(setLoading(true));
+      const dataRequest={
         number: data.number,
         name: data.name,
         customerId: data.customerId,
@@ -61,17 +67,26 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
         endDate: data.endDate,
         beforeTax: data.beforeTax,
         taxRate: Number(data.taxRate) / 100,
-      });
+      } 
+      let res = null 
+      if(contract){
+       res = await customersApi.updateCustomerContract({...dataRequest,contractId:contract.id});
+      }
+      else{
+       res = await customersApi.createCustomerContract(dataRequest);
+      }
       if (res.metadata.message === 'OK') {
         toast.success(t('Tạo hợp đồng thành công'));
+        dispatch(setRefresh(!isRefresh));
       }
       onUpdate?.(data);
       reset();
       onClose();
     } catch (error) {
+      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.error('Error creating bot:', error);
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
   useEffect(() => {
@@ -106,7 +121,7 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
     <DialogCustom
       open={open}
       onClose={onClose}
-      title={contract ? t('Chỉnh sửa hợp đồng') : t('Tạo hợp hợp đồng')}
+      title={contract ? t('Cập nhật hợp đồng') : t('Tạo hợp hợp đồng')}
       actions={
         <>
           <Stack

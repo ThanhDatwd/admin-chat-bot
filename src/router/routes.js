@@ -10,4 +10,5 @@ export const routes = {
   invoices: '/invoices',
   ranking: '/ranking',
   partner: '/partner',
+  field: '/field',
 };

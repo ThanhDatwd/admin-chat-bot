@@ -16,15 +16,19 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
 import { customersApi } from 'src/api/customer';
 import contractSchema from 'src/schemas/contract-schema';
 import customerConfigSchema from 'src/schemas/customer-config-schema';
+import { setLoading, setRefresh } from 'src/slices/common';
 import { DialogCustom } from '../common/dialog-custom';
 import { InputOutline } from '../common/input-outline';
 
 const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config }) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [cleared, setCleared] = useState(false);
+  const dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
 
   const theme = useTheme();
   const {
@@ -45,23 +49,33 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
 
   const onSubmit = async (data) => {
     try {
-      setIsLoading(true);
-      const res = await customersApi.createCustomerConfig({
+      dispatch(setLoading(true));
+      const dataRequest = {
         customerId: data.customerId,
         quota: data.quota,
         freeRequest: data.freeRequest,
         freeTraining: data.freeTraining,
-      });
+      };
+      let res = null;
+
+      if (config) {
+        res = await customersApi.updateCustomerConfig({ ...dataRequest, customerConfigId: config.id });
+      } else {
+       res = await customersApi.createCustomerConfig(dataRequest);
+      }
+
       if (res.metadata.message === 'OK') {
-        toast.success(t('Tạo cấu hình  thành công'));
+        toast.success(config?t('Cập nhật cấu hình  thành công'):t('Tạo cấu hình  thành công'));
+        dispatch(setRefresh(!isRefresh));
       }
       onUpdate?.(data);
       reset();
       onClose();
     } catch (error) {
+      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.error('Error creating bot:', error);
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
   useEffect(() => {
@@ -74,7 +88,7 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
     if (customer) {
       setValue('customerId', customer.customerId);
     }
-  }, [customer,open]);
+  }, [customer, open]);
 
   useEffect(() => {
     if (config) {
@@ -83,13 +97,13 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
       setValue('freeRequest', config.freeRequest);
       setValue('feeTraining', config.feeTraining);
     }
-  }, [config,open]);
+  }, [config, open]);
 
   return (
     <DialogCustom
       open={open}
       onClose={onClose}
-      title={'Tạo hợp đồng '}
+      title={config? t('Cập nhật cấu hình '):t('Cấu hình  ')}
       actions={
         <>
           <Stack
@@ -116,7 +130,7 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
               }}
               onClick={handleSubmit(onSubmit)}
             >
-              {t('Tạo hợp đồng')}
+             {config ? t('Cập nhật') : t('Tạo mới')}
               {isLoading && (
                 <Box
                   sx={{

@@ -53,7 +53,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                   variant="contained"
                   onClick={handleDialogOpen}
                 >
-                  Chỉnh sửa
+                  Cập nhật
                 </Button>
               )}
             </Stack>
@@ -112,7 +112,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                 primary={t('Ngày ký') + ':'}
               />
               <Typography variant="subtitle2">
-                {format(new Date(contract?.signedDate), 'dd-MM-yyyy')}
+                {/* {format(new Date(contract?.signedDate), 'dd-MM-yyyy')} */}
               </Typography>
             </ListItem>
             <ListItem disableGutters>
@@ -125,7 +125,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                 primary={t('Ngày hiệu lực') + ':'}
               />
               <Typography variant="subtitle2">
-                {format(new Date(contract?.effectiveDate), 'dd-MM-yyyy')}
+                {/* {format(new Date(contract?.effectiveDate), 'dd-MM-yyyy')} */}
               </Typography>
             </ListItem>
 
@@ -139,7 +139,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                 primary={t('Ngày hết hạn') + ':'}
               />
               <Typography variant="subtitle2">
-                {format(new Date(contract?.endDate), 'dd-MM-yyyy')}
+                {/* {format(new Date(contract?.endDate), 'dd-MM-yyyy')} */}
               </Typography>
             </ListItem>
             <ListItem disableGutters>

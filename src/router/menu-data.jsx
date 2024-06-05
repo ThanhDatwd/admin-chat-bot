@@ -10,10 +10,11 @@ import LeaderboardTwoToneIcon from '@mui/icons-material/LeaderboardTwoTone';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import SmartToyTwoToneIcon from '@mui/icons-material/SmartToyTwoTone';
+import TopicIcon from '@mui/icons-material/Topic';
 import { Box } from '@mui/material';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { routes } from 'src/router/routes';
+import { routes } from './routes';
 
 export const useMenuItems = () => {
   const { t } = useTranslation();
@@ -33,18 +34,6 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.index,
-          },
-          {
-            title: 'Another page',
-            icon: (
-              <Box
-                width={24}
-                height={24}
-              >
-                <ReportIcon />
-              </Box>
-            ),
-            route: routes.pageExample,
           },
           {
             title: 'Chatbot',
@@ -119,18 +108,6 @@ export const useMenuItems = () => {
             route: routes.invoices,
           },
           {
-            title: 'Xếp hạng',
-            icon: (
-              <Box
-                width={24}
-                height={24}
-              >
-                <LeaderboardTwoToneIcon />
-              </Box>
-            ),
-            route: routes.ranking,
-          },
-          {
             title: 'Đối tác',
             icon: (
               <Box
@@ -142,6 +119,31 @@ export const useMenuItems = () => {
             ),
             route: routes.partner,
           },
+          {
+            title: 'Lĩnh vực',
+            icon: (
+              <Box
+                width={24}
+                height={24}
+              >
+                <TopicIcon />
+              </Box>
+            ),
+            route: routes.field,
+          },
+          {
+            title: 'Xếp hạng',
+            icon: (
+              <Box
+                width={24}
+                height={24}
+              >
+                <LeaderboardTwoToneIcon />
+              </Box>
+            ),
+            route: routes.ranking,
+          },
+
           {
             title: 'Dropdown menu',
             icon: (

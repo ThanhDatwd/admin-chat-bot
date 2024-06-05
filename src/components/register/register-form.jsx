@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Container,
   Divider,
   FilledInput,
@@ -32,24 +33,23 @@ import { setUser } from 'src/slices/auth';
 import { setLoading } from 'src/slices/common';
 import { z } from 'zod';
 
-const schema = z
-  .object({
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
-    username: z.string().min(1, 'User name is required'),
-    phoneNumber: z.string().min(1, 'Phone number is required'),
-    email: z
-      .string()
-      .min(1, 'Email is required')
-      .email({ message: 'Invalid email address' })
-      .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/, { message: 'Invalid email address' }),
-    password: z.string().min(6, 'Password must be at least 6 characters long'),
-    // repeatPassword: z.string().min(6, 'Please confirm your password'),
-  })
-  // .refine((data) => data.password === data.repeatPassword, {
-  //   message: 'Passwords do not match',
-  //   path: ['repeatPassword'], // Set the path to the field that should cause the error
-  // });
+const schema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  username: z.string().min(1, 'User name is required'),
+  phoneNumber: z.string().min(1, 'Phone number is required'),
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email({ message: 'Invalid email address' })
+    .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/, { message: 'Invalid email address' }),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  // repeatPassword: z.string().min(6, 'Please confirm your password'),
+});
+// .refine((data) => data.password === data.repeatPassword, {
+//   message: 'Passwords do not match',
+//   path: ['repeatPassword'], // Set the path to the field that should cause the error
+// });
 function RegisterForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -375,8 +375,31 @@ function RegisterForm() {
                   type="submit"
                   size="large"
                   fullWidth
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '16px',
+                  }}
                 >
-                  Sign in
+                  Sign up
+                  {!isLoading && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '16px',
+                      }}
+                      color="common.white"
+                    >
+                      {' '}
+                      <CircularProgress
+                        style={{ height: '20px', width: '20px' }}
+                        color={'inherit'}
+                      />
+                    </Box>
+                  )}
                 </Button>
               </Grid>
               <Grid
