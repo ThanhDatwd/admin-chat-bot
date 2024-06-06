@@ -59,13 +59,16 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
       let res = null;
 
       if (config) {
-        res = await customersApi.updateCustomerConfig({ ...dataRequest, customerConfigId: config.id });
+        res = await customersApi.updateCustomerConfig({
+          ...dataRequest,
+          customerConfigId: config.id,
+        });
       } else {
-       res = await customersApi.createCustomerConfig(dataRequest);
+        res = await customersApi.createCustomerConfig(dataRequest);
       }
 
       if (res.metadata.message === 'OK') {
-        toast.success(config?t('Cập nhật cấu hình  thành công'):t('Tạo cấu hình  thành công'));
+        toast.success(config ? t('Cập nhật cấu hình  thành công') : t('Tạo cấu hình  thành công'));
         dispatch(setRefresh(!isRefresh));
       }
       onUpdate?.(data);
@@ -103,7 +106,7 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
     <DialogCustom
       open={open}
       onClose={onClose}
-      title={config? t('Cập nhật cấu hình '):t('Cấu hình  ')}
+      title={config ? t('Cập nhật cấu hình ') : t('Cấu hình  ')}
       actions={
         <>
           <Stack
@@ -130,7 +133,7 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
               }}
               onClick={handleSubmit(onSubmit)}
             >
-             {config ? t('Cập nhật') : t('Tạo mới')}
+              {config ? t('Cập nhật') : t('Tạo mới')}
               {isLoading && (
                 <Box
                   sx={{

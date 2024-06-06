@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { botsApi } from 'src/api/bots';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import CreateChatbotDialog from 'src/components/chatbot/create-chatbot-dialog';
+import CreatePackageDialog from 'src/components/services-package/create-package-dialog';
 import ServicesPackageTable from 'src/components/services-package/services-package-table';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
@@ -186,7 +186,7 @@ const ServicesPackage = () => {
           <ServicesPackageTable packages={packages} />
         </Container>
       </Box>
-      <CreateChatbotDialog
+      <CreatePackageDialog
         open={open}
         onClose={handleDialogClose}
         onUpdate={getBots}

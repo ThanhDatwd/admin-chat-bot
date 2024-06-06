@@ -132,23 +132,6 @@ const Ranking = () => {
               }}
               title={t('Đối tác')}
               description={t('Quản lý đối tác')}
-              actions={
-                <div>
-                  <Button
-                    sx={{
-                      mt: {
-                        xs: 2,
-                        md: 0,
-                      },
-                    }}
-                    variant="contained"
-                    onClick={handleDialogOpen}
-                    startIcon={<AddOutlinedIcon fontSize="small" />}
-                  >
-                    {t('Thêm đối tác')}
-                  </Button>
-                </div>
-              }
               iconBox={
                 <AvatarState
                   isSoft
@@ -172,11 +155,6 @@ const Ranking = () => {
           <PartnerTable partners={partners} />
         </Container>
       </Box>
-      <CreateChatbotDialog
-        open={open}
-        onClose={handleDialogClose}
-        onUpdate={getBots}
-      />
     </>
   );
 };

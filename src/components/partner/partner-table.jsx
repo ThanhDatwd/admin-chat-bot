@@ -1,6 +1,4 @@
 import { DeleteRounded } from '@mui/icons-material';
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import HowToRegTwoToneIcon from '@mui/icons-material/HowToRegTwoTone';
 import LockTwoToneIcon from '@mui/icons-material/LockTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
@@ -27,6 +25,8 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ButtonSoft } from '../base/styles/button-soft';
+import ApprovePartnerDialog from './approve-partner-dialog';
+import LockPartnerDialog from './lock-partner-dialog';
 
 const statusOptions = [
   { id: 'all', name: 'Tất cả' },
@@ -205,14 +205,16 @@ const PartnerTable = ({ partners }) => {
                 hover
                 key={partner.id}
                 selected={isSelected(partner.id)}
-                onClick={(event) => handleSelectOne(event, partner.id)}
               >
                 <TableCell>
                   <Typography
                     noWrap
                     variant="subtitle2"
                   >
-                    <Checkbox checked={isSelected(partner.id)} />
+                    <Checkbox
+                      onClick={(event) => handleSelectOne(event, partner.id)}
+                      checked={isSelected(partner.id)}
+                    />
                   </Typography>
                 </TableCell>
                 <TableCell>
@@ -282,28 +284,8 @@ const PartnerTable = ({ partners }) => {
                 </TableCell>
                 <TableCell align="center">
                   <Typography noWrap>
-                    <Tooltip
-                      title={t('Duyệt tài khoản')}
-                      arrow
-                    >
-                      <IconButton
-                        color="primary"
-                        onClick={() => console.log('Duyệt tài khoản')}
-                      >
-                        <HowToRegTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip
-                      title={t('Khóa tài khoản')}
-                      arrow
-                    >
-                      <IconButton
-                        color="error"
-                        onClick={() => console.log('Khóa tài khoản')}
-                      >
-                        <LockTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <ApprovePartnerDialog />
+                    <LockPartnerDialog />
                   </Typography>
                 </TableCell>
               </TableRow>

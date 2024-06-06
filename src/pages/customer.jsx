@@ -3,8 +3,7 @@ import CorporateFareTwoToneIcon from '@mui/icons-material/CorporateFareTwoTone';
 import { Box, Button, Container, useTheme } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { customersApi } from 'src/api/customer';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
@@ -37,7 +36,7 @@ const CustomerPage = () => {
   const geCustomers = useCallback(
     async (paginate, filter) => {
       try {
-        dispatch(setLoading(true))
+        dispatch(setLoading(true));
         const response = await customersApi.getCustomers({
           pageNumber: paginate.pageNumber,
           pageSize: paginate.pageSize,
@@ -47,14 +46,13 @@ const CustomerPage = () => {
         }
       } catch (err) {
         console.error(err);
-      }
-      finally{
-        dispatch(setLoading(false))
+      } finally {
+        dispatch(setLoading(false));
       }
     },
     [isMountedRef, isRefresh]
   );
-  
+
   return (
     <>
       <Box

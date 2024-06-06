@@ -143,37 +143,6 @@ const Invoices = () => {
               }}
               title={t('Hóa đơn')}
               description={t('Quản lý hóa đơn')}
-              actions={
-                <div>
-                  <Button
-                    sx={{
-                      mt: {
-                        xs: 2,
-                        md: 0,
-                      },
-                      mr: 2,
-                    }}
-                    variant="contained"
-                    onClick={handleDialogOpen}
-                    startIcon={<FileDownloadOutlinedIcon fontSize="small" />}
-                  >
-                    {t('Xuất file')}
-                  </Button>
-                  <Button
-                    sx={{
-                      mt: {
-                        xs: 2,
-                        md: 0,
-                      },
-                    }}
-                    variant="contained"
-                    onClick={handleDialogOpen}
-                    startIcon={<AddOutlinedIcon fontSize="small" />}
-                  >
-                    {t('Tạo hóa đơn')}
-                  </Button>
-                </div>
-              }
               iconBox={
                 <AvatarState
                   isSoft
@@ -197,11 +166,6 @@ const Invoices = () => {
           <InvoicesTable invoices={invoices} />
         </Container>
       </Box>
-      <CreateChatbotDialog
-        open={open}
-        onClose={handleDialogClose}
-        onUpdate={getBots}
-      />
     </>
   );
 };
