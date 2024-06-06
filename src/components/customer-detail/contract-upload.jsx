@@ -1,22 +1,19 @@
-import { UploadFileRounded } from '@mui/icons-material';
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import DoDisturbAltRoundedIcon from '@mui/icons-material/DoDisturbAltRounded';
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import {
-  Box,
-  Button,
-  Card,
-  CardActionArea,
-  CardContent,
-  Divider,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Stack,
-  Typography,
+    Box,
+    Card,
+    CardActionArea,
+    CardContent,
+    LinearProgress,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Stack,
+    Typography
 } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -27,8 +24,6 @@ import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { CardAddActionDashed } from 'src/components/base/styles/card';
 import * as XLSX from 'xlsx';
 import fileIcon from '../base/fileIcon';
-import TableGroupUser from './table-group-customer';
-import TableUserUpload from './table-user-upload';
 
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
@@ -39,7 +34,7 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-const UserUploadList = ({ files, setFiles, setData, data }) => {
+const ContractUpload = ({ files, setFiles }) => {
   const [uploadProgress, setUploadProgress] = useState({});
   const [selectedGroupUser, setSelectedGroupUser] = useState([]);
   const { id } = useParams();
@@ -70,7 +65,6 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
-        setData(json);
         simulateProgress(file);
       };
       reader.readAsArrayBuffer(file);
@@ -99,14 +93,21 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
     }, 200);
   };
 
+  
 
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     onDrop,
     accept: {
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/gif': ['.gif'],
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
       'application/vnd.ms-excel': ['.xls'],
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
     },
-    maxFiles: 10,
+    maxFiles: 1,
   });
 
   const removeFile = (fileName) => {
@@ -116,17 +117,9 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
       delete newProgress[fileName];
       return newProgress;
     });
-    setData([]);
   };
 
-  const handleRemoveUser = (index) => {
-    const newData = [...data];
-    newData.splice(index, 1);
-    setData(newData);
-    if (newData.length === 0) {
-      setFiles([]);
-    }
-  };
+ 
 
   return (
     <>
@@ -229,8 +222,11 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
           variant="outlined"
           elevation={0}
           sx={{
-            height: '200px',
-            borderWidth: 1,
+            maxeight: 74,
+            width: {
+              xs: '100%',
+              sm: 185,
+            },
           }}
         >
           <CardActionArea {...getRootProps()}>
@@ -296,9 +292,9 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
                         isDragAccept ? 'success.main' : isDragReject ? 'error.main' : 'primary.main'
                       }
                     >
-                      Click to upload
+                    Click to upload
                     </Typography>{' '}
-                    or drag and drop excel here
+                    or drag and drop file here
                   </Typography>
                 </Box>
               </Stack>
@@ -306,16 +302,9 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
           </CardActionArea>
         </CardAddActionDashed>
       )}
-      {uploadProgress[files[0]?.file?.name]?.progress === 100 && (
-        <TableUserUpload
-          selectedItems={selectedGroupUser}
-          setSelectedItems={setSelectedGroupUser}
-          users={data}
-          onRemove={handleRemoveUser}
-        />
-      )}
+      
     </>
   );
 };
 
-export default UserUploadList;
+export default ContractUpload;

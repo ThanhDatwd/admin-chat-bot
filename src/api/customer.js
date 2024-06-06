@@ -1,9 +1,9 @@
 import api, { getData, postData } from './axios';
 
 class CustomerApi {
-  getCustomers({ pageNumber, pageSize }) {
+  getCustomers(pagination) {
     const data = getData(
-      import.meta.env.VITE_API_URL_8086 + `customer?&pageNumber=${pageNumber}&pageSize=${pageSize}`
+      import.meta.env.VITE_API_URL_8086 + `customer?pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}`
     );
     return data;
   }

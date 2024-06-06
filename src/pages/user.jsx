@@ -20,7 +20,7 @@ import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import CreateCustomerByAdminDialog from 'src/components/customer/create-customer-dialog-by-admin';
 import CreateUserByOrganizationDialog from 'src/components/customer/create-user-dialog-by-organization';
-import UserSection from 'src/components/user/user-section';
+import UserTable from 'src/components/user/user-section';
 // import UserSection from 'src/components/user/user-section';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
@@ -44,24 +44,25 @@ const UserPage = () => {
     setOpen(false);
   };
 
-  const geCustomers = useCallback(async () => {
-    try {
-      const response = await usersApi.getUserByOrg({
-        customerId: '967aac21-c16c-4c20-9208-f27a0f19fc05',
-        pagination: { pageNumber: 0, pageSize: 20 },
-      });
-      if (isMountedRef()) {
-        console.log('this is data user', response);
-        setCustomers(response);
+  const geCustomers = useCallback(
+    async (paginate, filter) => {
+      try {
+        const response = await usersApi.getUserByOrg({
+          customerId: '2c4eda1e-b155-48d0-abe3-e74253f63922',
+          pagination: {
+            pageNumber: paginate.pageNumber,
+            pageSize: paginate.pageSize,
+          },
+        });
+        if (isMountedRef()) {
+          setCustomers(response);
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [isMountedRef, isRefresh]);
-
-  useEffect(() => {
-    geCustomers();
-  }, [geCustomers]);
+    },
+    [isMountedRef, isRefresh]
+  );
 
   return (
     <>
@@ -132,10 +133,19 @@ const UserPage = () => {
               }
             />
           </Box>
-          <UserSection
-            users={customers}
-            setIsRefresh={setIsRefresh}
-          />
+          <Box
+            pb={{
+              xs: 2,
+              sm: 3,
+            }}
+          >
+            <UserTable
+              fetchData={geCustomers}
+              totalCount={100}
+              users={customers}
+              setIsRefresh={setIsRefresh}
+            />
+          </Box>
         </Container>
       </Box>
       <CreateUserByOrganizationDialog

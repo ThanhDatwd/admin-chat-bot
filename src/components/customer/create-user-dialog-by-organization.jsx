@@ -1,9 +1,11 @@
-import { Button, Stack, useTheme } from '@mui/material';
+import { Box, Button, CircularProgress, Stack, useTheme } from '@mui/material';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 import { usersApi } from 'src/api/user';
+import { setLoading } from 'src/slices/common';
 import { DialogCustom } from '../common/dialog-custom';
 import UserUploadList from './user-upload-list';
 
@@ -11,12 +13,16 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [userDataUpload, setUserDataUpload] = useState([]);
-  const [uploadFiles, setUploadFiles] = useState([]);
+  const dispatch = useDispatch();
+
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
 
   const theme = useTheme();
 
   const handleCreateUser = async () => {
     try {
+      dispatch(setLoading(true));
       if (userDataUpload.length > 0) {
         const customerId = '967aac21-c16c-4c20-9208-f27a0f19fc05';
         const dataRequest = {
@@ -28,7 +34,6 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
         toast.error(t('Tạo người dùng thành công'));
         setFiles([]);
         setUserDataUpload([]);
-        setUploadFiles([]);
         onClose();
         onUpdate?.(response.data);
       } else {
@@ -37,8 +42,15 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
     } catch (error) {
       toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.log(error);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
+  useEffect(() => {
+    if (!open) {
+      setFiles([]);
+    }
+  }, [open]);
   return (
     <>
       <DialogCustom
@@ -60,9 +72,34 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
               </Button>
               <Button
                 variant="contained"
+                type="submit"
+                size="large"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '16px',
+                }}
                 onClick={handleCreateUser}
               >
-                Save
+                {t('Tạo mới')}
+                {isLoading && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '16px',
+                    }}
+                    color="common.white"
+                  >
+                    {' '}
+                    <CircularProgress
+                      style={{ height: '20px', width: '20px' }}
+                      color={'inherit'}
+                    />
+                  </Box>
+                )}
               </Button>
             </Stack>
           </>
@@ -71,7 +108,6 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
         <UserUploadList
           files={files}
           setFiles={setFiles}
-          setUploadFiles={setUploadFiles}
           data={userDataUpload}
           setData={setUserDataUpload}
         />

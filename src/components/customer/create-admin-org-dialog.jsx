@@ -21,10 +21,15 @@ import api from 'src/api/axios';
 import { userOrganizationSchema } from 'src/schemas/user-schema';
 import { DialogCustom } from '../common/dialog-custom';
 import { InputOutline } from '../common/input-outline';
+import { setLoading } from 'src/slices/common';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const CreateAdminOrgDialog = ({ open, onClose, onUpdate, customer }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
   const theme = useTheme();
   const {
     control,
@@ -46,7 +51,7 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate, customer }) => {
 
   const onSubmit = async (data) => {
     try {
-      setIsLoading(true);
+      dispatch(setLoading(true));
       const res = await api.post(import.meta.env.VITE_API_AUTH_URL_8080 + 'users/customer-ad', {
         customerId: customer.customerId,
         user: {
@@ -66,7 +71,7 @@ const CreateAdminOrgDialog = ({ open, onClose, onUpdate, customer }) => {
     } catch (error) {
       console.error('Error creating bot:', error);
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(true));
     }
   };
   useEffect(() => {

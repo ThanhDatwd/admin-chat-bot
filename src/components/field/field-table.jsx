@@ -198,7 +198,7 @@ const FieldTable = ({ field }) => {
                   >
                     {t('Hiển thị')}:
                   </Typography>{' '}
-                  <b>{paginatedField.length}</b> <b>{t('hóa đơn')}</b>
+                  <b>{paginatedField.length}</b> <b>{t('lĩnh vực')}</b>
                 </Box>
               </>
             )}

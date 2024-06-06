@@ -2,20 +2,25 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined';
-import { Box, Button, Grid, InputAdornment, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Button, CircularProgress, Grid, InputAdornment, Stack, Typography, useTheme } from '@mui/material';
 import { t } from 'i18next';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
 import api from 'src/api/axios';
 import { userOrganizationSchema } from 'src/schemas/user-schema';
+import { setLoading } from 'src/slices/common';
 import AutocompleteCustom from '../common/auto-complete-custom';
 import { InputOutline } from '../common/input-outline';
 
 const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] }) => {
   const [selectedOrganization, setSelectedOrganization] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
 
   const theme = useTheme();
   const {
@@ -36,7 +41,7 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
   });
   const onSubmit = async (data) => {
     try {
-      setIsLoading(true);
+      dispatch(setLoading(true));
       const res = await api.post(import.meta.env.VITE_API_AUTH_URL_8080 + 'users/customer-ad', {
         customerId: data.customerId,
         user: {
@@ -54,9 +59,10 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
       reset();
       onClose();
     } catch (error) {
+      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.error('Error creating bot:', error);
     } finally {
-      setIsLoading(false);
+      dispatch(setLoading(false));
     }
   };
   useEffect(() => {
@@ -299,9 +305,34 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
                   </Button>
                   <Button
                     variant="contained"
+                    type="submit"
+                    size="large"
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '16px',
+                    }}
                     onClick={handleSubmit(onSubmit)}
                   >
-                    Save
+                    {t('Tạo mới')}
+                    {isLoading && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '16px',
+                        }}
+                        color="common.white"
+                      >
+                        {' '}
+                        <CircularProgress
+                          style={{ height: '20px', width: '20px' }}
+                          color={'inherit'}
+                        />
+                      </Box>
+                    )}
                   </Button>
                 </Stack>
               </>

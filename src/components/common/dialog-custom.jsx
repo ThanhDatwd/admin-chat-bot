@@ -40,7 +40,7 @@ export const DialogCustom = (props) => {
             fullScreen={!mdUp}
             scroll="paper"
             aria-labelledby="basic-dialog-title"
-            maxWidth="lg"
+            maxWidth='md'
             fullWidth
             {...other}
           >

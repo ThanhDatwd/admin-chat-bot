@@ -7,6 +7,7 @@ import { botsApi } from 'src/api/bots';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import CreateChatbotDialog from 'src/components/chatbot/create-chatbot-dialog';
+import CreateRankingDialog from 'src/components/ranking/create-ranking-dialog';
 import RankingTable from 'src/components/ranking/ranking-table';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
@@ -137,7 +138,7 @@ const Ranking = () => {
           <RankingTable rankings={rankings} />
         </Container>
       </Box>
-      <CreateChatbotDialog
+      <CreateRankingDialog
         open={open}
         onClose={handleDialogClose}
         onUpdate={getBots}

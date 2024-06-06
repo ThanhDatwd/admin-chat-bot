@@ -1,3 +1,8 @@
+import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import DoDisturbAltRoundedIcon from '@mui/icons-material/DoDisturbAltRounded';
+import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import {
   Box,
   Button,
@@ -7,6 +12,7 @@ import {
   Divider,
   List,
   ListItem,
+  ListItemIcon,
   ListItemText,
   Stack,
   Typography,
@@ -14,7 +20,10 @@ import {
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { downloadFile } from 'src/api/files';
 import PlaceholderBox from 'src/components/base/placeholder-box';
+import fileIcon from '../base/fileIcon';
+import { ButtonIcon } from '../base/styles/button-icon';
 import CreateCustomerContractDialog from './create-contract-dialog';
 
 const CustomerContractSection = ({ customer, contract }) => {
@@ -30,7 +39,16 @@ const CustomerContractSection = ({ customer, contract }) => {
   const handleDialogClose = () => {
     setOpen(false);
   };
-
+  const handleDownload = async ({ fileKey, fileName }) => {
+    try {
+      await downloadFile({
+        fileKey,
+        fileName,
+      });
+    } catch (error) {
+      console.error('Error fetching user files:', error);
+    }
+  };
   return (
     <Card sx={{ width: '100%' }}>
       <CardHeader
@@ -112,7 +130,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                 primary={t('Ngày ký') + ':'}
               />
               <Typography variant="subtitle2">
-                {/* {format(new Date(contract?.signedDate), 'dd-MM-yyyy')} */}
+                {format(new Date(contract?.signedDate), 'dd-MM-yyyy')}
               </Typography>
             </ListItem>
             <ListItem disableGutters>
@@ -125,7 +143,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                 primary={t('Ngày hiệu lực') + ':'}
               />
               <Typography variant="subtitle2">
-                {/* {format(new Date(contract?.effectiveDate), 'dd-MM-yyyy')} */}
+                {format(new Date(contract?.effectiveDate), 'dd-MM-yyyy')}
               </Typography>
             </ListItem>
 
@@ -139,7 +157,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                 primary={t('Ngày hết hạn') + ':'}
               />
               <Typography variant="subtitle2">
-                {/* {format(new Date(contract?.endDate), 'dd-MM-yyyy')} */}
+                {format(new Date(contract?.endDate), 'dd-MM-yyyy')}
               </Typography>
             </ListItem>
             <ListItem disableGutters>
@@ -162,9 +180,7 @@ const CustomerContractSection = ({ customer, contract }) => {
                 }}
                 primary={t('Số tiền trước thuế') + ':'}
               />
-              <Typography variant="subtitle2">
-                {contract.custHouseNumber} {contract?.beforeTax}
-              </Typography>
+              <Typography variant="subtitle2"> {contract?.beforeTax}</Typography>
             </ListItem>
             <ListItem disableGutters>
               <ListItemText
@@ -175,14 +191,88 @@ const CustomerContractSection = ({ customer, contract }) => {
                 }}
                 primary={t('Số tiền sau thuế') + ':'}
               />
-              <Typography variant="subtitle2">
-                {contract.custHouseNumber} {contract?.afterTax}
-              </Typography>
+              <Typography variant="subtitle2"> {contract?.afterTax}</Typography>
             </ListItem>
+            {contract.fileName && contract.fileId && (
+              <>
+                <ListItemText
+                  primaryTypographyProps={{
+                    variant: 'subtitle2',
+                    fontWeight: 500,
+                    color: 'text.secondary',
+                  }}
+                  primary={t('File hợp đồng') + ':'}
+                  sx={{ mb: 1.5 }}
+                />
+                <Card
+                  variant="outlined"
+                  elevation={0}
+                  key={contract.fileName}
+                  sx={{
+                    '&:hover': {
+                      borderColor: (theme) =>
+                        theme.palette.mode === 'dark' ? 'neutral.800' : 'neutral.500',
+                    },
+                  }}
+                >
+                  <ListItem
+                    component="div"
+                    alignItems="flex-start"
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 38,
+                        color: 'neutral.700',
+                      }}
+                    >
+                      {fileIcon(contract?.fileName)}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Typography
+                            noWrap
+                            variant="subtitle1"
+                            fontWeight={500}
+                            color="text.primary"
+                          >
+                            {contract.fileName}
+                          </Typography>
+                          <Typography
+                            variant="subtitle2"
+                            color="text.secondary"
+                          >
+                            {/* {formatBytes(file.size)} */}
+                          </Typography>
+                          <ButtonIcon
+                            aria-label="delete"
+                            onClick={() => {
+                              handleDownload({
+                                fileKey: contract.fileId,
+                                fileName: contract.fileName,
+                              });
+                            }}
+                            size="small"
+                            color="info"
+                          >
+                            <FileDownloadOutlinedIcon fontSize="small" />
+                          </ButtonIcon>
+                        </Box>
+                      }
+                      disableTypography
+                    />
+                  </ListItem>
+                </Card>
+              </>
+            )}
           </List>
         )}
         <CreateCustomerContractDialog
-        contract={contract}
+          contract={contract}
           customer={customer}
           open={open}
           onClose={handleDialogClose}

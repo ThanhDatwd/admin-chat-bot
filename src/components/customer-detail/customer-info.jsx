@@ -140,7 +140,7 @@ function CustomerInfo(props) {
               }}
               primary={t('Người đại diện') + ':'}
             />
-            <Typography variant="subtitle2">{customer.representative}</Typography>
+            <Typography variant="subtitle2">{customer?.representative}</Typography>
           </ListItem>
           <ListItem disableGutters>
             <ListItemText
@@ -162,7 +162,7 @@ function CustomerInfo(props) {
               }}
               primary={t('Mã số thuế') + ':'}
             />
-            <Typography variant="subtitle2">{customer.taxCode}</Typography>
+            <Typography variant="subtitle2">{customer?.taxCode}</Typography>
           </ListItem>
 
           <ListItem disableGutters>
@@ -197,7 +197,7 @@ function CustomerInfo(props) {
               primary={t('Địa chỉ') + ':'}
             />
             <Typography variant="subtitle2">
-              {customer.custHouseNumber} {customer?.address}
+              {customer?.custHouseNumber} {customer?.address}
             </Typography>
           </ListItem>
         </List>

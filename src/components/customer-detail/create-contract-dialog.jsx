@@ -11,25 +11,27 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { format, parseISO } from 'date-fns';
+import { el } from 'date-fns/locale';
 import { t } from 'i18next';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
 import { customersApi } from 'src/api/customer';
+import { uploadFile } from 'src/api/files';
 import contractSchema from 'src/schemas/contract-schema';
+import { setLoading, setRefresh } from 'src/slices/common';
 import { DialogCustom } from '../common/dialog-custom';
 import { InputOutline } from '../common/input-outline';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { setLoading, setRefresh } from 'src/slices/common';
-import { el } from 'date-fns/locale';
+import ContractUpload from './contract-upload';
 
 const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contract }) => {
   const [cleared, setCleared] = useState(false);
   const [selectedSignDate, setSelectedSignDate] = useState(null);
   const [selectedEffectiveDate, setSelectedEffectiveDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
+  const [files, setFiles] = useState([]);
   const dispatch = useDispatch();
 
   const isLoading = useSelector((state) => state.common.loading);
@@ -58,7 +60,12 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
   const onSubmit = async (data) => {
     try {
       dispatch(setLoading(true));
-      const dataRequest={
+      let uploadResponse = null;
+      if (files.length > 0 && files[0].file) {
+        uploadResponse = await handleUploadFile(files[0].file);
+      }
+
+      const dataRequest = {
         number: data.number,
         name: data.name,
         customerId: data.customerId,
@@ -67,13 +74,20 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
         endDate: data.endDate,
         beforeTax: data.beforeTax,
         taxRate: Number(data.taxRate) / 100,
-      } 
-      let res = null 
-      if(contract){
-       res = await customersApi.updateCustomerContract({...dataRequest,contractId:contract.id});
-      }
-      else{
-       res = await customersApi.createCustomerContract(dataRequest);
+        fileId: uploadResponse?.objectId ?? null,
+        fileName: uploadResponse?.fileName ?? null,
+      };
+
+      let res = null;
+      if (contract) {
+        console.log(dataRequest);
+        res = await customersApi.updateCustomerContract({
+          ...dataRequest,
+          contractId: contract.id,
+        });
+      } else {
+        console.log(dataRequest);
+        res = await customersApi.createCustomerContract(dataRequest);
       }
       if (res.metadata.message === 'OK') {
         toast.success(t('Tạo hợp đồng thành công'));
@@ -82,16 +96,32 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
       onUpdate?.(data);
       reset();
       onClose();
+      setFiles([]);
     } catch (error) {
       toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
-      console.error('Error creating bot:', error);
+      console.error('Error customer:', error);
     } finally {
       dispatch(setLoading(false));
+    }
+  };
+  const handleUploadFile = async (file, json = null) => {
+    try {
+      const uploadResponse = await uploadFile({
+        file: file,
+        userId: 'ac140002-8f4e-1c14-818f-58c164f6000a',
+        isPublic: false,
+        jsonData: json,
+      });
+
+      return uploadResponse;
+    } catch (error) {
+      console.error('Error upload file:', error);
     }
   };
   useEffect(() => {
     if (!open) {
       reset();
+      setFiles([]);
     }
   }, [open]);
 
@@ -526,6 +556,16 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
                       )}
                     </>
                   )}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                md={12}
+              >
+                <ContractUpload
+                  files={files}
+                  setFiles={setFiles}
                 />
               </Grid>
             </Grid>

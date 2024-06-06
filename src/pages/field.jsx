@@ -1,16 +1,12 @@
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import { Box, Button, Container, useTheme } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { botsApi } from 'src/api/bots';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import CreateChatbotDialog from 'src/components/chatbot/create-chatbot-dialog';
+import CreateFieldDialog from 'src/components/field/create-field-dialog';
 import FieldTable from 'src/components/field/field-table';
-import InvoicesTable from 'src/components/invoices/invoices-table';
-import { useCustomization } from 'src/hooks/use-customization';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 
 const invoices = [
@@ -62,8 +58,7 @@ const FieldPage = () => {
   const theme = useTheme();
   const { t } = useTranslation();
   const isMountedRef = useRefMounted();
-  const customization = useCustomization();
-  const [bots, setBots] = useState([]);
+  const [fields, setFields] = useState([]);
   const [open, setOpen] = useState(false);
 
   const handleDialogOpen = () => {
@@ -73,20 +68,18 @@ const FieldPage = () => {
     setOpen(false);
   };
 
-  const getBots = useCallback(async () => {
+  const getFields = useCallback(async () => {
     try {
-      const response = await botsApi.getBots({ pageNumber: 0, pageSize: 20 });
-      if (isMountedRef()) {
-        setBots(response);
-      }
+      // const response = await botsApi.getBots({ pageNumber: 0, pageSize: 20 });
+      // if (isMountedRef()) {
+      //   setBots(response);
+      // }
     } catch (err) {
       console.error(err);
     }
   }, [isMountedRef]);
 
-  useEffect(() => {
-    getBots();
-  }, [getBots]);
+
 
   return (
     <>
@@ -160,10 +153,10 @@ const FieldPage = () => {
           <FieldTable field={invoices} />
         </Container>
       </Box>
-      <CreateChatbotDialog
+      <CreateFieldDialog
         open={open}
         onClose={handleDialogClose}
-        onUpdate={getBots}
+        onUpdate={getFields}
       />
     </>
   );

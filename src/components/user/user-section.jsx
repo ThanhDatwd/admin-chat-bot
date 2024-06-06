@@ -1,3 +1,4 @@
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import ArrowForwardTwoToneIcon from '@mui/icons-material/ArrowForwardTwoTone';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
@@ -13,6 +14,7 @@ import {
   Card,
   Checkbox,
   Chip,
+  CircularProgress,
   Divider,
   Unstable_Grid2 as Grid,
   IconButton,
@@ -41,12 +43,14 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { customersApi } from 'src/api/customer';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { useRouter } from 'src/hooks/use-router';
-import { getKnowledge } from 'src/slices/knowledge';
+import { setRefresh } from 'src/slices/common';
 import { useDispatch } from 'src/store';
+import { debounce } from 'src/utils';
 import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
 // import CustomerFooterDropdown from './customer-footer-dropdown';
@@ -76,74 +80,37 @@ export const CardWrapper = styled(Card)(
   `
 );
 
-const applyFilters = (users, query, filters) => {
-  return users.filter((user) => {
-    let matches = true;
-    if (query) {
-      const properties = ['userId', 'userName'];
-      let containsQuery = false;
-      properties.forEach((property) => {
-        if (user[property].toLowerCase().includes(query.toLowerCase())) {
-          containsQuery = true;
-        }
-      });
-      if (filters.knowId && user.knowId !== filters.knowId) {
-        matches = false;
-      }
-      if (!containsQuery) {
-        matches = false;
-      }
-    }
-    Object.keys(filters).forEach((key) => {
-      const value = filters[key];
-      if (value && user[key] !== value) {
-        matches = false;
-      }
-    });
-    return matches;
-  });
-};
+
 const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
-const UserSection = ({ users ,setIsRefresh }) => {
+const UserTable = ({ users, fetchData, totalCount }) => {
   const [selectedItems, setSelectedUsers] = useState([]);
-  const [knowledges, setKnowledges] = useState([]);
   const { t } = useTranslation();
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState({
-    knowId: null,
-  });
+  const [filters, setFilters] = useState();
+  const [searchByNameValue, setSearchByNameValue] = useState('');
+  const [currentCustomer, setCurrentCustomer] = useState();
+  const [openDialogCreateAdminAccount, setOpenDialogCreateAdminAccount] = useState(false);
+
+  const paginatedUsers = applyPagination(users, page, limit);
+  const selectedBulkActions = selectedItems.length > 0;
+  const selectedSomeUsers = selectedItems.length > 0 && selectedItems.length < users.length;
+  const selectedAllUsers = selectedItems.length === users.length;
+  const [toggleView, setToggleView] = useState('grid_view');
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
+
   const navigate = useNavigate();
-  const [openDialogDelete, setOpenDialogDelete] = useState(false);
+  const router = useRouter();
+  const dispatch = useDispatch();
 
-  const getUserRoleLabel = (knowId) => {
-    const knowledgeItem = knowledges.find((item) => item.value === knowId);
-    const labelName = knowledgeItem ? knowledgeItem.label : 'Unknown';
-
-    return (
-      <Chip
-        style={{ maxWidth: '80%' }}
-        color={'info'}
-        label={labelName}
-      />
-    );
-  };
-
-  const handleTabsChange = (_event, tabsValue) => {
-    let value = null;
-    if (tabsValue !== 'all') {
-      value = tabsValue;
-    }
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      knowId: value,
-    }));
-    setSelectedUsers([]);
+  const handleViewOrientation = (_event, newValue) => {
+    setToggleView(newValue);
   };
 
   const handleSelectChange = (event) => {
@@ -161,12 +128,12 @@ const UserSection = ({ users ,setIsRefresh }) => {
   };
 
   const handleSelectAllUsers = (event) => {
-    setSelectedUsers(event.target.checked ? users.map((user) => user.userId) : []);
+    setSelectedUsers(event.target.checked ? users.map((user) => user.id) : []);
   };
 
   const handleSelectOneUser = (_event, userId) => {
     if (!selectedItems.includes(userId)) {
-      setSelectedUsers((prevSelected) => [...prevSelected, userId]);
+      setSelectedUsers((prevSelected) => [...prevSelected,userId ]);
     } else {
       setSelectedUsers((prevSelected) => prevSelected.filter((id) => id !== userId));
     }
@@ -174,134 +141,50 @@ const UserSection = ({ users ,setIsRefresh }) => {
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
+    fetchData({ pageNumber: newPage, pageSize: limit });
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
+    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) });
   };
+  const handleChangeFilter = (data) => {
+    let newFilter = { ...filters, ...data };
 
-  const filteredUsers = applyFilters(users, query, filters);
-  const paginatedUsers = applyPagination(filteredUsers, page, limit);
-  const selectedBulkActions = selectedItems.length > 0;
-  const selectedSomeUsers = selectedItems.length > 0 && selectedItems.length < users.length;
-  const selectedAllUsers = selectedItems.length === users.length;
-  const [toggleView, setToggleView] = useState('grid_view');
-  const handleViewOrientation = (_event, newValue) => {
-    setToggleView(newValue);
-  };
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const fetchKnowledgeData = async () => {
-      try {
-        let data = [];
-        data = await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
-        const knowledgeCounts = users.reduce((acc, item) => {
-          acc[item.knowId] = (acc[item.knowId] || 0) + 1;
-          return acc;
-        }, {});
-
-        const convertedKnowledges = [
-          {
-            value: 'all',
-            label: t('All users'),
-            count: users.length,
-          },
-          // eslint-disable-next-line no-unsafe-optional-chaining
-          ...data?.map((item) => ({
-            value: item.knowId,
-            label: t(item.knowName),
-            count: knowledgeCounts[item.knowId],
-          })),
-        ];
-
-        setKnowledges(convertedKnowledges);
-      } catch (error) {
-        console.error('Error fetching knowledge data:', error);
+    for (const key in newFilter) {
+      if (newFilter[key] === '' || newFilter[key] === undefined) {
+        delete newFilter[key];
       }
-    };
+    }
 
-    if (users.length) fetchKnowledgeData();
-  }, [users]);
+    setFilters(newFilter);
+    return newFilter
 
+    // const queryParams = qs.stringify(newFilter);
+    // window.history.pushState(null, "", `?${queryParams.toString()}`);
+  };
+  const handleSearchByName = async (value) => {
+    handleChangeFilter({ username: value });
+  };
+  const debounceHandleSearch = debounce(handleSearchByName, 900);
   const handleDeleteCustomer = async (userId) => {
     try {
       const response = await customersApi.deleteCustomer(userId);
-      
-      toast.success(t(response.data));
-      setIsRefresh((preState)=>!preState)
 
+      toast.success(t(response.data));
+      dispatch(setRefresh(!isRefresh));
     } catch (error) {
       toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    fetchData({ pageNumber: page, pageSize: limit });
+  }, [isRefresh]);
+
   return (
     <>
-      {/* {mdUp ? (
-        <TabsShadow
-          sx={{
-            '& .MuiTab-root': {
-              flexDirection: 'row',
-              pr: 1,
-              '& .MuiChip-root': {
-                ml: 1,
-                transition: theme.transitions.create(['background', 'color'], {
-                  duration: theme.transitions.duration.complex,
-                }),
-              },
-              '&.Mui-selected': {
-                '& .MuiChip-root': {
-                  backgroundColor: alpha(theme.palette.primary.contrastText, 0.12),
-                  color: 'primary.contrastText',
-                },
-              },
-              '&:first-child': {
-                ml: 0,
-              },
-            },
-          }}
-          onChange={handleTabsChange}
-          scrollButtons="auto"
-          textColor="secondary"
-          value={filters.knowId || 'all'}
-          variant="scrollable"
-        >
-          {knowledges.map((tab) => (
-            <Tab
-              key={tab.value}
-              value={tab.value}
-              label={
-                <>
-                  {tab.label}
-                  <Chip
-                    label={tab.count}
-                    size="small"
-                  />
-                </>
-              }
-            />
-          ))}
-        </TabsShadow>
-      ) : (
-        <Select
-          value={filters.knowId || 'all'}
-          //@ts-ignore
-          onChange={handleSelectChange}
-          fullWidth
-        >
-          {knowledges.map((tab) => (
-            <MenuItem
-              key={tab.value}
-              value={tab.value}
-            >
-              {tab.label}
-            </MenuItem>
-          ))}
-        </Select>
-      )} */}
-
       <Box
         display="flex"
         justifyContent="space-between"
@@ -383,9 +266,12 @@ const UserSection = ({ users ,setIsRefresh }) => {
                   </InputAdornment>
                 ),
               }}
-              onChange={handleQueryChange}
+              onChange={(event) => {
+                debounceHandleSearch(event.target.value);
+                setSearchByNameValue(event.target.value);
+              }}
               placeholder={t('Filter results')}
-              value={query}
+              value={searchByNameValue}
               size="small"
               variant="outlined"
             />
@@ -409,7 +295,21 @@ const UserSection = ({ users ,setIsRefresh }) => {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
-      {paginatedUsers.length === 0 ? (
+      {isLoading ? (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px',
+            height: '50vh',
+          }}
+          color="common.white"
+        >
+          {' '}
+          <CircularProgress style={{ height: '30px', width: '30px' }} />
+        </Box>
+      ) : users.length === 0 ? (
         <>
           <Typography
             sx={{
@@ -452,8 +352,8 @@ const UserSection = ({ users ,setIsRefresh }) => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {paginatedUsers.map((user, index) => {
-                        const isUserSelected = selectedItems.includes(user.userId);
+                      {users.map((user, index) => {
+                        const isUserSelected = selectedItems.includes(user.id);
                         return (
                           <TableRow
                             hover
@@ -463,7 +363,7 @@ const UserSection = ({ users ,setIsRefresh }) => {
                             <TableCell padding="checkbox">
                               <Checkbox
                                 checked={isUserSelected}
-                                onChange={(event) => handleSelectOneUser(event, user.userId)}
+                                onChange={(event) => handleSelectOneUser(event, user.id)}
                                 value={isUserSelected}
                               />
                             </TableCell>
@@ -485,53 +385,50 @@ const UserSection = ({ users ,setIsRefresh }) => {
                               {' '}
                               <Typography fontWeight={600}>{user.username}</Typography>
                             </TableCell>
-                            
+                            {/* <TableCell>
+                              <Chip
+                                color={'info'}
+                                label={user?.representative}
+                              />
+                            </TableCell> */}
                             <TableCell>
                               <Typography fontWeight={600}>{user.email}</Typography>
                               <Typography fontWeight={600}>{user.phoneNumber}</Typography>
                             </TableCell>
                             <TableCell align="center">
                               <Switch
-                                checked={true}
+                                checked={user.active}
                                 onChange={() => {}}
                                 inputProps={{ 'aria-label': 'controlled' }}
                               />
                             </TableCell>
                             <TableCell align="center">
                               <Typography noWrap>
-                                {/* <Tooltip
-                                  title={t('Tạo mới')}
-                                  arrow
-                                >
-                                  <IconButton color="secondary">
-                                    <AddCircleOutlineOutlinedIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip> */}
                                 <Tooltip
                                   title={t('Xem chi tiết')}
                                   arrow
                                 >
                                   <IconButton
                                     onClick={() => {
-                                      navigate(`/user/${user.userId}`);
+                                      navigate(`/user/${user.customerId}`);
                                     }}
-                                    color="secondary"
+                                    color="primary"
                                   >
                                     <LaunchTwoToneIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
-                                <DialogConfirmDelete
-                                  onConfirm={() => handleDeleteCustomer(user?.userId)}
+                                <Tooltip
+                                  title={t('Xoá')}
+                                  arrow
                                 >
-                                  <Tooltip
-                                    title={t('Xoá')}
-                                    arrow
-                                  >
-                                    <IconButton color="secondary">
+                                  <IconButton color="error">
+                                    <DialogConfirmDelete
+                                      onConfirm={() => handleDeleteCustomer(user?.customerId)}
+                                    >
                                       <DeleteTwoToneIcon fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                </DialogConfirmDelete>
+                                    </DialogConfirmDelete>
+                                  </IconButton>
+                                </Tooltip>
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -541,38 +438,11 @@ const UserSection = ({ users ,setIsRefresh }) => {
                   </Table>
                 </TableContainer>
               </Card>
-              <Box
-                pt={2}
-                sx={{
-                  '.MuiTablePagination-select': {
-                    py: 0.55,
-                  },
-                }}
-              >
-                <TablePagination
-                  component="div"
-                  count={filteredUsers.length}
-                  onPageChange={handlePageChange}
-                  onRowsPerPageChange={handleLimitChange}
-                  page={page}
-                  rowsPerPage={limit}
-                  rowsPerPageOptions={[5, 10, 15]}
-                  slotProps={{
-                    select: {
-                      variant: 'outlined',
-                      size: 'small',
-                      sx: {
-                        p: 0,
-                      },
-                    },
-                  }}
-                />
-              </Box>
             </>
           )}
           {toggleView === 'grid_view' && (
             <>
-              {paginatedUsers.length === 0 ? (
+              {users.length === 0 ? (
                 <Typography
                   sx={{
                     py: {
@@ -597,14 +467,14 @@ const UserSection = ({ users ,setIsRefresh }) => {
                       sm: 3,
                     }}
                   >
-                    {paginatedUsers.map((user) => {
-                      const isUserSelected = selectedItems.includes(user.userId);
+                    {users.map((user) => {
+                      const isUserSelected = selectedItems.includes(user.id);
                       return (
                         <Grid
                           xs={12}
                           sm={6}
                           lg={4}
-                          key={user.userId}
+                          key={user.id}
                         >
                           <CardWrapper
                             className={clsx({
@@ -624,8 +494,18 @@ const UserSection = ({ users ,setIsRefresh }) => {
                                 alignItems="flex-start"
                                 justifyContent="space-between"
                               >
-                                {getUserRoleLabel(user.knowId)}
-                                {/* <CustomerFooterDropdown customer={user} /> */}
+                                <Chip
+                                  style={{ maxWidth: '80%' }}
+                                  color={user.active?'info':'error'}
+                                  label={user.active?"Đang hoạt động":"Ngừng hoạt động"}
+                                />
+                                {/* <CustomerFooterDropdown
+                                  onDelete={() => handleDeleteCustomer(user.customerId)}
+                                  onCreate={() => {
+                                    setCurrentCustomer(user);
+                                    setOpenDialogCreateAdminAccount(true);
+                                  }}
+                                /> */}
                               </Box>
                               <Box
                                 p={2}
@@ -664,7 +544,7 @@ const UserSection = ({ users ,setIsRefresh }) => {
                                       variant="body2"
                                       color="text.secondary"
                                     >
-                                      {user.customerName}
+                                      {user.username}
                                     </Typography>
                                   </Box>
                                   <Typography
@@ -710,14 +590,14 @@ const UserSection = ({ users ,setIsRefresh }) => {
                               >
                                 <Button
                                   variant="contained"
-                                  onClick={() => router.push(`/user/${user.userId}`)}
+                                  onClick={() => router.push(`/user/${user.id}`)}
                                   endIcon={<ArrowForwardTwoToneIcon />}
                                 >
                                   {t('Xem chi tiết ')}
                                 </Button>
                                 <Checkbox
                                   checked={isUserSelected}
-                                  onChange={(event) => handleSelectOneUser(event, user.userId)}
+                                  onChange={(event) => handleSelectOneUser(event, user.id)}
                                   value={isUserSelected}
                                 />
                               </Box>
@@ -727,48 +607,6 @@ const UserSection = ({ users ,setIsRefresh }) => {
                       );
                     })}
                   </Grid>
-                  <Card
-                    sx={{
-                      p: 2,
-                      mt: 3,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      '.MuiTablePagination-select': {
-                        py: 0.55,
-                      },
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        component="span"
-                        variant="subtitle1"
-                      >
-                        {t('Showing')}
-                      </Typography>{' '}
-                      <b>{Math.min(limit, filteredUsers.length)}</b> {t('of')}{' '}
-                      <b>{filteredUsers.length}</b> <b>{t('users')}</b>
-                    </Box>
-                    <TablePagination
-                      component="div"
-                      count={filteredUsers.length}
-                      onPageChange={handlePageChange}
-                      onRowsPerPageChange={handleLimitChange}
-                      page={page}
-                      rowsPerPage={limit}
-                      labelRowsPerPage=""
-                      rowsPerPageOptions={[5, 10, 15]}
-                      slotProps={{
-                        select: {
-                          variant: 'outlined',
-                          size: 'small',
-                          sx: {
-                            p: 0,
-                          },
-                        },
-                      }}
-                    />
-                  </Card>
                 </>
               )}
             </>
@@ -803,13 +641,40 @@ const UserSection = ({ users ,setIsRefresh }) => {
           )}
         </>
       )}
+      <Box
+        pt={2}
+        sx={{
+          '.MuiTablePagination-select': {
+            py: 0.55,
+          },
+        }}
+      >
+        <TablePagination
+          component="div"
+          count={totalCount}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleLimitChange}
+          page={page}
+          rowsPerPage={limit}
+          rowsPerPageOptions={[5, 10, 15]}
+          slotProps={{
+            select: {
+              variant: 'outlined',
+              size: 'small',
+              sx: {
+                p: 0,
+              },
+            },
+          }}
+        />
+      </Box>
     </>
   );
 };
-UserSection.propTypes = {
+UserTable.propTypes = {
   users: PropTypes.array.isRequired,
 };
-UserSection.defaultProps = {
+UserTable.defaultProps = {
   users: [],
 };
-export default UserSection;
+export default UserTable;

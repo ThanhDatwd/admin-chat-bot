@@ -5,11 +5,9 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import GridViewTwoToneIcon from '@mui/icons-material/GridViewTwoTone';
 import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded';
 import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
-import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
 import {
-  alpha,
   Avatar,
   Box,
   Button,
@@ -22,12 +20,9 @@ import {
   IconButton,
   InputAdornment,
   Link,
-  MenuItem,
-  Select,
   Stack,
   styled,
   Switch,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -41,22 +36,19 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { customersApi } from 'src/api/customer';
-import { knowledgesApi } from 'src/api/knowledges';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
-import { TabsShadow } from 'src/components/base/styles/tabs';
 import { useRouter } from 'src/hooks/use-router';
 import { setRefresh } from 'src/slices/common';
-import { getKnowledge, setKnowledge } from 'src/slices/knowledge';
 import { useDispatch } from 'src/store';
 import { debounce } from 'src/utils';
 import BulkDelete from '../common/bulk-delete';
@@ -121,7 +113,6 @@ const applyPagination = (users, page, limit) => {
 };
 const CustomerSection = ({ users, fetchData, totalCount }) => {
   const [selectedItems, setSelectedUsers] = useState([]);
-  const [knowledges, setKnowledges] = useState([]);
   const { t } = useTranslation();
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
@@ -217,7 +208,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
-  
+
   return (
     <>
       <Box
