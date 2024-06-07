@@ -1,7 +1,6 @@
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import ArrowForwardTwoToneIcon from '@mui/icons-material/ArrowForwardTwoTone';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import GridViewTwoToneIcon from '@mui/icons-material/GridViewTwoTone';
 import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded';
 import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
@@ -40,7 +39,6 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import * as qs from 'qs';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';

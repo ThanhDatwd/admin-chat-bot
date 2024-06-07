@@ -1,16 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    Box,
-    Button,
-    CircularProgress,
-    DialogContent,
-    FormControl,
-    Grid,
-    OutlinedInput,
-    Stack,
-    Switch,
-    Typography,
-    useTheme
+  Box,
+  Button,
+  CircularProgress,
+  DialogContent,
+  FormControl,
+  Grid,
+  OutlinedInput,
+  Stack,
+  Switch,
+  Typography,
+  useTheme,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
@@ -26,24 +26,24 @@ import { DialogCustom } from '../common/dialog-custom';
 const formSchema = z.object({
   rankName: z.string().min(1, 'Tên thứ hạng là bắt buộc').max(200, 'Tên thứ hạng tối đa 200 ký tự'),
   icon: z.string().min(1, 'Biểu tượng là bắt buộc'),
-  startingPoint: z.number().int().positive({ message: 'Nhập điểm bắt đầu thứ hạng là bắt buộc' }),
+  startingPoints: z.number().int().positive({ message: 'Nhập điểm bắt đầu thứ hạng là bắt buộc' }),
   status: z.enum(['active', 'inactive']).default('active'),
 });
 
-const CreateRankingDialog = ({ open, onClose, onUpdate }) => {
+const CreateRankingDialog = ({ open, onClose, onUpdate, rank }) => {
   const { t } = useTranslation();
-  const [tagValue, setTagValue] = useState();
-  const [tagList, setTagList] = useState([]);
+  const [rankStatus, setRankStatus] = useState(true);
+
   const dispatch = useDispatch();
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
 
   const theme = useTheme();
-  const { control, setValue, handleSubmit, reset } = useForm({
+  const { control, setValue, getValues, handleSubmit, reset } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       rankName: '',
-      startingPoint: 0,
+      startingPoints: 0,
       icon: '',
       status: 'active',
     },
@@ -64,32 +64,27 @@ const CreateRankingDialog = ({ open, onClose, onUpdate }) => {
     }
   };
 
-  const handleAddTag = () => {
-    if (tagValue && tagValue !== '' && !tagList.includes(tagValue)) {
-      let newTagList = [...tagList, tagValue];
-      setTagList(newTagList);
-      setValue('tags', newTagList);
-      setTagValue('');
-    }
-  };
-  const handleRemoveTag = (index) => {
-    const newTagList = [...tagList];
-    newTagList.splice(index, 1);
-    setTagList(newTagList);
-    setValue('tags', newTagList);
-    setTagValue('');
-  };
   useEffect(() => {
     if (!open) {
       reset();
+      setRankStatus(true)
     }
   }, [open]);
+
+  useEffect(() => {
+    if (rank) {
+      setValue('rankName', rank.rankName);
+      setValue('startingPoints', rank.startingPoints);
+      setValue('status', rank.status);
+      setRankStatus(rank.status === 'inactive' ? false : true);
+    }
+  }, [rank, open]);
 
   return (
     <DialogCustom
       open={open}
       onClose={onClose}
-      title={t('Tạo mới thứ hạng')}
+      title={rank ? t('Cập nhật thứ hạng') : t('Tạo mới thứ hạng')}
       actions={
         <>
           <Stack
@@ -116,7 +111,7 @@ const CreateRankingDialog = ({ open, onClose, onUpdate }) => {
               }}
               onClick={handleSubmit(onSubmit)}
             >
-              {t('Tạo mới')}
+              {rank ? t('Cập nhật') : t('Tạo mới')}
               {isLoading && (
                 <Box
                   sx={{
@@ -223,14 +218,14 @@ const CreateRankingDialog = ({ open, onClose, onUpdate }) => {
                       Điểm bắt đầu thứ hạng
                     </Typography>
                     <Controller
-                      name="startingPoint"
+                      name="startingPoints"
                       control={control}
                       render={({ field, fieldState }) => (
                         <>
                           <OutlinedInput
                             {...field}
                             type="number"
-                            id="rank-startingPoint-input"
+                            id="rank-startingPoints-input"
                             fullWidth
                             onChange={(e) => field.onChange(Number(e.target.value))}
                           />
@@ -260,11 +255,20 @@ const CreateRankingDialog = ({ open, onClose, onUpdate }) => {
                       >
                         Trạng thái
                       </Typography>
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        noWrap
+                      >
+                        {getValues('status') === 'inactive' ? 'Không hoat động' : 'Hoạt động'}
+                      </Typography>
                     </Box>
                     <>
                       <Switch
-                        defaultChecked
+                        defaultChecked={rankStatus}
+                        checked={rankStatus}
                         onChange={(e) => {
+                          setRankStatus(e.target.checked);
                           setValue('status', e.target.checked ? 'active' : 'inactive');
                         }}
                         id="switch-spatial-audio"
