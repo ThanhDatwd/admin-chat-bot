@@ -1,6 +1,6 @@
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
+import SyncOutlinedIcon from '@mui/icons-material/SyncOutlined';
 import { Box, Button, Container, useTheme } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -160,6 +160,37 @@ const Invoices = () => {
                 >
                   <ReceiptOutlinedIcon />
                 </AvatarState>
+              }
+              actions={
+                <div>
+                  <Button
+                    sx={{
+                      mt: {
+                        xs: 2,
+                        md: 0,
+                      },
+                      mr: 1,
+                    }}
+                    variant="contained"
+                    onClick={handleDialogOpen}
+                    startIcon={<SyncOutlinedIcon fontSize="small" />}
+                  >
+                    {t('Đồng bộ')}
+                  </Button>
+                  <Button
+                    sx={{
+                      mt: {
+                        xs: 2,
+                        md: 0,
+                      },
+                    }}
+                    variant="contained"
+                    onClick={handleDialogOpen}
+                    startIcon={<FileDownloadOutlinedIcon fontSize="small" />}
+                  >
+                    {t('Xuất file')}
+                  </Button>
+                </div>
               }
             />
           </Box>

@@ -34,6 +34,7 @@ import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import UpdatePackageDialog from './update-package-dialog';
 
 export const ButtonSoft = styled(Button)(({ theme, color }) => {
   const computedColor = color ? theme.palette[color].main : theme.palette.primary.main;
@@ -309,7 +310,7 @@ const ServicesPackageTable = ({ packages }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {pkg.packageName}
                           </Typography>
@@ -317,7 +318,7 @@ const ServicesPackageTable = ({ packages }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {pkg.packageCode}
                           </Typography>
@@ -333,7 +334,7 @@ const ServicesPackageTable = ({ packages }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {pkg.usageCount}
                           </Typography>
@@ -341,7 +342,7 @@ const ServicesPackageTable = ({ packages }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {format(new Date(pkg.registrationDeadline), 'dd/MM/yyyy')}
                           </Typography>
@@ -349,7 +350,7 @@ const ServicesPackageTable = ({ packages }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {pkg.status === 'active'
                               ? 'Hoạt động'
@@ -361,7 +362,7 @@ const ServicesPackageTable = ({ packages }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {format(new Date(pkg.creationDate), 'dd/MM/yyyy')}
                           </Typography>
@@ -383,26 +384,14 @@ const ServicesPackageTable = ({ packages }) => {
                                 />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip
-                              title={t('Sửa')}
-                              arrow
-                            >
-                              <IconButton
-                                color="primary"
-                                disabled={pkg.status !== 'Hoạt động'}
-                                onClick={() => console.log('Sửa', pkg.id)}
-                              >
-                                <EditTwoToneIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
+                            <UpdatePackageDialog selectedItem={pkg} />
                             <Tooltip
                               title={t('Xóa')}
                               arrow
                             >
                               <IconButton
                                 color="error"
-                                disabled={pkg.status !== 'Không hoạt động'}
-                                onClick={() => console.log('Xóa', pkg.id)}
+                                onClick={() => console.log('Xóa', pkg)}
                               >
                                 <DeleteTwoToneIcon fontSize="small" />
                               </IconButton>

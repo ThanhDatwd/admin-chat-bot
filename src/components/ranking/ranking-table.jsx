@@ -90,7 +90,7 @@ const RankingTable = ({ rankings }) => {
                   <TableCell>
                     <Typography
                       noWrap
-                      variant="body2"
+                      variant="subtitle2"
                     >
                       {index + 1}
                     </Typography>
@@ -98,7 +98,7 @@ const RankingTable = ({ rankings }) => {
                   <TableCell>
                     <Typography
                       noWrap
-                      variant="body2"
+                      variant="subtitle2"
                     >
                       {rank.name}
                     </Typography>
@@ -106,7 +106,7 @@ const RankingTable = ({ rankings }) => {
                   <TableCell>
                     <Typography
                       noWrap
-                      variant="body2"
+                      variant="subtitle2"
                     >
                       {rank.startingPoints}
                     </Typography>
@@ -114,7 +114,7 @@ const RankingTable = ({ rankings }) => {
                   <TableCell>
                     <Typography
                       noWrap
-                      variant="body2"
+                      variant="subtitle2"
                     >
                       {rank.status}
                     </Typography>
@@ -122,7 +122,7 @@ const RankingTable = ({ rankings }) => {
                   <TableCell>
                     <Typography
                       noWrap
-                      variant="body2"
+                      variant="subtitle2"
                     >
                       {rank.creationDate}
                     </Typography>

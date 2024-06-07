@@ -1,7 +1,7 @@
 import { DeleteRounded } from '@mui/icons-material';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import {
   alpha,
@@ -59,31 +59,6 @@ const applyFilters = (invoices, query, filters) => {
       }
     }
 
-    if (query.customerInfo) {
-      if (
-        !invoice.customerName.toLowerCase().includes(query.customerInfo.toLowerCase()) &&
-        !invoice.customerCode.toLowerCase().includes(query.customerInfo.toLowerCase())
-      ) {
-        matches = false;
-      }
-    }
-
-    if (query.contractNumber) {
-      if (!invoice.contractNumber.toLowerCase().includes(query.contractNumber.toLowerCase())) {
-        matches = false;
-      }
-    }
-
-    if (query.amountFrom || query.amountTo) {
-      const amount = parseFloat(invoice.amount);
-      if (query.amountFrom && amount < parseFloat(query.amountFrom)) {
-        matches = false;
-      }
-      if (query.amountTo && amount > parseFloat(query.amountTo)) {
-        matches = false;
-      }
-    }
-
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
       if (value && invoice[key] !== value) {
@@ -106,10 +81,6 @@ const InvoicesTable = ({ invoices }) => {
   const [limit, setLimit] = useState(6);
   const [query, setQuery] = useState({
     invoiceNumber: '',
-    customerInfo: '',
-    contractNumber: '',
-    amountFrom: '',
-    amountTo: '',
   });
   const [filters, setFilters] = useState({
     invoiceStatus: null,
@@ -229,7 +200,6 @@ const InvoicesTable = ({ invoices }) => {
           >
             <TextField
               size="small"
-              style={{ width: 150 }}
               placeholder="Số hóa đơn"
               value={query.invoiceNumber}
               onChange={handleQueryChange('invoiceNumber')}
@@ -262,98 +232,6 @@ const InvoicesTable = ({ invoices }) => {
                   </InputAdornment>
                 ),
               }}
-            />
-            <TextField
-              size="small"
-              style={{ width: 210 }}
-              placeholder="Tên / Mã khách hàng"
-              value={query.customerInfo}
-              onChange={handleQueryChange('customerInfo')}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchTwoToneIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: query.customerInfo && (
-                  <InputAdornment
-                    sx={{
-                      mr: -0.7,
-                    }}
-                    position="end"
-                  >
-                    <IconButton
-                      color="error"
-                      aria-label="clear input"
-                      onClick={() => setQuery((prevQuery) => ({ ...prevQuery, customerInfo: '' }))}
-                      edge="end"
-                      size="small"
-                      sx={{
-                        color: 'error.main',
-                      }}
-                    >
-                      <ClearRoundedIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              size="small"
-              style={{ width: 150 }}
-              placeholder="Số hợp đồng"
-              value={query.contractNumber}
-              onChange={handleQueryChange('contractNumber')}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchTwoToneIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: query.contractNumber && (
-                  <InputAdornment
-                    sx={{
-                      mr: -0.7,
-                    }}
-                    position="end"
-                  >
-                    <IconButton
-                      color="error"
-                      aria-label="clear input"
-                      onClick={() =>
-                        setQuery((prevQuery) => ({ ...prevQuery, contractNumber: '' }))
-                      }
-                      edge="end"
-                      size="small"
-                      sx={{
-                        color: 'error.main',
-                      }}
-                    >
-                      <ClearRoundedIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              size="small"
-              style={{ width: 120 }}
-              type="number"
-              placeholder="Số tiền từ"
-              value={query.amountFrom}
-              onChange={handleQueryChange('amountFrom')}
-              variant="outlined"
-            />
-            <TextField
-              size="small"
-              style={{ width: 120 }}
-              type="number"
-              placeholder="Số tiền đến"
-              value={query.amountTo}
-              onChange={handleQueryChange('amountTo')}
-              variant="outlined"
             />
             <FormControl
               size="small"
@@ -458,7 +336,7 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {invoice.invoiceNumber}
                           </Typography>
@@ -466,7 +344,7 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {invoice.customerName}
                           </Typography>
@@ -474,7 +352,7 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {invoice.customerCode}
                           </Typography>
@@ -482,7 +360,7 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {invoice.contractNumber}
                           </Typography>
@@ -498,7 +376,7 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {invoice.invoiceStatus === 'unsynced' ? 'Chưa đồng bộ' : 'Đã đồng bộ'}
                           </Typography>
@@ -506,7 +384,7 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {invoice.paymentStatus === 'unpaid'
                               ? 'Chưa thanh toán'
@@ -516,7 +394,7 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {format(new Date(invoice.creationDate), 'dd/MM/yyyy')}
                           </Typography>
@@ -524,25 +402,14 @@ const InvoicesTable = ({ invoices }) => {
                         <TableCell align="center">
                           <Typography noWrap>
                             <Tooltip
-                              title={t('Sửa')}
+                              title={t('Xem')}
                               arrow
                             >
                               <IconButton
                                 color="primary"
                                 onClick={() => console.log('Sửa', invoice.id)}
                               >
-                                <EditTwoToneIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip
-                              title={t('Xóa')}
-                              arrow
-                            >
-                              <IconButton
-                                color="error"
-                                onClick={() => console.log('Xóa', invoice.id)}
-                              >
-                                <DeleteTwoToneIcon fontSize="small" />
+                                <LaunchTwoToneIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
                           </Typography>

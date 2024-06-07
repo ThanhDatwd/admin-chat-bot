@@ -252,7 +252,6 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
                 ),
               }}
             />
-
             <FormControl
               size="small"
               variant="outlined"
@@ -348,7 +347,7 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {field.fieldName}
                           </Typography>
@@ -357,7 +356,7 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {field.fieldCode}
                           </Typography>
@@ -377,7 +376,7 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
                         <TableCell>
                           <Typography
                             noWrap
-                            variant="body2"
+                            variant="subtitle2"
                           >
                             {field.status === 'inactive' ? 'Không hoat động' : 'Hoạt động'}
                           </Typography>
