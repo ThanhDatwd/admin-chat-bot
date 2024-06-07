@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { botsApi } from 'src/api/bots';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import CreateChatbotDialog from 'src/components/chatbot/create-chatbot-dialog';
 import CreateRankingDialog from 'src/components/ranking/create-ranking-dialog';
 import RankingTable from 'src/components/ranking/ranking-table';
 import { useCustomization } from 'src/hooks/use-customization';
@@ -17,21 +16,21 @@ const rankings = [
     id: 1,
     name: 'Rank A',
     startingPoints: 100,
-    status: 'Active',
+    status: 'active',
     creationDate: '2024-06-05',
   },
   {
     id: 2,
     name: 'Rank B',
     startingPoints: 200,
-    status: 'Inactive',
+    status: 'inactive',
     creationDate: '2024-06-04',
   },
   {
     id: 3,
     name: 'Rank C',
     startingPoints: 300,
-    status: 'Active',
+    status: 'active',
     creationDate: '2024-06-03',
   },
 ];

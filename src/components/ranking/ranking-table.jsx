@@ -22,6 +22,8 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import DialogConfirmDelete from '../common/dialog-confirm-delete';
+import { UpdateRank } from './update-ranking';
 
 const RankingTable = ({ rankings }) => {
   const { t } = useTranslation();
@@ -143,28 +145,8 @@ const RankingTable = ({ rankings }) => {
                           />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip
-                        title={t('Sửa')}
-                        arrow
-                      >
-                        <IconButton
-                          color="primary"
-                          onClick={() => console.log('Sửa')}
-                        >
-                          <EditTwoToneIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip
-                        title={t('Xóa')}
-                        arrow
-                      >
-                        <IconButton
-                          color="error"
-                          onClick={() => console.log('Xóa')}
-                        >
-                          <DeleteTwoToneIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <UpdateRank rank={rank} />
+                      <DialogConfirmDelete onConfirm={() => {}} />
                     </Typography>
                   </TableCell>
                 </TableRow>
