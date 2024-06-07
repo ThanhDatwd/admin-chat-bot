@@ -143,58 +143,6 @@ export const useMenuItems = () => {
             ),
             route: routes.ranking,
           },
-
-          {
-            title: 'Dropdown menu',
-            icon: (
-              <Box
-                width={24}
-                height={24}
-              >
-                <DocumentIcon />
-              </Box>
-            ),
-            subMenu: [
-              {
-                title: 'Listings',
-                route: routes.dummy,
-              },
-              {
-                title: 'Reviews',
-                route: routes.dummy,
-              },
-              {
-                title: 'Files',
-                subMenu: [
-                  {
-                    title: 'Reports',
-                    route: routes.dummy,
-                  },
-                  {
-                    title: 'Logs',
-                    route: routes.dummy,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        title: 'Archive',
-        subMenu: [
-          {
-            title: 'Old Docs',
-            icon: (
-              <Box
-                width={24}
-                height={24}
-              >
-                <ArchiveIcon />
-              </Box>
-            ),
-            route: routes.dummy,
-          },
         ],
       },
     ];

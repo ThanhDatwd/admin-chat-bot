@@ -44,16 +44,17 @@ const formSchema = z.object({
   status: z.enum(['active', 'inactive']).default('active'),
 });
 
-const CreateFieldDialog = ({ open, onClose, onUpdate }) => {
+const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
   const { t } = useTranslation();
   const [tagValue, setTagValue] = useState();
   const [tagList, setTagList] = useState([]);
   const dispatch = useDispatch();
+  const [fieldStatus, setFieldStatus] = useState(true);
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
 
   const theme = useTheme();
-  const { control, setValue, handleSubmit, reset } = useForm({
+  const { control, setValue, getValues, handleSubmit, reset } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fieldName: '',
@@ -65,9 +66,7 @@ const CreateFieldDialog = ({ open, onClose, onUpdate }) => {
 
   const onSubmit = async (data) => {
     try {
-      console.log('data field', data);
       // dispatch(setLoading(true));
-
       // onUpdate?.(data);
       // reset();
       // onClose();
@@ -100,11 +99,22 @@ const CreateFieldDialog = ({ open, onClose, onUpdate }) => {
     }
   }, [open]);
 
+  useEffect(() => {
+    if (field) {
+      setValue('fieldName', field.fieldName);
+      setValue('fieldCode', field.fieldCode);
+      setValue('tags', field.tags);
+      setValue('status', field.status);
+      setTagList(field.tags);
+      setFieldStatus(field.status === 'inactive' ? false : true);
+    }
+  }, [field, open]);
+
   return (
     <DialogCustom
       open={open}
       onClose={onClose}
-      title={t('Tạo mới lĩnh vực')}
+      title={field ? t('Cập nhật lĩnh vực') : t('Tạo mới lĩnh vực')}
       actions={
         <>
           <Stack
@@ -131,7 +141,7 @@ const CreateFieldDialog = ({ open, onClose, onUpdate }) => {
               }}
               onClick={handleSubmit(onSubmit)}
             >
-              {t('Tạo mới')}
+              {field ? t('Cập nhật') : t('Tạo mới')}
               {isLoading && (
                 <Box
                   sx={{
@@ -259,7 +269,6 @@ const CreateFieldDialog = ({ open, onClose, onUpdate }) => {
                       direction={'row'}
                       gap={1}
                       mb={1}
-                     
                     >
                       <OutlinedInput
                         value={tagValue}
@@ -279,31 +288,32 @@ const CreateFieldDialog = ({ open, onClose, onUpdate }) => {
                     <Controller
                       name="tags"
                       control={control}
-                      render={({ field, fieldState }) => (
-                        tagList.length>0&&
-                        <>
-                          <Stack
-                            direction={'row'}
-                            flexWrap={'wrap'}
-                            gap={'5px'}
-                            p={1}
-                            sx={{border:'1px solid #c8cacb', borderRadius:'6px'}}
-                          >
-                            {tagList.map((tag, index) => (
-                              <Chip
-                                key={index}
-                                style={{ width: 'auto' }}
-                                label={tag}
-                                variant="outlined"
-                                onDelete={() => handleRemoveTag(index)}
-                              />
-                            ))}
-                          </Stack>
-                          {fieldState.error && (
-                            <Typography color="error">{fieldState.error.message}</Typography>
-                          )}
-                        </>
-                      )}
+                      render={({ field, fieldState }) =>
+                        tagList.length > 0 && (
+                          <>
+                            <Stack
+                              direction={'row'}
+                              flexWrap={'wrap'}
+                              gap={'5px'}
+                              p={1}
+                              sx={{ border: '1px solid #c8cacb', borderRadius: '6px' }}
+                            >
+                              {tagList.map((tag, index) => (
+                                <Chip
+                                  key={index}
+                                  style={{ width: 'auto' }}
+                                  label={tag}
+                                  variant="outlined"
+                                  onDelete={() => handleRemoveTag(index)}
+                                />
+                              ))}
+                            </Stack>
+                            {fieldState.error && (
+                              <Typography color="error">{fieldState.error.message}</Typography>
+                            )}
+                          </>
+                        )
+                      }
                     />
                   </FormControl>
                 </Grid>
@@ -329,13 +339,19 @@ const CreateFieldDialog = ({ open, onClose, onUpdate }) => {
                         color="text.secondary"
                         noWrap
                       >
-                        Đang hoạt động
+                        {getValues('status') === 'inactive' ? 'Không hoat động' : 'Hoạt động'}
                       </Typography>
                     </Box>
+                    {/* <Controller
+                      name="status"
+                      control={control}
+                      render={({ field, fieldState }) => ( */}
                     <>
                       <Switch
-                        defaultChecked
+                        defaultChecked={fieldStatus}
+                        checked={fieldStatus}
                         onChange={(e) => {
+                          setFieldStatus(e.target.checked);
                           setValue('status', e.target.checked ? 'active' : 'inactive');
                         }}
                         id="switch-spatial-audio"

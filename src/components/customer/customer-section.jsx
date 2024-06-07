@@ -36,10 +36,11 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme
+  useTheme,
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+import * as qs from 'qs';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -48,7 +49,7 @@ import { useNavigate } from 'react-router';
 import { customersApi } from 'src/api/customer';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { useRouter } from 'src/hooks/use-router';
-import { setRefresh } from 'src/slices/common';
+import { setLoading, setRefresh } from 'src/slices/common';
 import { useDispatch } from 'src/store';
 import { debounce } from 'src/utils';
 import BulkDelete from '../common/bulk-delete';
@@ -81,33 +82,6 @@ export const CardWrapper = styled(Card)(
   `
 );
 
-const applyFilters = (users, query, filters) => {
-  return users.filter((user) => {
-    let matches = true;
-    if (query) {
-      const properties = ['customerName', 'customerId'];
-      let containsQuery = false;
-      properties.forEach((property) => {
-        if (user[property].toLowerCase().includes(query.toLowerCase())) {
-          containsQuery = true;
-        }
-      });
-      if (filters.knowId && user.knowId !== filters.knowId) {
-        matches = false;
-      }
-      if (!containsQuery) {
-        matches = false;
-      }
-    }
-    Object.keys(filters).forEach((key) => {
-      const value = filters[key];
-      if (value && user[key] !== value) {
-        matches = false;
-      }
-    });
-    return matches;
-  });
-};
 const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
@@ -149,11 +123,6 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
     setSelectedUsers([]);
   };
 
-  const handleQueryChange = (event) => {
-    event.persist();
-    setQuery(event.target.value);
-  };
-
   const handleSelectAllUsers = (event) => {
     setSelectedUsers(event.target.checked ? users.map((user) => user.customerId) : []);
   };
@@ -168,12 +137,12 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
-    fetchData({ pageNumber: newPage, pageSize: limit });
+    fetchData({ pageNumber: newPage, pageSize: limit }, filters);
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
-    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) });
+    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
@@ -185,10 +154,25 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
     }
 
     setFilters(newFilter);
-
-    // const queryParams = qs.stringify(newFilter);
-    // window.history.pushState(null, "", `?${queryParams.toString()}`);
+    return newFilter;
   };
+
+  const handleFilter = async () => {
+    if (fetchData && filters) {
+      dispatch(setLoading(true));
+      fetchData(
+        {
+          pageNumber: page,
+          pageSize: limit,
+        },
+        filters
+      ).finally(() => dispatch(setLoading(false)));
+    }
+
+    // const queryParams = qs.stringify(filters);
+    // window.history.pushState(null, '', `?${queryParams.toString()}`);
+  };
+
   const handleSearchByName = async (value) => {
     handleChangeFilter({ customerName: value });
   };
@@ -215,11 +199,21 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
+        flexWrap={{
+          xs: 'wrap',
+          md: 'nowrap',
+        }}
+        gap={1}
         py={2}
       >
         <Box
           display="flex"
+          order={{
+            xs: 1,
+            md: 0,
+          }}
           alignItems="center"
+          width={'100%'}
         >
           {toggleView === 'grid_view' && (
             <Tooltip
@@ -229,9 +223,6 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
             >
               <Checkbox
                 edge="start"
-                sx={{
-                  mr: 1,
-                }}
                 disabled={paginatedUsers.length === 0}
                 checked={selectedAllUsers}
                 indeterminate={selectedSomeUsers}
@@ -262,51 +253,69 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
               </Tooltip>
             </Stack>
           ) : (
-            <TextField
-              margin="none"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchTwoToneIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: query && (
-                  <InputAdornment
-                    sx={{
-                      mr: -0.7,
-                    }}
-                    position="end"
-                  >
-                    <IconButton
-                      color="error"
-                      aria-label="clear input"
-                      onClick={() => setQuery('')}
-                      edge="end"
-                      size="small"
-                      sx={{
-                        color: 'error.main',
-                      }}
-                    >
-                      <ClearRoundedIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              onChange={(event) => {
-                debounceHandleSearch(event.target.value);
-                setSearchByNameValue(event.target.value);
-              }}
-              placeholder={t('Filter results')}
-              value={searchByNameValue}
-              size="small"
-              variant="outlined"
-            />
+            <Stack
+              direction="row"
+              // flexWrap={'wrap'}
+              gap={'10px'}
+              width={'100%'}
+            >
+              <Box
+                width={{
+                  xs: '100%',
+                  md: '50%',
+                }}
+              >
+                <TextField
+                  margin="none"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchTwoToneIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: query && (
+                      <InputAdornment
+                        position="end"
+                      >
+                        <IconButton
+                          color="error"
+                          aria-label="clear input"
+                          onClick={() => setQuery('')}
+                          edge="end"
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                          }}
+                        >
+                          <ClearRoundedIcon fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  onChange={(event) => {
+                    debounceHandleSearch(event.target.value);
+                    setSearchByNameValue(event.target.value);
+                  }}
+                  placeholder={t('Tên/ mã / người đại diện')}
+                  value={searchByNameValue}
+                  size="small"
+                  variant="outlined"
+                />
+              </Box>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                sx={{ whiteSpace: 'nowrap' }}
+                onClick={handleFilter}
+              >
+                Tìm kiếm
+              </Button>
+            </Stack>
           )}
         </Box>
         <ToggleButtonGroup
-          sx={{
-            ml: 1,
-          }}
           size="large"
           color="primary"
           value={toggleView}
@@ -460,18 +469,8 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
                                     <LaunchTwoToneIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
-                                <Tooltip
-                                  title={t('Xoá')}
-                                  arrow
-                                >
-                                  <IconButton color="error">
                                     <DialogConfirmDelete
-                                      onConfirm={() => handleDeleteCustomer(user?.customerId)}
-                                    >
-                                      <DeleteTwoToneIcon fontSize="small" />
-                                    </DialogConfirmDelete>
-                                  </IconButton>
-                                </Tooltip>
+                                      onConfirm={() => handleDeleteCustomer(user?.customerId)}/>
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -542,6 +541,11 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
                                   color={'info'}
                                   label={user.customerName}
                                 />
+                                {/* <Chip
+                                  style={{ maxWidth: '80%' }}
+                                  color={user.active?'info':'error'}
+                                  label={user.active?"Đang hoạt động":"Ngừng hoạt động"}
+                                /> */}
                                 <CustomerFooterDropdown
                                   onDelete={() => handleDeleteCustomer(user.customerId)}
                                   onCreate={() => {
