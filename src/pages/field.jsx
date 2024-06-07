@@ -15,43 +15,55 @@ const invoices = [
     fieldName: 'Bộ công an',
     fieldCode: 'CA',
     tags: ['C03', 'CO4', 'C08'],
+    status: 'active',
   },
   {
-    id: '1',
+    id: '2',
     fieldName: 'Bộ tài nguyên và môi trường',
     fieldCode: 'TNMT',
     tags: ['TNMT03', 'TNMTO4', 'TNMT08'],
+    status: 'active',
   },
-  { id: '1', fieldName: 'Bộ Ngoại giao', fieldCode: 'NG', tags: ['NG03', 'NG04', 'NG08'] },
-  { id: '2', fieldName: 'Bộ Tài chính', fieldCode: 'TC', tags: ['TC04', 'TC05', 'TC09'] },
+  { id: '3', fieldName: 'Bộ Ngoại giao', fieldCode: 'NG', tags: ['NG03', 'NG04', 'NG08'] },
+  { id: '4', fieldName: 'Bộ Tài chính', fieldCode: 'TC', tags: ['TC04', 'TC05', 'TC09'] },
   {
-    id: '3',
+    id: '5',
     fieldName: 'Bộ Giáo dục và Đào tạo',
     fieldCode: 'GD',
     tags: ['GD05', 'GD06', 'GD10'],
+    status: 'active',
   },
-  { id: '4', fieldName: 'Bộ Y tế', fieldCode: 'YT', tags: ['YT06', 'YT07', 'YT11'] },
-  { id: '5', fieldName: 'Bộ Công thương', fieldCode: 'CT', tags: ['CT07', 'CT08', 'CT12'] },
+  { id: '6', fieldName: 'Bộ Y tế', fieldCode: 'YT', tags: ['YT06', 'YT07', 'YT11'] },
+  { id: '7', fieldName: 'Bộ Công thương', fieldCode: 'CT', tags: ['CT07', 'CT08', 'CT12'] },
   {
-    id: '6',
+    id: '8',
     fieldName: 'Bộ Giao thông vận tải',
     fieldCode: 'GTVT',
     tags: ['GTVT08', 'GTVT09', 'GTVT13'],
+    status: 'inactive',
   },
-  { id: '7', fieldName: 'Bộ Tư pháp', fieldCode: 'TP', tags: ['TP09', 'TP10', 'TP14'] },
+  { id: '9', fieldName: 'Bộ Tư pháp', fieldCode: 'TP', tags: ['TP09', 'TP10', 'TP14'] },
   {
-    id: '8',
+    id: '10',
     fieldName: 'Bộ Nông nghiệp và Phát triển nông thôn',
     fieldCode: 'NNPTNT',
     tags: ['NNPTNT10', 'NNPTNT11', 'NNPTNT15'],
+    status: 'active',
   },
   {
-    id: '9',
+    id: '11',
     fieldName: 'Bộ Lao động - Thương binh và Xã hội',
     fieldCode: 'LDTBXH',
     tags: ['LDTBXH11', 'LDTBXH12', 'LDTBXH16'],
+    status: 'inactive',
   },
-  { id: '10', fieldName: 'Bộ Quốc phòng', fieldCode: 'QP', tags: ['QP12', 'QP13', 'QP17'] },
+  {
+    id: '12',
+    fieldName: 'Bộ Quốc phòng',
+    fieldCode: 'QP',
+    tags: ['QP12', 'QP13', 'QP17'],
+    status: 'active',
+  },
 ];
 
 const FieldPage = () => {
@@ -78,8 +90,6 @@ const FieldPage = () => {
       console.error(err);
     }
   }, [isMountedRef]);
-
-
 
   return (
     <>
@@ -150,7 +160,10 @@ const FieldPage = () => {
               }
             />
           </Box>
-          <FieldTable field={invoices} />
+          <FieldTable
+            fields={invoices}
+            fetchData={getFields}
+          />
         </Container>
       </Box>
       <CreateFieldDialog

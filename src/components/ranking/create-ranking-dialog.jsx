@@ -1,37 +1,25 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Badge,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  Slide,
-  Stack,
-  Switch,
-  Typography,
-  useMediaQuery,
-  useTheme,
+    Box,
+    Button,
+    CircularProgress,
+    DialogContent,
+    FormControl,
+    Grid,
+    OutlinedInput,
+    Stack,
+    Switch,
+    Typography,
+    useTheme
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import React, { forwardRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { postData } from 'src/api/axios';
-import { setLoading, setRefresh } from 'src/slices/common';
+import { setLoading } from 'src/slices/common';
 import { useSelector } from 'src/store';
 import { z } from 'zod';
-import { InlineBadge } from '../base/styles/inline-badge';
 import UploadIconChatbot from '../chatbot/upload-icon-chatbot';
 import { DialogCustom } from '../common/dialog-custom';
 

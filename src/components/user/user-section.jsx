@@ -36,7 +36,7 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme
+  useTheme,
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
@@ -53,10 +53,6 @@ import { useDispatch } from 'src/store';
 import { debounce } from 'src/utils';
 import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
-// import CustomerFooterDropdown from './customer-footer-dropdown';
-
-// import ChatuserFooterDropdown from './user-footer-dropdown';
-
 export const CardWrapper = styled(Card)(
   ({ theme }) => `
 
@@ -80,7 +76,6 @@ export const CardWrapper = styled(Card)(
   `
 );
 
-
 const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
@@ -94,8 +89,6 @@ const UserTable = ({ users, fetchData, totalCount }) => {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState();
   const [searchByNameValue, setSearchByNameValue] = useState('');
-  const [currentCustomer, setCurrentCustomer] = useState();
-  const [openDialogCreateAdminAccount, setOpenDialogCreateAdminAccount] = useState(false);
 
   const paginatedUsers = applyPagination(users, page, limit);
   const selectedBulkActions = selectedItems.length > 0;
@@ -133,7 +126,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
 
   const handleSelectOneUser = (_event, userId) => {
     if (!selectedItems.includes(userId)) {
-      setSelectedUsers((prevSelected) => [...prevSelected,userId ]);
+      setSelectedUsers((prevSelected) => [...prevSelected, userId]);
     } else {
       setSelectedUsers((prevSelected) => prevSelected.filter((id) => id !== userId));
     }
@@ -158,10 +151,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
     }
 
     setFilters(newFilter);
-    return newFilter
-
-    // const queryParams = qs.stringify(newFilter);
-    // window.history.pushState(null, "", `?${queryParams.toString()}`);
+    return newFilter;
   };
   const handleSearchByName = async (value) => {
     handleChangeFilter({ username: value });
@@ -417,18 +407,9 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                     <LaunchTwoToneIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
-                                <Tooltip
-                                  title={t('Xoá')}
-                                  arrow
-                                >
-                                  <IconButton color="error">
-                                    <DialogConfirmDelete
-                                      onConfirm={() => handleDeleteCustomer(user?.customerId)}
-                                    >
-                                      <DeleteTwoToneIcon fontSize="small" />
-                                    </DialogConfirmDelete>
-                                  </IconButton>
-                                </Tooltip>
+                                <DialogConfirmDelete
+                                  onConfirm={() => handleDeleteCustomer(user?.customerId)}
+                                />
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -496,8 +477,8 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                               >
                                 <Chip
                                   style={{ maxWidth: '80%' }}
-                                  color={user.active?'info':'error'}
-                                  label={user.active?"Đang hoạt động":"Ngừng hoạt động"}
+                                  color={user.active ? 'info' : 'error'}
+                                  label={user.active ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                                 />
                                 {/* <CustomerFooterDropdown
                                   onDelete={() => handleDeleteCustomer(user.customerId)}

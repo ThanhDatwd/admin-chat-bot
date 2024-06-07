@@ -10,6 +10,8 @@ import {
   Card,
   Checkbox,
   Chip,
+  CircularProgress,
+  debounce,
   Divider,
   FormControl,
   Grid,
@@ -33,8 +35,14 @@ import {
 import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { setLoading, setRefresh } from 'src/slices/common';
+import DialogConfirmDelete from '../common/dialog-confirm-delete';
+import CreateFieldDialog from './create-field-dialog';
+import { UpdateField } from './update-field';
 
 export const ButtonSoft = styled(Button)(({ theme, color }) => {
   const computedColor = color ? theme.palette[color].main : theme.palette.primary.main;
@@ -51,59 +59,37 @@ export const ButtonSoft = styled(Button)(({ theme, color }) => {
   };
 });
 
-const applyFilters = (field, query, filters) => {
-  return field.filter((field) => {
-    let matches = true;
-
-    if (query.fieldInfo) {
-      if (
-        !field.fieldName.toLowerCase().includes(query.fieldInfo.toLowerCase()) &&
-        !field.fieldCode.toLowerCase().includes(query.fieldInfo.toLowerCase())
-      ) {
-        matches = false;
-      }
-    }
-
-    Object.keys(filters).forEach((key) => {
-      const value = filters[key];
-      if (value && field[key] !== value) {
-        matches = false;
-      }
-    });
-
-    return matches;
-  });
+const applyPagination = (fields, page, limit) => {
+  return fields.slice(page * limit, page * limit + limit);
 };
 
-const applyPagination = (field, page, limit) => {
-  return field.slice(page * limit, page * limit + limit);
-};
+const FieldTable = ({ fields = [], fetchData, totalCount }) => {
+  const dispatch = useDispatch();
 
-const FieldTable = ({ field }) => {
   const [selectedItems, setSelectedField] = useState([]);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(6);
-  const [query, setQuery] = useState({
-    fieldName: '',
-    fieldInfo: '',
-    tag: '',
-  });
+  const [query, setQuery] = useState();
+  const [searchValue, setSearchValue] = useState('');
+
   const [filters, setFilters] = useState({
     fieldStatus: null,
     paymentStatus: null,
   });
 
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
+
+  const paginatedField = applyPagination(fields, page, limit);
+  const selectedBulkActions = selectedItems.length > 0;
+  const selectedSomeField = selectedItems.length > 0 && selectedItems.length < fields.length;
+  const selectedAllField = selectedItems.length === fields.length;
+
   const fieldStatusOptions = [
     { id: 'all', name: 'Tất cả' },
-    { id: 'unsynced', name: 'Chưa đồng bộ' },
-    { id: 'synced', name: 'Đã đồng bộ' },
-  ];
-
-  const paymentStatusOptions = [
-    { id: 'all', name: 'Tất cả' },
-    { id: 'unpaid', name: 'Chưa thanh toán' },
-    { id: 'paid', name: 'Đã thanh toán' },
+    { id: 'active', name: 'Hoạt động' },
+    { id: 'inactive', name: 'Không hoạt động' },
   ];
 
   const handleQueryChange = (field) => (event) => {
@@ -125,7 +111,7 @@ const FieldTable = ({ field }) => {
   };
 
   const handleSelectAllField = (event) => {
-    setSelectedField(event.target.checked ? field.map((field) => field.id) : []);
+    setSelectedField(event.target.checked ? fields.map((field) => field.id) : []);
   };
 
   const handleSelectOneInvoice = (_event, fieldId) => {
@@ -138,17 +124,58 @@ const FieldTable = ({ field }) => {
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
+    fetchData({ pageNumber: newPage, pageSize: limit }, filters);
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
+    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
+  };
+  const handleChangeFilter = (data) => {
+    let newFilter = { ...filters, ...data };
+
+    for (const key in newFilter) {
+      if (newFilter[key] === '' || newFilter[key] === undefined) {
+        delete newFilter[key];
+      }
+    }
+
+    setFilters(newFilter);
+    return newFilter;
   };
 
-  const filteredField = applyFilters(field, query, filters);
-  const paginatedField = applyPagination(filteredField, page, limit);
-  const selectedBulkActions = selectedItems.length > 0;
-  const selectedSomeField = selectedItems.length > 0 && selectedItems.length < field.length;
-  const selectedAllField = selectedItems.length === field.length;
+  const handleFilter = async () => {
+    if (fetchData && filters) {
+      dispatch(setLoading(true));
+      fetchData(
+        {
+          pageNumber: page,
+          pageSize: limit,
+        },
+        filters
+      ).finally(() => dispatch(setLoading(false)));
+    }
+  };
+
+  const handleSearchByName = async (value) => {
+    handleChangeFilter({ customerName: value });
+  };
+  const debounceHandleSearch = debounce(handleSearchByName, 900);
+  const handleDeleteField = async (customerId) => {
+    try {
+      // const response = await customersApi.deleteCustomer(customerId);
+
+      // toast.success(t(response.data));
+      dispatch(setRefresh(!isRefresh));
+    } catch (error) {
+      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData({ pageNumber: page, pageSize: limit });
+  }, [isRefresh]);
 
   return (
     <>
@@ -164,9 +191,8 @@ const FieldTable = ({ field }) => {
         >
           <Stack
             direction="row"
-            spacing={1}
             alignItems="center"
-            flexWrap={"wrap"}
+            flexWrap={'wrap'}
           >
             <Checkbox
               checked={selectedAllField}
@@ -206,39 +232,22 @@ const FieldTable = ({ field }) => {
           <Stack
             direction="row"
             flexWrap={'wrap'}
-            // spacing={1}
             gap={'10px'}
           >
             <TextField
               size="small"
               style={{ width: 210 }}
               placeholder="Tên / Mã lĩnh vực"
-              value={query.customerInfo}
-              onChange={handleQueryChange('fieldInfo')}
+              value={searchValue}
+              onChange={(event) => {
+                debounceHandleSearch(event.target.value);
+                setSearchValue(event.target.value);
+              }}
               variant="outlined"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchTwoToneIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: query.customerInfo && (
-                  <InputAdornment
-                    
-                    position="end"
-                  >
-                    <IconButton
-                      color="error"
-                      aria-label="clear input"
-                      onClick={() => setQuery((prevQuery) => ({ ...prevQuery, fieldInfo: '' }))}
-                      edge="end"
-                      size="small"
-                      sx={{
-                        color: 'error.main',
-                      }}
-                    >
-                      <ClearRoundedIcon fontSize="small" />
-                    </IconButton>
                   </InputAdornment>
                 ),
               }}
@@ -263,37 +272,33 @@ const FieldTable = ({ field }) => {
                 ))}
               </Select>
             </FormControl>
-            <FormControl
-              size="small"
-              variant="outlined"
-            >
-              <Select
-                value={filters.paymentStatus || 'all'}
-                onChange={handleStatusChange('paymentStatus')}
-                label=""
-              >
-                {paymentStatusOptions.map((statusOption) => (
-                  <MenuItem
-                    key={statusOption.id}
-                    value={statusOption.id}
-                  >
-                    {statusOption.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+
             <Button
               variant="contained"
               color="primary"
               size="small"
+              onClick={handleFilter}
             >
               Tìm kiếm
             </Button>
           </Stack>
         </Box>
         <Divider />
-
-        {paginatedField.length === 0 ? (
+        {isLoading ? (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              height: '50vh',
+            }}
+            color="common.white"
+          >
+            {' '}
+            <CircularProgress style={{ height: '30px', width: '30px' }} />
+          </Box>
+        ) : fields.length === 0 ? (
           <Typography
             sx={{
               py: {
@@ -325,7 +330,7 @@ const FieldTable = ({ field }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginatedField.map((field, index) => {
+                  {fields.map((field, index) => {
                     const isInvoiceSelected = selectedItems.includes(field.id);
                     return (
                       <TableRow
@@ -360,49 +365,28 @@ const FieldTable = ({ field }) => {
 
                         <TableCell>
                           {field.tags.map((tag, index) => (
-                            <Chip sx={{margin:'5px'}}
-                            key={index}
+                            <Chip
+                              sx={{ margin: '5px' }}
+                              key={index}
                               label={tag}
                               size="small"
                               variant="outlined"
                             />
-
                           ))}
-
                         </TableCell>
                         <TableCell>
                           <Typography
                             noWrap
                             variant="body2"
                           >
-                            {field.fieldStatus === 'unsynced' ? 'Chưa đồng bộ' : 'Đã đồng bộ'}
+                            {field.status === 'inactive' ? 'Không hoat động' : 'Hoạt động'}
                           </Typography>
                         </TableCell>
 
                         <TableCell align="center">
                           <Typography noWrap>
-                            <Tooltip
-                              title={t('Sửa')}
-                              arrow
-                            >
-                              <IconButton
-                                color="primary"
-                                onClick={() => console.log('Sửa', field.id)}
-                              >
-                                <EditTwoToneIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip
-                              title={t('Xóa')}
-                              arrow
-                            >
-                              <IconButton
-                                color="error"
-                                onClick={() => console.log('Xóa', field.id)}
-                              >
-                                <DeleteTwoToneIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
+                            <UpdateField field={field} />
+                            <DialogConfirmDelete onConfirm={() => handleDeleteField(field?.id)} />
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -421,7 +405,7 @@ const FieldTable = ({ field }) => {
             >
               <TablePagination
                 component="div"
-                count={filteredField.length}
+                count={100}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleLimitChange}
                 page={page}

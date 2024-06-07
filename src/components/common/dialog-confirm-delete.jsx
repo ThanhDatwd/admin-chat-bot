@@ -1,5 +1,5 @@
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import {
@@ -25,14 +25,14 @@ import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import AlertDialogContent from './alert-dialog-content';
 
 const DialogConfirmDelete = (props) => {
-  const { onConfirm, children } = props;
+  const { onConfirm } = props;
   const { t } = useTranslation();
   const theme = useTheme();
   const smUp = useMediaQuery(theme.breakpoints.up('sm'));
   const [open, setOpen] = React.useState(false);
-  //   const handleClickOpen = () => {
-  //     setOpen(true);
-  //   };
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
   const handleClose = () => {
     setOpen(false);
   };
@@ -139,12 +139,17 @@ const DialogConfirmDelete = (props) => {
   };
   return (
     <>
-      <Box
-        sx={{ width: '100%', display: 'inline-block' }}
-        onClick={() => setOpen(true)}
+      <Tooltip
+        title={t('Xoá')}
+        arrow
       >
-        {children}
-      </Box>
+        <IconButton
+          color="error"
+          onClick={handleClickOpen}
+        >
+          <DeleteTwoToneIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
       <Dialog
         open={open}
         onClose={handleClose}
