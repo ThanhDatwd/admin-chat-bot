@@ -28,7 +28,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import api from 'src/api/axios';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
-import { setUser } from 'src/slices/auth';
+import { setAmin } from 'src/slices/auth';
 import { setLoading } from 'src/slices/common';
 import { z } from 'zod';
 

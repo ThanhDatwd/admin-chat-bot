@@ -1,20 +1,21 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { authApi } from 'src/api/auth';
 
 const storedUser = localStorage.getItem('accessToken');
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: storedUser || null,
+    admin: null,
     isAuth: !!storedUser,
   },
   reducers: {
-    setUser: (state, action) => {
-      state.user = action.payload?.accessToken;
+    setAmin: (state, action) => {
+      state.admin = action.payload;
       state.isAuth = true;
     },
     logOut: (state, action) => {
-      state.user = null;
+      state.admin = null;
       state.isAuth = false;
     },
     // refreshToken: (state, action) => {
@@ -30,7 +31,19 @@ export const authSlice = createSlice({
     // },
   },
 });
+export const getCurrentUser = () => async (dispatch) => {
+  try {
+    const response = await authApi.whoami();
+    dispatch(setAmin(response.data));
+    return response;
+  } catch (error) {
+    dispatch(logOut());
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    console.log(error);
+  }
+};
 
-export const { setUser, logOut } = authSlice.actions;
+export const { setAmin, logOut } = authSlice.actions;
 export const { reducer } = authSlice;
 export default authSlice;

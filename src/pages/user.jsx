@@ -3,22 +3,15 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Container,
-  Divider,
-  Typography,
-  useTheme,
+  useTheme
 } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { botsApi } from 'src/api/bots';
-import { customersApi } from 'src/api/customer';
+import { useSelector } from 'react-redux';
 import { usersApi } from 'src/api/user';
-import { Helmet } from 'src/components/base/helmet';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
-import CreateCustomerByAdminDialog from 'src/components/customer/create-customer-dialog-by-admin';
 import CreateUserByOrganizationDialog from 'src/components/customer/create-user-dialog-by-organization';
 import UserTable from 'src/components/user/user-section';
 // import UserSection from 'src/components/user/user-section';
@@ -33,6 +26,7 @@ const UserPage = () => {
   const [customers, setCustomers] = useState([]);
   const [open, setOpen] = useState(false);
   const [isRefresh, setIsRefresh] = useState(false);
+  const currentAdmin = useSelector((state) => state.auth.admin);
 
   // HANDLE OPEN CREATE USER DIALOG
   const handleDialogOpen = () => {
@@ -48,7 +42,7 @@ const UserPage = () => {
     async (paginate, filter) => {
       try {
         const response = await usersApi.getUserByOrg({
-          customerId: '2c4eda1e-b155-48d0-abe3-e74253f63922',
+          customerId: currentAdmin.customerId,
           pagination: {
             pageNumber: paginate.pageNumber,
             pageSize: paginate.pageSize,

@@ -11,10 +11,12 @@ import {
   IconButton,
   Stack,
   styled,
+  Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
 import { Logo } from 'src/components/base/logo';
 import { PulseBadge } from 'src/components/base/styles/pulse-badge';
 import { useSidebarContext } from 'src/contexts/sidebar-context';
@@ -46,11 +48,8 @@ export const Header = (props) => {
   const notifications = useDialog();
   const widgets = useDialog();
   const popoverChat = usePopover();
-  const user = {
-    avatar: '/avatars/3.png',
-    name: 'Ethan Donovan',
-    jobtitle: 'Principal Engineer',
-  };
+  const currentAmin = useSelector((state) => state.auth.admin);
+
   return (
     <HeaderWrapper
       role="banner"
@@ -194,32 +193,37 @@ export const Header = (props) => {
               </>
             )}
           </Stack>
-
-          <IconButton
-            id="profile-button"
-            sx={{
-              p: 0,
-              '&:hover': {
-                boxShadow: `0 0 0 3px ${theme.palette.primary.main}`,
-              },
-            }}
-            color="inherit"
-            aria-controls={popover.open ? 'profile-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={popover.open ? 'true' : undefined}
-            onClick={popover.handleOpen}
-            ref={popover.anchorRef}
+          <Stack
+            gap={1}
+            alignItems={'center'}
+            direction={'row'}
           >
-            <Avatar
-              alt={user.name}
-              src={user.avatar}
+            <IconButton
+              id="profile-button"
               sx={{
-                borderRadius: 'inherit',
-                height: 36,
-                width: 36,
+                p: 0,
+                '&:hover': {
+                  boxShadow: `0 0 0 3px ${theme.palette.primary.main}`,
+                },
               }}
-            />
-          </IconButton>
+              color="inherit"
+              aria-controls={popover.open ? 'profile-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={popover.open ? 'true' : undefined}
+              onClick={popover.handleOpen}
+              ref={popover.anchorRef}
+            >
+              <Avatar
+                src={''}
+                sx={{
+                  borderRadius: 'inherit',
+                  height: 36,
+                  width: 36,
+                }}
+              />
+            </IconButton>
+            <Typography>{currentAmin?.username}</Typography>
+          </Stack>
           {!lgUp && (
             <IconButton
               onClick={onMobileNav}
