@@ -27,7 +27,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import api from 'src/api/axios';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
-import { setUser } from 'src/slices/auth';
+import { setAmin } from 'src/slices/auth';
 import { setLoading } from 'src/slices/common';
 import { useSelector } from 'src/store';
 import { z } from 'zod';
@@ -67,9 +67,8 @@ function LoginForm() {
         import.meta.env.VITE_API_AUTH_URL_8080 + 'auth/login',
         requestData
       );
-      dispatch(setUser(response.data));
+      dispatch(setAmin(response.data));
 
-      localStorage.setItem('username', data.username);
       localStorage.setItem('accessToken', response.data.accessToken);
       localStorage.setItem('refreshToken', response.data.refreshToken);
       localStorage.setItem('expiration', response.data.expiration);
