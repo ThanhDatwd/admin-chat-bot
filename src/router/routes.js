@@ -11,4 +11,5 @@ export const routes = {
   ranking: '/ranking',
   partner: '/partner',
   field: '/field',
+  decentralization: '/decentralization',
 };

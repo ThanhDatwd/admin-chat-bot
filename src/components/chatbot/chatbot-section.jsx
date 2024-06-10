@@ -124,10 +124,7 @@ const ChatbotSection = ({ bots }) => {
     knowId: null,
   });
 
-  const getBotRoleLabel = (knowId) => {
-    const knowledgeItem = knowledges.find((item) => item.value === knowId);
-    const labelName = knowledgeItem ? knowledgeItem.label : 'Unknown';
-
+  const getBotRoleLabel = (labelName) => {
     return (
       <Chip
         style={{ maxWidth: '80%' }}
@@ -491,7 +488,7 @@ const ChatbotSection = ({ bots }) => {
                               </Box>
                             </TableCell>
                             <TableCell>0</TableCell>
-                            <TableCell>{getBotRoleLabel(bot.knowId)}</TableCell>
+                            <TableCell>{getBotRoleLabel(bot.botStatus)}</TableCell>
                             <TableCell>
                               <Typography fontWeight={600}>{bot.botDescription}</Typography>
                             </TableCell>
@@ -619,7 +616,7 @@ const ChatbotSection = ({ bots }) => {
                                 alignItems="flex-start"
                                 justifyContent="space-between"
                               >
-                                {getBotRoleLabel(bot.knowId)}
+                                {getBotRoleLabel(bot.botStatus)}
                                 <ChatbotFooterDropdown
                                   onSelect={() => setSelectedBot(bot)}
                                   setOpenAuthorizeChatbotQuery={setOpenAuthorizeChatbotQuery}

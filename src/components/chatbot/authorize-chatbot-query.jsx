@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import DecentralizationTable from '../decentralization/decentralization-table';
 import AuthorizeChatbotQueryList from './authorize-chatbot-query-list';
 
 const AuthorizeChatbotQuery = ({ open, setOpen, botName }) => {
@@ -90,7 +91,44 @@ const AuthorizeChatbotQuery = ({ open, setOpen, botName }) => {
             p: 0,
           }}
         >
-          <AuthorizeChatbotQueryList />
+          <AuthorizeChatbotQueryList fetchData={()=>{}}
+            fields={[
+              {
+                id: '1',
+                fieldName: 'Bộ công an',
+                fieldCode: 'CA',
+                tags: ['C03', 'CO4', 'C08'],
+                status: 'active',
+              },
+              {
+                id: '2',
+                fieldName: 'Bộ tài nguyên và môi trường',
+                fieldCode: 'TNMT',
+                tags: ['TNMT03', 'TNMTO4', 'TNMT08'],
+                status: 'active',
+              },
+            ]}
+            totalCount={100} />
+          {/* <DecentralizationTable
+          fetchData={()=>{}}
+            fields={[
+              {
+                id: '1',
+                fieldName: 'Bộ công an',
+                fieldCode: 'CA',
+                tags: ['C03', 'CO4', 'C08'],
+                status: 'active',
+              },
+              {
+                id: '2',
+                fieldName: 'Bộ tài nguyên và môi trường',
+                fieldCode: 'TNMT',
+                tags: ['TNMT03', 'TNMTO4', 'TNMT08'],
+                status: 'active',
+              },
+            ]}
+            totalCount={100}
+          /> */}
         </DialogContent>
         <DialogActions
           sx={{

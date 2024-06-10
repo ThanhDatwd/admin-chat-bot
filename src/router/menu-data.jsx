@@ -1,6 +1,3 @@
-import ArchiveIcon from '@heroicons/react/24/outline/ArchiveBoxIcon';
-import DocumentIcon from '@heroicons/react/24/outline/DocumentMagnifyingGlassIcon';
-import ReportIcon from '@heroicons/react/24/outline/FlagIcon';
 import HomeIcon from '@heroicons/react/24/outline/HomeIcon';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import CorporateFareTwoToneIcon from '@mui/icons-material/CorporateFareTwoTone';
@@ -9,6 +6,7 @@ import HandshakeTwoToneIcon from '@mui/icons-material/HandshakeTwoTone';
 import LeaderboardTwoToneIcon from '@mui/icons-material/LeaderboardTwoTone';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
+import RuleIcon from '@mui/icons-material/Rule';
 import SmartToyTwoToneIcon from '@mui/icons-material/SmartToyTwoTone';
 import TopicIcon from '@mui/icons-material/Topic';
 import { Box } from '@mui/material';
@@ -70,6 +68,18 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.user,
+          },
+          {
+            title: t('Gán quyền'),
+            icon: (
+              <Box
+                width={24}
+                height={24}
+              >
+                <RuleIcon />
+              </Box>
+            ),
+            route: routes.decentralization,
           },
           {
             title: t('Tạo tài khoản quản trị'),

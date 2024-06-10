@@ -7,6 +7,7 @@ import RecoverPasswordPage from 'src/pages/auth/recover-password';
 import RegisterPage from 'src/pages/auth/register';
 import CreateAccountAdminPage from 'src/pages/create-account';
 import CustomerDetail from 'src/pages/customer-detail';
+import DecentralizationPage from 'src/pages/decentralization';
 import FieldPage from 'src/pages/field';
 import UserPage from 'src/pages/user';
 
@@ -103,6 +104,10 @@ export const routesOutlets = [
       {
         path: 'field',
         element: <FieldPage />,
+      },
+      {
+        path: 'decentralization',
+        element: <DecentralizationPage />,
       },
     ],
   },

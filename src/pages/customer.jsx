@@ -23,6 +23,7 @@ const CustomerPage = () => {
   const dispatch = useDispatch();
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
+  const [totalCount,setTotalCount] = useState(0)
 
   // HANDLE OPEN CREATE USER DIALOG
   const handleDialogOpen = () => {
@@ -42,7 +43,8 @@ const CustomerPage = () => {
           pageSize: paginate.pageSize,
         });
         if (isMountedRef()) {
-          setCustomers(response);
+          setCustomers(response.content);
+          setTotalCount(response.totalElements)
         }
       } catch (err) {
         console.error(err);
@@ -130,7 +132,7 @@ const CustomerPage = () => {
           >
             <CustomerSection
               fetchData={geCustomers}
-              totalCount={15}
+              totalCount={totalCount}
               users={customers}
             />
           </Box>

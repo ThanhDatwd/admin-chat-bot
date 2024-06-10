@@ -23,6 +23,7 @@ import { fetchUserFiles } from 'src/api/files';
 import BotInfo from 'src/components/chatbot-detail/bot-info';
 import EmbeddingHistory from 'src/components/chatbot-detail/embedding-history';
 import EmbeddingSection from 'src/components/chatbot-detail/embedding-section';
+import BotUsersTable from 'src/components/chatbot/decentralization-table';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 
 const ChatbotDetail = () => {
@@ -115,6 +116,26 @@ const ChatbotDetail = () => {
               }}
             >
               <EmbeddingHistory tableData={tableData} />
+            </Stack>
+          </Box>
+          <Box
+            pt={{
+              xs: 2,
+              sm: 3,
+            }}
+          >
+            <Stack
+              spacing={{
+                xs: 2,
+                sm: 3,
+              }}
+              direction={{
+                xs: 'column',
+                sm: 'row',
+              }}
+            >
+              <BotUsersTable users={[]} 
+              totalCount={100} />
             </Stack>
           </Box>
         </Container>

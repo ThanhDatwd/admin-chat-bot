@@ -17,6 +17,7 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
 
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
+  const currentAdmin = useSelector((state) => state.auth.admin);
 
   const theme = useTheme();
 
@@ -24,7 +25,7 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
     try {
       dispatch(setLoading(true));
       if (userDataUpload.length > 0) {
-        const customerId = '967aac21-c16c-4c20-9208-f27a0f19fc05';
+        const customerId =currentAdmin.customerId ;
         const dataRequest = {
           customerId,
           users: userDataUpload,
