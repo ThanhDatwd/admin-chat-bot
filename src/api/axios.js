@@ -73,6 +73,15 @@ export const patchData = async (url, data) => {
   }
 };
 
+export const putData = async (url, data) => {
+  try {
+    const response = await api.put(url, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const deleteData = async (url) => {
   try {
     const response = await api.delete(url);

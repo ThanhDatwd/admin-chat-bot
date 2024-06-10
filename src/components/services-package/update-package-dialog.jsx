@@ -21,11 +21,14 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers';
+import { format } from 'date-fns';
 import { forwardRef, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { modelsApi } from 'src/api/model';
+import { periodsApi } from 'src/api/period';
 import { z } from 'zod';
-import UploadIconChatbot from '../chatbot/upload-icon-chatbot';
 
 const Transition = forwardRef(function Transition(props, ref) {
   return (
@@ -38,25 +41,20 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const formSchema = z.object({
-  packageName: z.string().min(1, 'Tên gói là bắt buộc').max(500, 'Tên gói tối đa 500 ký tự'),
-  packageCode: z.string().min(1, 'Mã gói là bắt buộc').max(200, 'Mã gói tối đa 200 ký tự'),
-  avatar: z.string().optional(),
-  priority: z
-    .number()
-    .positive('Độ ưu tiên phải là số nguyên dương')
-    .max(1000000, 'Độ ưu tiên tối đa 1 triệu')
-    .optional(),
-  questionCount: z
-    .number()
-    .positive('Số lượng câu hỏi phải là số nguyên dương')
-    .max(1e12, 'Số lượng câu hỏi tối đa 1 triệu tỷ'),
-  description: z.string(),
-  fee: z
+  pkgName: z.string().min(1, 'Tên gói là bắt buộc').max(500, 'Tên gói tối đa 500 ký tự'),
+  pkgDescription: z.string(),
+  amount: z.coerce
     .number()
     .positive('Phí dịch vụ phải là số nguyên dương')
     .max(1e12, 'Phí dịch vụ tối đa 1 triệu tỷ'),
-  registrationDeadline: z.string().min(1, 'Hạn đăng ký là bắt buộc'),
-  status: z.enum(['Hoạt động', 'Không hoạt động']).default('Hoạt động'),
+  request: z.coerce
+    .number()
+    .positive('Số lượng request phải là số nguyên dương')
+    .max(1e12, 'Số lượng request tối đa 1 triệu tỷ'),
+  modelChatId: z.string().min(1, 'Chat model là bắt buộc'),
+  maxToken: z.coerce.number().positive('Số lượng token tối đa phải là số nguyên dương'),
+  periodId: z.string().min(1, 'Chu kì là bắt buộc'),
+  fromDate: z.string().min(1, 'Ngày bắt đầu là bắt buộc'),
 });
 
 const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
@@ -64,38 +62,92 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
-  const { control, handleSubmit, reset } = useForm({
+  const [periodOptions, setPeriodOptions] = useState([]);
+  const [modelChatOptions, setModelChatOptions] = useState([]);
+  const [selectedFromDate, setSelectedFromDate] = useState(null);
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      packageName: '',
-      packageCode: '',
-      avatar: '',
-      priority: '',
-      questionCount: '',
-      description: '',
-      fee: '',
-      registrationDeadline: '',
-      status: 'Hoạt động',
+      pkgName: '',
+      pkgDescription: '',
+      amount: 0,
+      request: 0,
+      modelChatId: '',
+      maxToken: 0,
+      periodId: '',
+      fromDate: '',
     },
   });
 
-  const onSubmit = async (data) => {
+  const fetchPeriods = async () => {
     try {
-      onUpdate?.(data);
+      const data = await periodsApi.getPeriods({ pageNumber: 0, pageSize: 50 });
+      setPeriodOptions(
+        data.content.map((period) => ({
+          value: period.id,
+          label: period.name,
+        }))
+      );
+    } catch (error) {
+      console.error('Error fetching periods:', error);
+    }
+  };
+
+  const fetchModels = async () => {
+    try {
+      const data = await modelsApi.getModels();
+      setModelChatOptions(
+        data.map((model) => ({
+          value: model.id,
+          label: model.name,
+        }))
+      );
+    } catch (error) {
+      console.error('Error fetching models:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      fetchPeriods();
+      fetchModels();
+      if (selectedItem) {
+        reset({
+          pkgName: selectedItem.pkgName,
+          pkgDescription: selectedItem.pkgDescription,
+          amount: selectedItem.amount,
+          request: selectedItem.request,
+          modelChatId: selectedItem.modelChatId,
+          maxToken: selectedItem.maxToken,
+          periodId: selectedItem.periodId,
+          fromDate: selectedItem.fromDate
+            ? format(new Date(selectedItem.fromDate), 'yyyy-MM-dd')
+            : '',
+        });
+        setSelectedFromDate(selectedItem.fromDate ? new Date(selectedItem.fromDate) : null);
+      } else {
+        reset();
+      }
+    }
+  }, [open, selectedItem, reset]);
+
+  const onSubmit = async (data) => {
+    console.log('Submitted Data:', data);
+    try {
+      await onUpdate?.(data);
       reset();
       setOpen(false);
     } catch (error) {
       console.error('Error updating package:', error);
     }
   };
-
-  useEffect(() => {
-    if (open && selectedItem) {
-      reset(selectedItem);
-    } else {
-      reset();
-    }
-  }, [open, selectedItem, reset]);
 
   return (
     <>
@@ -152,7 +204,6 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                   <Grid
                     item
                     xs={12}
-                    md={6}
                   >
                     <FormControl
                       fullWidth
@@ -162,186 +213,19 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="package-name-input"
+                        htmlFor="pkg-name-input"
                         fontWeight={500}
                       >
                         Tên gói
                       </Typography>
                       <Controller
-                        name="packageName"
+                        name="pkgName"
                         control={control}
                         render={({ field, fieldState }) => (
                           <>
                             <OutlinedInput
                               {...field}
-                              id="package-name-input"
-                              fullWidth
-                            />
-                            {fieldState.error && (
-                              <Typography color="error">{fieldState.error.message}</Typography>
-                            )}
-                          </>
-                        )}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        htmlFor="package-code-input"
-                        fontWeight={500}
-                      >
-                        Mã gói
-                      </Typography>
-                      <Controller
-                        name="packageCode"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <>
-                            <OutlinedInput
-                              {...field}
-                              id="package-code-input"
-                              fullWidth
-                              disabled
-                            />
-                            {fieldState.error && (
-                              <Typography color="error">{fieldState.error.message}</Typography>
-                            )}
-                          </>
-                        )}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <Controller
-                      name="avatar"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <>
-                          <UploadIconChatbot
-                            onUpload={(files) => field.onChange(files)}
-                            accept="image/jpeg, image/png, image/gif"
-                            maxSize={10 * 1024 * 1024}
-                          />
-                          {fieldState.error && (
-                            <Typography color="error">{fieldState.error.message}</Typography>
-                          )}
-                        </>
-                      )}
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        htmlFor="priority-input"
-                        fontWeight={500}
-                      >
-                        Độ ưu tiên
-                      </Typography>
-                      <Controller
-                        name="priority"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <>
-                            <OutlinedInput
-                              {...field}
-                              id="priority-input"
-                              fullWidth
-                            />
-                            {fieldState.error && (
-                              <Typography color="error">{fieldState.error.message}</Typography>
-                            )}
-                          </>
-                        )}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        htmlFor="question-count-input"
-                        fontWeight={500}
-                      >
-                        Số lượng câu hỏi
-                      </Typography>
-                      <Controller
-                        name="questionCount"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <>
-                            <OutlinedInput
-                              {...field}
-                              id="question-count-input"
-                              fullWidth
-                            />
-                            {fieldState.error && (
-                              <Typography color="error">{fieldState.error.message}</Typography>
-                            )}
-                          </>
-                        )}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={12}
-                    md={6}
-                  >
-                    <FormControl
-                      fullWidth
-                      variant="outlined"
-                    >
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        component="label"
-                        htmlFor="fee-input"
-                        fontWeight={500}
-                      >
-                        Phí dịch vụ
-                      </Typography>
-                      <Controller
-                        name="fee"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <>
-                            <OutlinedInput
-                              {...field}
-                              id="fee-input"
+                              id="pkg-name-input"
                               fullWidth
                             />
                             {fieldState.error && (
@@ -364,19 +248,19 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="description-input"
+                        htmlFor="pkg-description-input"
                         fontWeight={500}
                       >
                         Mô tả gói dịch vụ
                       </Typography>
                       <Controller
-                        name="description"
+                        name="pkgDescription"
                         control={control}
                         render={({ field, fieldState }) => (
                           <>
                             <OutlinedInput
                               {...field}
-                              id="description-input"
+                              id="pkg-description-input"
                               multiline
                               maxRows={6}
                               minRows={2}
@@ -403,19 +287,21 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="registration-deadline-input"
+                        htmlFor="amount-input"
                         fontWeight={500}
                       >
-                        Hạn đăng ký gói
+                        Phí dịch vụ
                       </Typography>
                       <Controller
-                        name="registrationDeadline"
+                        name="amount"
                         control={control}
                         render={({ field, fieldState }) => (
                           <>
                             <OutlinedInput
                               {...field}
-                              id="registration-deadline-input"
+                              id="amount-input"
+                              type="number"
+                              onChange={(e) => field.onChange(e.target.value)}
                               fullWidth
                             />
                             {fieldState.error && (
@@ -439,27 +325,193 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="status-select"
+                        htmlFor="request-input"
                         fontWeight={500}
                       >
-                        Trạng thái
+                        Số lượng request
                       </Typography>
                       <Controller
-                        name="status"
+                        name="request"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <>
+                            <OutlinedInput
+                              {...field}
+                              id="request-input"
+                              type="number"
+                              onChange={(e) => field.onChange(e.target.value)}
+                              fullWidth
+                            />
+                            {fieldState.error && (
+                              <Typography color="error">{fieldState.error.message}</Typography>
+                            )}
+                          </>
+                        )}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    md={6}
+                  >
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                    >
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        component="label"
+                        htmlFor="model-chat-select"
+                        fontWeight={500}
+                      >
+                        Chat model
+                      </Typography>
+                      <Controller
+                        name="modelChatId"
                         control={control}
                         render={({ field }) => (
                           <Select
-                            value={field.value}
-                            onChange={field.onChange}
-                            renderValue={(selected) => (
-                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {selected}
-                              </Box>
-                            )}
+                            {...field}
+                            id="model-chat-select"
+                            fullWidth
                           >
-                            <MenuItem value="Hoạt động">Hoạt động</MenuItem>
-                            <MenuItem value="Không hoạt động">Không hoạt động</MenuItem>
+                            {modelChatOptions.map((option) => (
+                              <MenuItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </MenuItem>
+                            ))}
                           </Select>
+                        )}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    md={6}
+                  >
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                    >
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        component="label"
+                        htmlFor="max-token-input"
+                        fontWeight={500}
+                      >
+                        Số lượng token tối đa
+                      </Typography>
+                      <Controller
+                        name="maxToken"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <>
+                            <OutlinedInput
+                              {...field}
+                              id="max-token-input"
+                              type="number"
+                              onChange={(e) => field.onChange(e.target.value)}
+                              fullWidth
+                            />
+                            {fieldState.error && (
+                              <Typography color="error">{fieldState.error.message}</Typography>
+                            )}
+                          </>
+                        )}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    md={6}
+                  >
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                    >
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        component="label"
+                        htmlFor="period-select"
+                        fontWeight={500}
+                      >
+                        Chu kì
+                      </Typography>
+                      <Controller
+                        name="periodId"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            {...field}
+                            id="period-select"
+                            fullWidth
+                          >
+                            {periodOptions.map((option) => (
+                              <MenuItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        )}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    md={6}
+                  >
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                    >
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        component="label"
+                        htmlFor="from-date-input"
+                        fontWeight={500}
+                      >
+                        Ngày bắt đầu
+                      </Typography>
+                      <Controller
+                        name="fromDate"
+                        control={control}
+                        render={({ field }) => (
+                          <>
+                            <DatePicker
+                              {...field}
+                              format="dd-MM-yyyy"
+                              value={selectedFromDate}
+                              onChange={(date) => {
+                                setSelectedFromDate(date);
+                                setValue('fromDate', date ? format(date, 'yyyy-MM-dd') : '');
+                              }}
+                              renderInput={(params) => (
+                                <OutlinedInput
+                                  {...params}
+                                  id="fromDate-input"
+                                  fullWidth
+                                  error={!!errors.fromDate}
+                                />
+                              )}
+                            />
+                            {errors.fromDate && (
+                              <Typography color="error">{errors.fromDate.message}</Typography>
+                            )}
+                          </>
                         )}
                       />
                     </FormControl>

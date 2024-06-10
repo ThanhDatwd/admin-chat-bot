@@ -1,7 +1,6 @@
 import { DeleteRounded } from '@mui/icons-material';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import {
   alpha,
@@ -32,11 +31,12 @@ import {
 import { format } from 'date-fns';
 import numeral from 'numeral';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { packageBasesApi } from 'src/api/package-base';
 import UpdatePackageDialog from './update-package-dialog';
 
-export const ButtonSoft = styled(Button)(({ theme, color }) => {
+const ButtonSoft = styled(Button)(({ theme, color }) => {
   const computedColor = color ? theme.palette[color].main : theme.palette.primary.main;
   return {
     backgroundColor: alpha(computedColor, 0.08),
@@ -56,7 +56,7 @@ const applyFilters = (packages, query, filters) => {
     let matches = true;
 
     if (query) {
-      const properties = ['packageName', 'packageCode'];
+      const properties = ['pkgName', 'pkgDescription'];
       let containsQuery = false;
       properties.forEach((property) => {
         if (pkg[property].toLowerCase().includes(query.toLowerCase())) {
@@ -83,7 +83,10 @@ const applyPagination = (packages, page, limit) => {
   return packages.slice(page * limit, page * limit + limit);
 };
 
-const ServicesPackageTable = ({ packages }) => {
+const ServicesPackageTable = () => {
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedItems, setSelectedPackages] = useState([]);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
@@ -92,6 +95,25 @@ const ServicesPackageTable = ({ packages }) => {
   const [filters, setFilters] = useState({
     status: null,
   });
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setLoading(true);
+        const data = await packageBasesApi.getPackageBases({
+          pageNumber: page,
+          pageSize: limit,
+        });
+        setPackages(data.content);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, [page, limit]);
 
   const statusOptions = [
     { id: 'all', name: 'Tất cả' },
@@ -117,7 +139,7 @@ const ServicesPackageTable = ({ packages }) => {
   };
 
   const handleSelectAllPackages = (event) => {
-    setSelectedPackages(event.target.checked ? packages.map((pkg) => pkg.id) : []);
+    setSelectedPackages(event.target.checked ? packages.map((pkg) => pkg.pkgId) : []);
   };
 
   const handleSelectOnePackage = (_event, packageId) => {
@@ -141,6 +163,14 @@ const ServicesPackageTable = ({ packages }) => {
   const selectedBulkActions = selectedItems.length > 0;
   const selectedSomePackages = selectedItems.length > 0 && selectedItems.length < packages.length;
   const selectedAllPackages = selectedItems.length === packages.length;
+
+  if (loading) {
+    return <Typography>{t('Loading...')}</Typography>;
+  }
+
+  if (error) {
+    return <Typography>{t('Error fetching packages')}</Typography>;
+  }
 
   return (
     <>
@@ -292,11 +322,11 @@ const ServicesPackageTable = ({ packages }) => {
                 </TableHead>
                 <TableBody>
                   {paginatedPackages.map((pkg, index) => {
-                    const isPackageSelected = selectedItems.includes(pkg.id);
+                    const isPackageSelected = selectedItems.includes(pkg.pkgId);
                     return (
                       <TableRow
                         hover
-                        key={pkg.id}
+                        key={pkg.pkgId}
                         selected={isPackageSelected}
                       >
                         <TableCell>
@@ -312,7 +342,7 @@ const ServicesPackageTable = ({ packages }) => {
                             noWrap
                             variant="subtitle2"
                           >
-                            {pkg.packageName}
+                            {pkg.pkgName}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -320,7 +350,7 @@ const ServicesPackageTable = ({ packages }) => {
                             noWrap
                             variant="subtitle2"
                           >
-                            {pkg.packageCode}
+                            {pkg.pkgDescription}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -328,7 +358,7 @@ const ServicesPackageTable = ({ packages }) => {
                             variant="h6"
                             fontWeight={600}
                           >
-                            {numeral(pkg.serviceFee).format('0,0')}
+                            {numeral(pkg.amount).format('0,0')}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -336,7 +366,7 @@ const ServicesPackageTable = ({ packages }) => {
                             noWrap
                             variant="subtitle2"
                           >
-                            {pkg.usageCount}
+                            {pkg.request}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -344,7 +374,7 @@ const ServicesPackageTable = ({ packages }) => {
                             noWrap
                             variant="subtitle2"
                           >
-                            {format(new Date(pkg.registrationDeadline), 'dd/MM/yyyy')}
+                            {format(new Date(pkg.endDate), 'dd/MM/yyyy')}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -352,9 +382,9 @@ const ServicesPackageTable = ({ packages }) => {
                             noWrap
                             variant="subtitle2"
                           >
-                            {pkg.status === 'active'
+                            {pkg.status === 'ACTIVE'
                               ? 'Hoạt động'
-                              : pkg.status === 'inactive'
+                              : pkg.status === 'INACTIVE'
                                 ? 'Không hoạt động'
                                 : 'Đã xóa'}
                           </Typography>
@@ -364,7 +394,7 @@ const ServicesPackageTable = ({ packages }) => {
                             noWrap
                             variant="subtitle2"
                           >
-                            {format(new Date(pkg.creationDate), 'dd/MM/yyyy')}
+                            {format(new Date(pkg.createDate), 'dd/MM/yyyy')}
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
@@ -375,8 +405,8 @@ const ServicesPackageTable = ({ packages }) => {
                             >
                               <IconButton
                                 color="primary"
-                                disabled={pkg.status !== 'Hoạt động'}
-                                onClick={() => console.log('Sửa', pkg.id)}
+                                disabled={pkg.status !== 'ACTIVE'}
+                                onClick={() => console.log('Sửa', pkg.pkgId)}
                               >
                                 <Switch
                                   defaultChecked
@@ -439,7 +469,7 @@ const ServicesPackageTable = ({ packages }) => {
 };
 
 ServicesPackageTable.propTypes = {
-  packages: PropTypes.array.isRequired,
+  packages: PropTypes.array,
 };
 
 ServicesPackageTable.defaultProps = {

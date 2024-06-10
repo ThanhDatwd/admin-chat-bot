@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DecentralizationTable from '../decentralization/decentralization-table';
 import AuthorizeChatbotQueryList from './authorize-chatbot-query-list';
@@ -26,12 +26,28 @@ const AuthorizeChatbotQuery = ({ open, setOpen, botName }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const [users, setUsers] = useState([]);
+  const [newUser, setNewUser] = useState('');
+
   const handleClickOpen = () => {
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
   };
+
+  const handleAddUser = () => {
+    if (newUser.trim()) {
+      setUsers([...users, newUser.trim()]);
+      setNewUser('');
+    }
+  };
+
+  const handleInputChange = (event) => {
+    setNewUser(event.target.value);
+  };
+
   return (
     <>
       <Dialog
@@ -43,12 +59,7 @@ const AuthorizeChatbotQuery = ({ open, setOpen, botName }) => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'dark' ? alpha(theme.palette.neutral[25], 0.02) : 'neutral.25',
-          }}
-        >
+        <DialogTitle>
           <Box
             display="flex"
             justifyContent="space-between"
@@ -62,73 +73,55 @@ const AuthorizeChatbotQuery = ({ open, setOpen, botName }) => {
               >
                 Gán người dùng cho bot
               </Typography>
-              <Typography variant="h6">{botName}</Typography>
+              <Typography variant="h5">{botName}</Typography>
             </Box>
-            <Button variant="outlined">Nhập Excel</Button>
+            {/* <Button variant="outlined">Nhập Excel</Button> */}
           </Box>
         </DialogTitle>
-        <Divider />
-        <Box>
+        <Box
+          sx={{
+            px: 2,
+            pb: 2,
+            borderRadius: 8,
+          }}
+        >
           <FormControl
             variant="outlined"
             fullWidth
           >
             <OutlinedInput
-              sx={{
-                '.MuiOutlinedInput-notchedOutline': {
-                  border: 0,
-                  borderRadius: 0,
-                },
-              }}
               type="text"
               placeholder={t('Thêm người dùng có quyền truy vấn bot')}
+              onChange={handleInputChange}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleAddUser}
+                    edge="end"
+                  >
+                    <SearchTwoToneIcon />
+                  </IconButton>
+                </InputAdornment>
+              }
             />
           </FormControl>
         </Box>
+        <Typography
+          variant="h5"
+          sx={{
+            mx: 2,
+            mb: 1,
+          }}
+        >
+          Những người dùng sau sẽ có quyền truy vấn Bot
+        </Typography>
         <DialogContent
           dividers
           sx={{
             p: 0,
           }}
         >
-          <AuthorizeChatbotQueryList fetchData={()=>{}}
-            fields={[
-              {
-                id: '1',
-                fieldName: 'Bộ công an',
-                fieldCode: 'CA',
-                tags: ['C03', 'CO4', 'C08'],
-                status: 'active',
-              },
-              {
-                id: '2',
-                fieldName: 'Bộ tài nguyên và môi trường',
-                fieldCode: 'TNMT',
-                tags: ['TNMT03', 'TNMTO4', 'TNMT08'],
-                status: 'active',
-              },
-            ]}
-            totalCount={100} />
-          {/* <DecentralizationTable
-          fetchData={()=>{}}
-            fields={[
-              {
-                id: '1',
-                fieldName: 'Bộ công an',
-                fieldCode: 'CA',
-                tags: ['C03', 'CO4', 'C08'],
-                status: 'active',
-              },
-              {
-                id: '2',
-                fieldName: 'Bộ tài nguyên và môi trường',
-                fieldCode: 'TNMT',
-                tags: ['TNMT03', 'TNMTO4', 'TNMT08'],
-                status: 'active',
-              },
-            ]}
-            totalCount={100}
-          /> */}
+          <AuthorizeChatbotQueryList users={users} />
         </DialogContent>
         <DialogActions
           sx={{
@@ -160,4 +153,5 @@ const AuthorizeChatbotQuery = ({ open, setOpen, botName }) => {
     </>
   );
 };
+
 export default AuthorizeChatbotQuery;

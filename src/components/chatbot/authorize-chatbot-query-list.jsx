@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { InlineBadge } from 'src/components/base/styles/inline-badge';
 import { PulseBadge } from 'src/components/base/styles/pulse-badge';
 
-const AuthorizeChatbotQueryList = () => {
+const AuthorizeChatbotQueryList = ({ users }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const items = [
