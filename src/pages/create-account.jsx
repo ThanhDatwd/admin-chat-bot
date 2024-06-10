@@ -24,7 +24,7 @@ const CreateAccountAdminPage = () => {
     try {
       const response = await customersApi.getCustomers({ pageNumber: 0, pageSize: 20 });
       if (isMountedRef()) {
-        setCustomers(response);
+        setCustomers(response.content);
       }
     } catch (err) {
       console.error(err);
