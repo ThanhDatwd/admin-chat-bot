@@ -50,6 +50,8 @@ const formSchema = z.object({
 
 const CreateChatbotDialog = ({ open, onClose, onUpdate }) => {
   const theme = useTheme();
+  const currentAdmin = useSelector((state) => state.auth.admin);
+
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const { knowledges } = useSelector((state) => state.knowledge);
   const { control, handleSubmit, reset } = useForm({
@@ -70,7 +72,7 @@ const CreateChatbotDialog = ({ open, onClose, onUpdate }) => {
         botDescription: data.botDescription,
         icon: data.icon,
         knowId: data.field[0],
-        createUserId: 'ac140002-8f4e-1c14-818f-587a1d230004',
+        createUserId: currentAdmin.id,
       });
       onUpdate?.(data);
       reset();

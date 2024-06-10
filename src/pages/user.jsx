@@ -23,7 +23,7 @@ const UserPage = () => {
   const { t } = useTranslation();
   const isMountedRef = useRefMounted();
   const customization = useCustomization();
-  const [customers, setCustomers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
   const [isRefresh, setIsRefresh] = useState(false);
   const currentAdmin = useSelector((state) => state.auth.admin);
@@ -38,7 +38,7 @@ const UserPage = () => {
     setOpen(false);
   };
 
-  const geCustomers = useCallback(
+  const getUserByOrg = useCallback(
     async (paginate, filter) => {
       try {
         const response = await usersApi.getUserByOrg({
@@ -49,7 +49,7 @@ const UserPage = () => {
           },
         });
         if (isMountedRef()) {
-          setCustomers(response);
+          setUsers(response.content);
         }
       } catch (err) {
         console.error(err);
@@ -134,9 +134,9 @@ const UserPage = () => {
             }}
           >
             <UserTable
-              fetchData={geCustomers}
+              fetchData={getUserByOrg}
               totalCount={100}
-              users={customers}
+              users={users}
               setIsRefresh={setIsRefresh}
             />
           </Box>
@@ -145,7 +145,7 @@ const UserPage = () => {
       <CreateUserByOrganizationDialog
         open={open}
         onClose={handleDialogClose}
-        onUpdate={(data) => setCustomers((prevCustomer) => [...prevCustomer, data])}
+        onUpdate={(data) => setUsers((prevCustomer) => [...prevCustomer, data])}
       />
     </>
   );

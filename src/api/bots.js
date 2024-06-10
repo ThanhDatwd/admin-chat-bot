@@ -15,5 +15,9 @@ class BotsApi {
     const response = await postData(import.meta.env.VITE_API_URL_8085 + 'bot', data);
     return response;
   }
+  async grantUserToBot(data) {
+    const response = await postData(import.meta.env.VITE_API_URL_8086 + 'customer/bots', data);
+    return response;
+  }
 }
 export const botsApi = new BotsApi();
