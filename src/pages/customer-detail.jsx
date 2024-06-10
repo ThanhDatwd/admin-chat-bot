@@ -35,7 +35,8 @@ const CustomerDetail = () => {
     try {
       const response = await customersApi.getCustomerContract(id,{ pageNumber: 0, pageSize: 20 });
       if (isMountedRef()) {
-        setContractData(response.data[response.data.length-1]??null);
+        setContractData(response.data.content[response.data.content.length-1]??null);
+        console.log(response.data.content[response.data.content.length-1]??null)
       }
     } catch (err) {
       console.error(err);
@@ -47,7 +48,7 @@ const CustomerDetail = () => {
         id,{ pageNumber: 0, pageSize: 20 }
       );
       if (isMountedRef()) {
-        setConfigData(response.data[response.data.length-1]??null);
+        setConfigData(response.data.content[response.data.content.length-1]??null);
       }
     } catch (err) {
       console.error(err);
