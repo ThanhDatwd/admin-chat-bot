@@ -33,7 +33,7 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
     defaultValues: {
       customerId: '',
       email: '',
-      username: '',
+      // username: '',
       firstname: '',
       lastname: '',
       phoneNumber: '',
@@ -49,7 +49,7 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
           lastname: data.lastname,
           phoneNumber: data.phoneNumber,
           email: data.email,
-          username: data.username,
+          // username: data.username,
         },
       });
       if (res.metadata.message === 'OK') {
@@ -208,7 +208,7 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
                 )}
               />
             </Grid>
-            <Grid
+            {/* <Grid
               item
               xs={12}
             >
@@ -234,7 +234,7 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
                   </>
                 )}
               />
-            </Grid>
+            </Grid> */}
 
             <Grid
               item

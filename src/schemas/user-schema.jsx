@@ -40,13 +40,13 @@ const userBaseSchema = z.object({
 
 export const userOrganizationSchema = z.object({
   customerId: z.string().min(1, { message: 'Tổ chức là bắt buộc' }),
-  username: z
-    .string()
-    .regex(/^[a-zA-Z0-9]*$/, {
-      message: 'Tài khoản chỉ được chứa chữ và số, không được chứa ký tự đặc biệt',
-    })
-    .min(1, { message: 'Tài khoản là bắt buộc' }).transform((val) => val.trim())
-    .refine((val) => val !== '', { message: 'Tài khoản không được để trống' }),
+  // username: z
+  //   .string()
+  //   .regex(/^[a-zA-Z0-9]*$/, {
+  //     message: 'Tài khoản chỉ được chứa chữ và số, không được chứa ký tự đặc biệt',
+  //   })
+  //   .min(1, { message: 'Tài khoản là bắt buộc' }).transform((val) => val.trim())
+  //   .refine((val) => val !== '', { message: 'Tài khoản không được để trống' }),
 
   firstname: z.string().min(1, { message: 'Họ là bắt buộc' }).transform((val) => val.trim())
     .refine((val) => val !== '', { message: 'Họ không hợp lệ' }),

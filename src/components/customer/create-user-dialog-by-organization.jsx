@@ -1,18 +1,24 @@
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Box, Button, CircularProgress, Stack, useTheme } from '@mui/material';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { usersApi } from 'src/api/user';
 import { setLoading } from 'src/slices/common';
 import { DialogCustom } from '../common/dialog-custom';
+import CreateUserByOrgForm from './create-user-form-by-org';
+import TableUserUpload from './table-user-upload';
 import UserUploadList from './user-upload-list';
+import UserUpload from './user-upload';
 
 const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [userDataUpload, setUserDataUpload] = useState([]);
+  const [selectedGroupUser, setSelectedGroupUser] = useState([]);
+  const uploadFileRef = useRef();
   const dispatch = useDispatch();
 
   const isLoading = useSelector((state) => state.common.loading);
@@ -25,7 +31,7 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
     try {
       dispatch(setLoading(true));
       if (userDataUpload.length > 0) {
-        const customerId =currentAdmin.customerId ;
+        const customerId = currentAdmin.customerId;
         const dataRequest = {
           customerId,
           users: userDataUpload,
@@ -47,6 +53,14 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
       dispatch(setLoading(false));
     }
   };
+  const handleRemoveUser = (index) => {
+    const newData = [...userDataUpload];
+    newData.splice(index, 1);
+    setUserDataUpload(newData);
+    if (newData.length === 0) {
+      setFiles([]);
+    }
+  };
   useEffect(() => {
     if (!open) {
       setFiles([]);
@@ -57,7 +71,15 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
       <DialogCustom
         open={open}
         onClose={onClose}
-        title={'Tạo người dùng mới '}
+        title={'Thêm mới người dùng'}
+        headerAction={
+          <UserUpload
+          files={files}
+          setFiles={setFiles}
+          data={userDataUpload}
+          setData={setUserDataUpload}
+        />
+        }
         actions={
           <>
             <Stack
@@ -106,11 +128,26 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
           </>
         }
       >
+        <Box sx={{ mt: 2 }}>
+          <CreateUserByOrgForm
+            onUpdate={(data) => {
+              setUserDataUpload((prevData) => [...prevData, data]);
+            }}
+          />
+        </Box>
+
         <UserUploadList
+          uploadFileRef={uploadFileRef}
           files={files}
           setFiles={setFiles}
           data={userDataUpload}
           setData={setUserDataUpload}
+        />
+        <TableUserUpload
+          selectedItems={selectedGroupUser}
+          setSelectedItems={setSelectedGroupUser}
+          users={userDataUpload}
+          onRemove={handleRemoveUser}
         />
       </DialogCustom>
     </>

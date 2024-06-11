@@ -25,6 +25,7 @@ export const DialogCustom = (props) => {
       open,
       values = {},
       actions,
+      headerAction,
       ...other
     } = props;
   const theme = useTheme();
@@ -46,6 +47,7 @@ export const DialogCustom = (props) => {
           >
             <DialogTitle
               sx={{
+                width:'100%',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -59,6 +61,7 @@ export const DialogCustom = (props) => {
                   {title}
                 </Typography>
               </Box>
+              <Box>{headerAction}</Box>
             </DialogTitle>
             <Divider />
             <Stack
