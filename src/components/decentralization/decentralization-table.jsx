@@ -1,7 +1,3 @@
-import { DeleteRounded } from '@mui/icons-material';
-import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import {
   alpha,
@@ -9,16 +5,10 @@ import {
   Button,
   Card,
   Checkbox,
-  Chip,
   CircularProgress,
   debounce,
   Divider,
-  FormControl,
-  Grid,
-  IconButton,
   InputAdornment,
-  MenuItem,
-  Select,
   Stack,
   styled,
   Table,
@@ -29,20 +19,15 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Tooltip,
-  Typography,
+  Typography
 } from '@mui/material';
-import { format } from 'date-fns';
-import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { setBots } from 'src/slices/bot';
-import { setLoading, setRefresh } from 'src/slices/common';
-import DialogConfirmDelete from '../common/dialog-confirm-delete';
 import { botsApi } from 'src/api/bots';
+import { setLoading } from 'src/slices/common';
 
 // import CreateUserDialog from './create-field-dialog';
 // import { UpdateUser } from './update-field';
@@ -75,6 +60,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const [limit, setLimit] = useState(6);
   const [searchValue, setSearchValue] = useState('');
   const [selectedUsersRole, setSelectUsersRole] = useState({});
+  const [aggregateUsers,setAggregateUsers] = useState([])
 
   const [filters, setFilters] = useState({
     fieldStatus: null,
@@ -90,61 +76,72 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const selectedSomeUser = selectedItems.length > 0 && selectedItems.length < users.length;
   const selectedAllUser = selectedItems.length === users.length;
   const [currentBotId, setCurrentBotId] = useState('');
-  const [selectedAllUserRoleQuery,setSelectedAllUserRoleQuery] = useState(false) ;
-  const [selectedAllUserRoleUpdate,setSelectedAllUserRoleUpdate] = useState(false) ;
+  const [selectedAllUserRoleQuery, setSelectedAllUserRoleQuery] = useState(false);
+  const [selectedAllUserRoleUpdate, setSelectedAllUserRoleUpdate] = useState(false);
+  const [countChange,setCountChange] = useState(0)
 
   const handleSelectAllRole = (event, key) => {
     if (botId && botId !== '') {
       let cloneSelectUserRole = { ...selectedUsersRole };
-      console.log(event.target.checked)
       users.forEach((item) => {
         cloneSelectUserRole = {
           ...cloneSelectUserRole,
-          [item.id]: {
-            ...cloneSelectUserRole[item.id],
+          [item.userId]: {
+            ...cloneSelectUserRole[item.userId],
             [key]: event.target.checked,
-            userId: item.id,
+            userId: item.userId,
             customerId: currentAdmin.customerId,
             botId: botId,
           },
         };
       });
-      setSelectedAllUserRoleQuery(Object.keys(cloneSelectUserRole).length>0?!users.some(item=>cloneSelectUserRole[item.id]?.canQuery===false):false )
-      setSelectedAllUserRoleUpdate(Object.keys(cloneSelectUserRole).length>0?!users.some(item=>cloneSelectUserRole[item.id]?.canUpdate===false):false )
+      setSelectedAllUserRoleQuery(
+        Object.keys(cloneSelectUserRole).length > 0
+          ? !users.some((item) => cloneSelectUserRole[item.userId]?.canQuery === false)
+          : false
+      );
+      setSelectedAllUserRoleUpdate(
+        Object.keys(cloneSelectUserRole).length > 0
+          ? !users.some((item) => cloneSelectUserRole[item.userId]?.canUpdate === false)
+          : false
+      );
       setSelectUsersRole(cloneSelectUserRole);
+      let dataChange =getChangedItems({...cloneSelectUserRole},aggregateUsers)
+      setCountChange(dataChange.count??0)
     } else {
-      toast.error('please chose bot');
+      toast.error(t('Vui lòng chọn bot để thực hiện'));
     }
   };
   const handleSelectOneRole = (_event, userId, data) => {
     if (botId && botId !== '') {
-      setSelectUsersRole((prevSelected) => {
-        return {
-          ...prevSelected,
-          [userId]: {
-            ...selectedUsersRole[userId],
-            ...data,
-            userId: userId,
-            customerId: currentAdmin.customerId,
-            botId: botId,
-          },
-        };
-      });
-    } else {
-      toast.error('please chose bot');
-    }
-    // if(selectedUsersRole.length>0&&selectedUsersRole.find(user=>user.userId===userId)){
-    //   setSelectUsersRole((prevSelected) => prevSelected.map((user)=>{
-    //     if(user.userId===userId){
-    //       return {...user,...data}
+      let cloneSelectUserRole = {
+        ...selectedUsersRole,
+        [userId]: {
+          ...selectedUsersRole[userId],
+          ...data,
+          userId: userId,
+          customerId: currentAdmin.customerId,
+          botId: botId,
+        },
+      };
 
-    //     }
-    //     return user
-    //   }));
-    // }
-    // else{
-    //   setSelectUsersRole((prevSelected) => [...prevSelected, {userId,...data}]);
-    // }
+      setSelectUsersRole(cloneSelectUserRole);
+      setSelectedAllUserRoleQuery(
+        Object.keys(cloneSelectUserRole).length > 0
+          ? !users.some((item) => cloneSelectUserRole[item.userId]?.canQuery === false)
+          : false
+      );
+      setSelectedAllUserRoleUpdate(
+        Object.keys(cloneSelectUserRole).length > 0
+          ? !users.some((item) => cloneSelectUserRole[item.userId]?.canUpdate === false)
+          : false
+      );
+
+      let dataChange =getChangedItems({...cloneSelectUserRole},aggregateUsers)
+      setCountChange(dataChange.count??0)
+    } else {
+      toast.error('Vui lòng chọn bot để thực hiện');
+    }
   };
 
   const handlePageChange = (_event, newPage) => {
@@ -186,66 +183,91 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
 
-  // useEffect(() => {
-   
-  // }, [isRefresh]);
-
   useEffect(() => {
     setSelectUsersRole({});
-    setSelectedAllUserRoleQuery(false)
-    setSelectedAllUserRoleUpdate(false)
-    fetchData({ pageNumber: page, pageSize: limit });
+    setSelectedAllUserRoleQuery(false);
+    setSelectedAllUserRoleUpdate(false);
+    setAggregateUsers([])
+    setCountChange(0)
+    fetchData({ pageNumber: 0, pageSize: limit });
+    setPage(0)
   }, [botId]);
+
   useEffect(() => {
-    // if (currentBotId && currentBotId !== '') {
-      let cloneSelectUserRole = { ...selectedUsersRole };
+    let cloneSelectUserRole = { ...selectedUsersRole };
 
-      setSelectedAllUserRoleQuery(Object.keys(cloneSelectUserRole).length>0?users.every(item=>cloneSelectUserRole[item.id]?.canQuery===true):false )
-      setSelectedAllUserRoleUpdate(Object.keys(cloneSelectUserRole).length>0?users.every(item=>cloneSelectUserRole[item.id]?.canUpdate===true):false )
-      
-      const currentPage =  Math.ceil(Object.keys(cloneSelectUserRole).length/limit)
-      if(currentPage===0||currentPage<=page){
-        users.forEach((item) => {
-          cloneSelectUserRole = {
-            ...cloneSelectUserRole,
-            [item.id]: {
-              ...cloneSelectUserRole[item.id],
-              canQuery: item.canQuery??false,
-              canUpdate: item.canUpdate??false,
-              canDelete: item.canDelete??false,
-              userId: item.id,
-              customerId: currentAdmin.customerId,
-              botId: currentBotId,
-            },
-          };
-        });
-     
-      
+    setSelectedAllUserRoleQuery(
+      Object.keys(cloneSelectUserRole).length > 0
+        ? users.every((item) => cloneSelectUserRole[item.userId]?.canQuery === true)
+        : false
+    );
+    setSelectedAllUserRoleUpdate(
+      Object.keys(cloneSelectUserRole).length > 0
+        ? users.every((item) => cloneSelectUserRole[item.userId]?.canUpdate === true)
+        : false
+    );
 
-        setSelectUsersRole(prev=>{
-          console.log('alo')
-          console.log({...prev,...cloneSelectUserRole})
-          return {...prev,...cloneSelectUserRole}
-        });
-      }
-      
+    const currentPage = Math.ceil(Object.keys(cloneSelectUserRole).length / limit);
+    if (currentPage === 0 || currentPage <= page) {
+      users.forEach((item) => {
+        cloneSelectUserRole = {
+          ...cloneSelectUserRole,
+          [item.userId]: {
+            ...cloneSelectUserRole[item.userId],
+            canQuery: item.canQuery ?? false,
+            canUpdate: item.canUpdate ?? false,
+            canDelete: item.canDelete ?? false,
+            userId: item.userId,
+            customerId: currentAdmin.customerId,
+            botId: currentBotId,
+          },
+        };
+      });
+      setAggregateUsers(prev=>[...prev,...users])
+      setSelectUsersRole((prev) => {
+        return { ...prev, ...cloneSelectUserRole };
+      });
+    }
+
     // } else {
     //   toast.error('please chose bot');
     // }
-
   }, [users]);
- 
-  const handleGrantPermissions =  async () => {
+
+  const handleGrantPermissions = async () => {
     try {
-      const selectedUsersRoleArray = Object.keys(selectedUsersRole).map(key => selectedUsersRole[key]);
-      console.log(selectedUsersRoleArray)
-      const response = await botsApi.grantUserToBot(selectedUsersRoleArray)
-      console.log('this is response when grant::', response)
+      const selectedUsersRoleArray = Object.keys(selectedUsersRole).map(
+        (key) => selectedUsersRole[key]
+      );
+      console.log(selectedUsersRoleArray);
+      const response = await botsApi.grantUserToBot(selectedUsersRoleArray);
+      console.log('this is response when grant::', response);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
+  const  getChangedItems= (compareData, originalData)=> {
+    originalData.forEach(item => {
+        const state = compareData[item.userId];
+        if (state) {
+            if (
+                state.canQuery === item.canQuery &&
+                state.canUpdate === item.canUpdate &&
+                state.canDelete === item.canDelete
+            ) {
+                // Xoá các phần tử không thay đổi
+                delete compareData[item.userId];
+            }
+        }
+    });
 
+    return {
+      data:Object.keys(compareData).map(
+        (key) => compareData[key]
+      ),
+      count:Object.keys(compareData).length
+    };
+}
   return (
     <>
       <Card>
@@ -295,8 +317,9 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
             color="primary"
             size="small"
             onClick={handleGrantPermissions}
+            disabled={countChange<=0}
           >
-            Áp dụng ()
+            Áp dụng {countChange>0&&(`${countChange}`)}
           </Button>
         </Box>
         <Divider />
@@ -329,7 +352,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
             fontWeight={500}
             align="center"
           >
-            {t("We couldn't find any field matching your search criteria")}
+            {botId ? t('Không có dữ liệu') : t('Cần chọn một bot để thực hiện')}
           </Typography>
         ) : (
           <>
@@ -342,7 +365,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                     <TableCell>
                       {t('Role chat')}
                       <Checkbox
-                        checked={ selectedAllUserRoleQuery}
+                        checked={selectedAllUserRoleQuery}
                         onChange={(event) => handleSelectAllRole(event, 'canQuery')}
                         disabled={users.length === 0}
                       />{' '}
@@ -359,14 +382,11 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                 </TableHead>
                 <TableBody>
                   {users.map((user, index) => {
-                    {
-                      /* const userSelected = selectedUsersRole.length>0?selectedUsersRole.find(item=>item.userId==user.id):null */
-                    }
-                    const userSelected = selectedUsersRole[user.id];
+                    const userSelected = selectedUsersRole[user.userId];
                     return (
                       <TableRow
                         hover
-                        key={user.id}
+                        key={user.userId}
                       >
                         <TableCell>
                           <Typography
@@ -390,7 +410,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                           <Checkbox
                             checked={userSelected?.canQuery ?? false}
                             onChange={(event) =>
-                              handleSelectOneRole(event, user.id, {
+                              handleSelectOneRole(event, user.userId, {
                                 canQuery: userSelected?.canQuery ? false : true,
                               })
                             }
@@ -402,7 +422,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                           <Checkbox
                             checked={userSelected?.canUpdate ?? false}
                             onChange={(event) =>
-                              handleSelectOneRole(event, user.id, {
+                              handleSelectOneRole(event, user.userId, {
                                 canUpdate: userSelected?.canUpdate ? false : true,
                               })
                             }
