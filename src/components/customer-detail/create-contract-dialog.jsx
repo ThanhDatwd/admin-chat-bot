@@ -33,6 +33,7 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [files, setFiles] = useState([]);
   const dispatch = useDispatch();
+  const [beforeTaxValue,setBeforeTaxValue] = useState()
 
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
@@ -380,17 +381,20 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
                               clearable: true,
                               onClear: () => {
                                 setSelectedSignDate(null);
-                                setValue('signedDate', '');
+                                field.onChange('')
                               },
                             },
                           }}
                           onChange={(date) => {
                             setSelectedSignDate(date);
-                            setValue('signedDate', format(date, 'yyyy-MM-dd'));
+                            // setValue('signedDate', format(date, 'yyyy-MM-dd'));
+                            field.onChange(format(date, 'yyyy-MM-dd'))
                           }}
                           sx={{
                             width: '100%',
-                            '& .MuiIconButton-edgeEnd': {},
+                            '& .css-bda1wc-MuiOutlinedInput-notchedOutline': {
+                              borderColor: !!errors.signedDate&&"#F1393B"
+                            },
                           }}
                           label=""
                           error={!!errors.signedDate}
@@ -443,10 +447,6 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
                             setSelectedEffectiveDate(date);
                             setValue('effectiveDate', format(date, 'yyyy-MM-dd'));
                           }}
-                          sx={{
-                            width: '100%',
-                            '& .MuiIconButton-edgeEnd': {},
-                          }}
                           label=""
                         />
                       </>
@@ -486,17 +486,19 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
                               clearable: true,
                               onClear: () => {
                                 setSelectedEndDate(null);
-                                setValue('endDate', '');
+                                field.onChange('')
                               },
                             },
                           }}
                           onChange={(date) => {
                             setSelectedEndDate(date);
-                            setValue('endDate', format(date, 'yyyy-MM-dd'));
+                            field.onChange(format(date, 'yyyy-MM-dd'))
                           }}
                           sx={{
                             width: '100%',
-                            '& .MuiIconButton-edgeEnd': {},
+                            '& .css-bda1wc-MuiOutlinedInput-notchedOutline': {
+                              borderColor: !!errors.endDate&&"#F1393B"
+                            },
                           }}
                           label=""
                         />
@@ -520,9 +522,14 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
                     <>
                       <InputOutline
                         {...field}
+                        value={field.value.toString().replace(/^0+/, '')}
                         type="number"
                         min={0}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        inputMode = "numeric"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value))
+                        }}
+                        onKeyDown={e => ["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
                         label={t('Số tiền trước thuế (VNĐ)')}
                         error={!!errors.beforeTax}
                       />
@@ -545,9 +552,14 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
                     <>
                       <InputOutline
                         {...field}
+                        value={field.value.toString().replace(/^0+/, '')}
                         type="number"
                         min={0}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        inputMode = "numeric"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value))
+                        }}
+                        onKeyDown={e => ["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
                         label={t('Thuế (%)')}
                         error={!!errors.taxRate}
                       />

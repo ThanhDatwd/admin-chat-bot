@@ -337,24 +337,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
             {' '}
             <CircularProgress style={{ height: '30px', width: '30px' }} />
           </Box>
-        ) : users.length === 0 ? (
-          <Typography
-            sx={{
-              py: {
-                xs: 2,
-                sm: 3,
-                md: 6,
-                lg: 10,
-              },
-            }}
-            variant="h3"
-            color="text.secondary"
-            fontWeight={500}
-            align="center"
-          >
-            {botId ? t('Không có dữ liệu') : t('Cần chọn một bot để thực hiện')}
-          </Typography>
-        ) : (
+        ) :(
           <>
             <TableContainer>
               <Table>
@@ -381,7 +364,33 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {users.map((user, index) => {
+                { users.length === 0 ? (
+                  <TableCell colSpan={4}>
+                  <Box
+            sx={{ minHeight: '50vh' }}
+            display={'flex'}
+            justifyContent={'center'}
+            flexDirection={'column'}
+            alignItems={'center'}
+          >
+            {' '}
+            {botId &&<img
+              style={{ width: '200px' }}
+              src="empty-data.png"
+            />}
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              align="center"
+              fontWeight={500}
+            >
+              {botId ? t('Không có dữ liệu người dùng') : t('Cần chọn một bot để thực hiện')}
+            </Typography>
+          </Box>
+                  
+                  
+                  </TableCell>
+        ) : users.map((user, index) => {
                     const userSelected = selectedUsersRole[user.userId];
                     return (
                       <TableRow

@@ -17,19 +17,19 @@ export const Layout = (props) => {
   const currentAdmin = useSelector((state) => state.auth.admin);
   const dispatch = useDispatch();
 
-  if (!isAuth)
-    return (
-      <Navigate
-        replace
-        to="/login"
-      />
-    );
+  // if (!isAuth)
+  //   return (
+  //     <Navigate
+  //       replace
+  //       to="/login"
+  //     />
+  //   );
 
-  useEffect(() => {
-    dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
-    dispatch(getCurrentUser());
-    return () => {};
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
+  //   dispatch(getCurrentUser());
+  //   return () => {};
+  // }, []);
 
   switch (customization.layout) {
     // Vertical Shells
@@ -37,7 +37,7 @@ export const Layout = (props) => {
     default:
       return (
         <>
-          {currentAdmin ? (
+          {!currentAdmin ? (
             <VerticalShellsDark
               menuItems={menuItems}
               {...props}

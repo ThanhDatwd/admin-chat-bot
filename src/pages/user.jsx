@@ -1,11 +1,7 @@
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import {
-  Box,
-  Button,
-  Container,
-  useTheme
-} from '@mui/material';
+import { Box, Button, Container, Stack, useTheme } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';

@@ -1,24 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import {
   Box,
   Button,
-  Checkbox,
-  Container,
-  Divider,
   FilledInput,
   FormControl,
-  FormControlLabel,
   FormHelperText,
   Unstable_Grid2 as Grid,
   InputAdornment,
-  Link,
-  Stack,
-  Typography,
+  Typography
 } from '@mui/material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -27,28 +19,28 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import api from 'src/api/axios';
-import { ButtonIcon } from 'src/components/base/styles/button-icon';
-import { setAmin } from 'src/slices/auth';
 import { setLoading } from 'src/slices/common';
 import { z } from 'zod';
 
 const schema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  username: z.string().min(1, 'User name is required'),
-  phoneNumber: z.string().min(1, 'Phone number is required'),
+  firstname: z.string().min(1, 'Vui lòng nhập họ').transform((val) => val.trim())
+  .refine((val) => val !== '', { message: 'Họ không hợp lệ' }),
+  lastname: z.string().min(1, 'Vui lòng nhập tên').transform((val) => val.trim())
+  .refine((val) => val !== '', { message: 'Tên không hợp lệ' }),
+  phoneNumber: z.string().min(1, 'Vui lòng nhập số điện thoại').transform((val) => val.trim())
+  .refine((val) => val !== '', { message: 'Số điện thoại không hợp lệ' }),
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email({ message: 'Invalid email address' })
-    .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/, { message: 'Invalid email address' }),
+    .min(1, 'Vui lòng nhập email')
+    .email({ message: 'Email không hợp lệ' })
+    .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/, { message: 'Email không hợp lệ' }),
   // repeatPassword: z.string().min(6, 'Please confirm your password'),
 });
 // .refine((data) => data.password === data.repeatPassword, {
 //   message: 'Passwords do not match',
 //   path: ['repeatPassword'], // Set the path to the field that should cause the error
 // });
-function CreateUserByOrgForm() {
+function CreateUserByOrgForm({onUpdate}) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoading = useSelector((state) => state.common.loading);
@@ -56,13 +48,13 @@ function CreateUserByOrgForm() {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
     watch,
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      username: '',
+      firstname: '',
+      lastname: '',
       phoneNumber: '',
       email: '',
     },
@@ -75,24 +67,8 @@ function CreateUserByOrgForm() {
   const { t } = useTranslation();
   const onSubmit = async (data) => {
     try {
-      dispatch(setLoading(true));
-      const requestData = {
-        firstname: data.firstName,
-        lastname: data.lastName,
-        username: data.username,
-        phoneNumber: data.phoneNumber,
-        email: data.email,
-        password: data.password,
-      };
-
-      const response = await api.post(
-        import.meta.env.VITE_API_AUTH_URL_8080 + 'auth/register',
-        requestData
-      );
-
-      toast.success(t('Login successfully'));
-
-      navigate('/login');
+      onUpdate(data)
+      reset();
     } catch (error) {
       toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.error('Login failed:', error);
@@ -106,7 +82,8 @@ function CreateUserByOrgForm() {
         container
         spacing={2}
       >
-        <Grid xs={12}>
+        <Grid xs={12}
+                sm={6}>
           <FormControl fullWidth>
             <Typography
               variant="h6"
@@ -115,78 +92,46 @@ function CreateUserByOrgForm() {
               htmlFor="firstname-input"
               fontWeight={500}
             >
-              Full name
+              Họ
             </Typography>
-            <Grid
-              container
-              spacing={{
-                xs: 2,
-                md: 3,
-              }}
-            >
-              <Grid
-                xs={12}
-                sm={6}
-              >
                 <FilledInput
-                  error={!!errors.firstName}
+                  error={!!errors.firstname}
                   hiddenLabel
-                  {...register('firstName')}
+                  {...register('firstname')}
                   id="firstname-input"
                   fullWidth
                   placeholder="First name"
                 />
 
-                <FormHelperText error={!!errors.firstName}>
-                  {errors.firstName?.message}
+                <FormHelperText error={!!errors.firstname}>
+                  {errors.firstname?.message}
                 </FormHelperText>
-              </Grid>
-              <Grid
-                xs={12}
-                sm={6}
-              >
-                <FilledInput
-                  error={!!errors.lastName}
-                  hiddenLabel
-                  {...register('lastName')}
-                  fullWidth
-                  id="lastname-input"
-                  placeholder="Last name"
-                />
-                <FormHelperText error={!!errors.lastName}>
-                  {errors.lastName?.message}
-                </FormHelperText>
-              </Grid>
-            </Grid>
           </FormControl>
         </Grid>
-        <Grid xs={12}>
-          <FormControl
-            fullWidth
-            error={!!errors.username}
-          >
+        <Grid xs={12}
+                sm={6}>
+          <FormControl fullWidth>
             <Typography
               variant="h6"
               gutterBottom
               component="label"
-              htmlFor="username-input"
+              htmlFor="firstname-input"
               fontWeight={500}
             >
-              User name
+              Tên
             </Typography>
-            <FilledInput
-              {...register('username')}
-              type="username"
-              hiddenLabel
-              id="username-input"
-              placeholder="Write your username"
-              startAdornment={
-                <InputAdornment position="start">
-                  <PersonOutlineOutlinedIcon fontSize="small" />
-                </InputAdornment>
-              }
-            />
-            <FormHelperText>{errors.username?.message}</FormHelperText>
+             
+                <FilledInput
+                  error={!!errors.lastname}
+                  hiddenLabel
+                  {...register('lastname')}
+                  fullWidth
+                  id="lastname-input"
+                  placeholder="Last name"
+                />
+                <FormHelperText error={!!errors.lastname}>
+                  {errors.lastname?.message}
+                </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12}>
@@ -230,7 +175,7 @@ function CreateUserByOrgForm() {
               htmlFor="phoneNumber-input"
               fontWeight={500}
             >
-              Phone number
+             Số điện thoại
             </Typography>
             <FilledInput
               {...register('phoneNumber')}
@@ -246,6 +191,21 @@ function CreateUserByOrgForm() {
             />
             <FormHelperText>{errors.phoneNumber?.message}</FormHelperText>
           </FormControl>
+        </Grid>
+        <Grid xs={12}>
+          <Box
+            display={'flex'}
+            justifyContent={'flex-end'}
+          >
+            <Button
+              variant="text"
+              type="submit"
+              onClick={handleSubmit(onSubmit)}
+              startIcon={<AddOutlinedIcon fontSize="small" />}
+            >
+              Thêm người dùng
+            </Button>
+          </Box>
         </Grid>
       </Grid>
     </form>

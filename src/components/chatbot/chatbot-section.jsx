@@ -399,22 +399,27 @@ const ChatbotSection = ({ bots }) => {
       </Box>
       {paginatedBots.length === 0 ? (
         <>
-          <Typography
-            sx={{
-              py: {
-                xs: 2,
-                sm: 3,
-                md: 6,
-                lg: 10,
-              },
-            }}
-            variant="h3"
-            color="text.secondary"
-            align="center"
-            fontWeight={500}
+          <Box
+            sx={{ minHeight: '50vh' }}
+            display={'flex'}
+            justifyContent={'center'}
+            flexDirection={'column'}
+            alignItems={'center'}
           >
-            {t('Không có dữ liệu bot')}
-          </Typography>
+            {' '}
+            <img
+              style={{ width: '200px' }}
+              src="empty-data.png"
+            />
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              align="center"
+              fontWeight={500}
+            >
+              {t('Không có dữ liệu bot')}
+            </Typography>
+          </Box>
         </>
       ) : (
         <>

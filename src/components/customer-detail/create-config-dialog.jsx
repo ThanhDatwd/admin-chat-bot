@@ -273,9 +273,14 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
                     <>
                       <InputOutline
                         {...field}
+                        value={field.value.toString().replace(/^0+/, '')}
                         type="number"
                         min={0}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        inputMode = "numeric"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value))
+                        }}
+                        onKeyDown={e => ["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
                         label={t('Hạn mức request theo ngày')}
                         error={!!errors.quota}
                       />
@@ -298,9 +303,14 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
                     <>
                       <InputOutline
                         {...field}
+                        value={field.value.toString().replace(/^0+/, '')}
                         type="number"
                         min={0}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        inputMode = "numeric"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value))
+                        }}
+                        onKeyDown={e => ["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
                         label={t('Số lượng qouta miễn phí')}
                         error={!!errors.freeRequest}
                       />
@@ -323,9 +333,14 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
                     <>
                       <InputOutline
                         {...field}
+                        value={field.value.toString().replace(/^0+/, '')}
                         type="number"
                         min={0}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        inputMode = "numeric"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value))
+                        }}
+                        onKeyDown={e => ["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
                         label={t('Số lượng training miễn phí')}
                         error={!!errors.freeTraining}
                       />

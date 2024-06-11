@@ -1,34 +1,20 @@
-import { UploadFileRounded } from '@mui/icons-material';
-import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import DoDisturbAltRoundedIcon from '@mui/icons-material/DoDisturbAltRounded';
-import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import {
   Box,
-  Button,
   Card,
-  CardActionArea,
-  CardContent,
-  Divider,
-  LinearProgress,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Stack,
-  Typography,
+  Typography
 } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useParams } from 'react-router';
-import { uploadFile } from 'src/api/files';
-import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
-import { CardAddActionDashed } from 'src/components/base/styles/card';
 import * as XLSX from 'xlsx';
 import fileIcon from '../base/fileIcon';
-import TableGroupUser from './table-group-customer';
-import TableUserUpload from './table-user-upload';
 
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
@@ -70,7 +56,12 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
-        setData(json);
+        setData((preData) => [
+          ...preData,
+          ...json.map((item) => {
+            return { ...item, fileName: file.name };
+          }),
+        ]);
         simulateProgress(file);
       };
       reader.readAsArrayBuffer(file);
@@ -99,7 +90,6 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
     }, 200);
   };
 
-
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     onDrop,
     accept: {
@@ -116,7 +106,7 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
       delete newProgress[fileName];
       return newProgress;
     });
-    setData([]);
+    setData((data) => data.filter((item) => item.fileName !== fileName));
   };
 
   const handleRemoveUser = (index) => {
@@ -197,27 +187,6 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
                       </Box>
                     }
                     disableTypography
-                    secondary={
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box flex={1}>
-                          <LinearProgress
-                            variant="determinate"
-                            value={uploadProgress[file.name]?.progress || 0}
-                          />
-                        </Box>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            pl: 0.5,
-                          }}
-                        >
-                          {uploadProgress[file.name]?.progress || 0}%
-                        </Typography>
-                      </Box>
-                    }
                   />
                 </ListItem>
               </Card>
@@ -225,94 +194,7 @@ const UserUploadList = ({ files, setFiles, setData, data }) => {
           </Stack>
         </List>
       ) : (
-        <CardAddActionDashed
-          variant="outlined"
-          elevation={0}
-          sx={{
-            height: '200px',
-            borderWidth: 1,
-          }}
-        >
-          <CardActionArea {...getRootProps()}>
-            <input {...getInputProps()} />
-            <CardContent>
-              <Stack
-                spacing={1}
-                justifyContent="center"
-                direction="column"
-                alignItems="center"
-              >
-                <AvatarState
-                  state="secondary"
-                  isSoft
-                  variant="rounded"
-                  sx={{
-                    borderWidth: 1,
-                    borderStyle: 'solid',
-                    borderColor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'neutral.800' : 'neutral.400',
-                    backgroundColor: 'background.paper',
-                  }}
-                >
-                  {isDragReject && (
-                    <DoDisturbAltRoundedIcon
-                      fontSize="small"
-                      sx={{
-                        color: 'error.main',
-                      }}
-                    />
-                  )}
-                  {isDragAccept && (
-                    <DoneRoundedIcon
-                      fontSize="small"
-                      sx={{
-                        color: 'success.main',
-                      }}
-                    />
-                  )}
-                  {!isDragActive && (
-                    <CloudUploadRoundedIcon
-                      fontSize="small"
-                      sx={{
-                        color: 'text.primary',
-                      }}
-                    />
-                  )}
-                </AvatarState>
-                <Box>
-                  <Typography
-                    textAlign="center"
-                    variant="h6"
-                    fontWeight={400}
-                    color={
-                      isDragAccept ? 'success.main' : isDragReject ? 'error.main' : 'text.secondary'
-                    }
-                  >
-                    <Typography
-                      variant="h6"
-                      fontWeight={600}
-                      component="span"
-                      color={
-                        isDragAccept ? 'success.main' : isDragReject ? 'error.main' : 'primary.main'
-                      }
-                    >
-                      Click to upload
-                    </Typography>{' '}
-                    or drag and drop excel here
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </CardActionArea>
-        </CardAddActionDashed>
-      )}
-      {uploadProgress[files[0]?.file?.name]?.progress === 100 && (
-        <TableUserUpload
-          selectedItems={selectedGroupUser}
-          setSelectedItems={setSelectedGroupUser}
-          users={data}
-          onRemove={handleRemoveUser}
-        />
+        <></>
       )}
     </>
   );
