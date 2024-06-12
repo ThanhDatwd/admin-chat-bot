@@ -10,13 +10,22 @@ import RuleIcon from '@mui/icons-material/Rule';
 import SmartToyTwoToneIcon from '@mui/icons-material/SmartToyTwoTone';
 import TopicIcon from '@mui/icons-material/Topic';
 import { Box } from '@mui/material';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ROLE } from 'src/constants/role';
 import { routes } from './routes';
 
-export const useMenuItems = () => {
+export const useMenuItems = (currentRole) => {
   const { t } = useTranslation();
-  return useMemo(() => {
+
+  const filterMenuItemsByRole = (menuItems, role) => {
+    return menuItems.map((menu) => ({
+      ...menu,
+      subMenu: menu.subMenu.filter((item) => item.roles.includes(role)),
+    }));
+  };
+
+  const allMenuItems = useMemo(() => {
     return [
       {
         title: 'Dashboard',
@@ -32,6 +41,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.index,
+            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: 'Chatbot',
@@ -44,6 +54,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.chatbot,
+            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: t('Khách hàng tổ chức'),
@@ -56,6 +67,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.customer,
+            roles: [ROLE.ADMIN],
           },
           {
             title: t('Người dùng'),
@@ -68,6 +80,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.user,
+            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: t('Gán quyền'),
@@ -80,6 +93,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.decentralization,
+            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: t('Tạo tài khoản quản trị'),
@@ -92,6 +106,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.createAccountAdmin,
+            roles: [ROLE.ADMIN],
           },
           {
             title: 'Gói dịch vụ',
@@ -104,6 +119,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.servicesPackage,
+            roles: [ROLE.ADMIN],
           },
           {
             title: 'Hóa đơn',
@@ -116,6 +132,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.invoices,
+            roles: [ROLE.ADMIN],
           },
           {
             title: 'Đối tác',
@@ -128,6 +145,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.partner,
+            roles: [ROLE.ADMIN],
           },
           {
             title: 'Lĩnh vực',
@@ -140,6 +158,7 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.field,
+            roles: [ROLE.ADMIN],
           },
           {
             title: 'Xếp hạng',
@@ -152,9 +171,15 @@ export const useMenuItems = () => {
               </Box>
             ),
             route: routes.ranking,
+            roles: [ROLE.ADMIN],
           },
         ],
       },
     ];
   }, [t]);
+
+  return useMemo(
+    () => filterMenuItemsByRole(allMenuItems, currentRole),
+    [allMenuItems, currentRole]
+  );
 };

@@ -1,20 +1,19 @@
 import { Box, CircularProgress } from '@mui/material';
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useMenuItems } from 'src/router/menu-data';
 import { getCurrentUser } from 'src/slices/auth';
 import { getKnowledge } from 'src/slices/knowledge';
-// Vertical Shells
 import { VerticalShellsDark } from './vertical-shells-dark';
 
 export const Layout = (props) => {
   const customization = useCustomization();
-  const menuItems = useMenuItems();
   const isAuth = useSelector((state) => state.auth.isAuth);
   const currentAdmin = useSelector((state) => state.auth.admin);
+  const [currentRole, setCurrentRole] = useState('');
   const dispatch = useDispatch();
 
   // if (!isAuth)
@@ -26,14 +25,22 @@ export const Layout = (props) => {
   //   );
 
   // useEffect(() => {
-  //   dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
-  //   dispatch(getCurrentUser());
-  //   return () => {};
-  // }, []);
+  //   const fetchData = async () => {
+  //     try {
+  //       await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
+  //       const response = await dispatch(getCurrentUser());
+  //       setCurrentRole(response.data?.authorities[0]?.role ?? '');
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [dispatch]);
+
+  const menuItems = useMenuItems(currentRole);
 
   switch (customization.layout) {
-    // Vertical Shells
-
     default:
       return (
         <>
@@ -59,6 +66,7 @@ export const Layout = (props) => {
       );
   }
 };
+
 Layout.propTypes = {
   children: PropTypes.node,
 };

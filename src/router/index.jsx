@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { ROLE } from 'src/constants/role';
 import { Layout } from 'src/layouts';
 import AuthLayout from 'src/layouts/AuthLayout';
 import LoginPage from 'src/pages/auth/login';
@@ -10,8 +11,7 @@ import CustomerDetail from 'src/pages/customer-detail';
 import DecentralizationPage from 'src/pages/decentralization';
 import FieldPage from 'src/pages/field';
 import UserPage from 'src/pages/user';
-
-// import { Layout as LayoutBase } from "src/layouts/base";
+import ProtectedRoute from './protected-route';
 
 const HomePage = lazy(() => import('src/pages/index'));
 const PageExample = lazy(() => import('src/pages/page-example'));
@@ -55,59 +55,115 @@ export const routesOutlets = [
       },
       {
         path: 'page-example',
-        element: <PageExample />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+            <PageExample />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'chatbot',
-        element: <Chatbot />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+            <Chatbot />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'chatbot/:id',
-        element: <ChatbotDetail />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+            <ChatbotDetail />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'customer',
-        element: <CustomerPage />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <CustomerPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'customer/:id',
-        element: <CustomerDetail />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <CustomerDetail />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'user',
-        element: <UserPage />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+            <UserPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'user/:id',
-        element: <CustomerDetail />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+            <CustomerDetail />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'create-account',
-        element: <CreateAccountAdminPage />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <CreateAccountAdminPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'services-package',
-        element: <ServicesPackage />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <ServicesPackage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'invoices',
-        element: <Invoices />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <Invoices />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'ranking',
-        element: <Ranking />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <Ranking />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'partner',
-        element: <Partner />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <Partner />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'field',
-        element: <FieldPage />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN]}>
+            <FieldPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'decentralization',
-        element: <DecentralizationPage />,
+        element: (
+          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+            <DecentralizationPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

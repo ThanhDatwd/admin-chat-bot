@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Logo } from 'src/components/base/logo';
 import { Scrollbar } from 'src/components/base/scrollbar';
 import { useSidebarContext } from 'src/contexts/sidebar-context';
@@ -68,6 +69,8 @@ export const Sidebar = (props) => {
     toggleSidebarCollapsed();
   };
   const theme = useTheme();
+  const currentAdmin = useSelector((state) => state.auth.admin);
+
   const sidebarContent = (
     <SidebarWrapper
       component="nav"
