@@ -23,7 +23,7 @@ import { fetchUserFiles } from 'src/api/files';
 import BotInfo from 'src/components/chatbot-detail/bot-info';
 import EmbeddingHistory from 'src/components/chatbot-detail/embedding-history';
 import EmbeddingSection from 'src/components/chatbot-detail/embedding-section';
-import BotUsersTable from 'src/components/chatbot/decentralization-table';
+import UserAccessTable from 'src/components/chatbot-detail/user-access-table';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 
 const ChatbotDetail = () => {
@@ -134,8 +134,7 @@ const ChatbotDetail = () => {
                 sm: 'row',
               }}
             >
-              <BotUsersTable users={[]} 
-              totalCount={100} />
+              <UserAccessTable botId={id} />
             </Stack>
           </Box>
         </Container>

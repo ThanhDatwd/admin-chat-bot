@@ -56,7 +56,7 @@ export const routesOutlets = [
       {
         path: 'page-example',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
             <PageExample />
           </ProtectedRoute>
         ),
@@ -64,7 +64,7 @@ export const routesOutlets = [
       {
         path: 'chatbot',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
             <Chatbot />
           </ProtectedRoute>
         ),
@@ -72,7 +72,7 @@ export const routesOutlets = [
       {
         path: 'chatbot/:id',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
             <ChatbotDetail />
           </ProtectedRoute>
         ),
@@ -80,7 +80,7 @@ export const routesOutlets = [
       {
         path: 'customer',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <CustomerPage />
           </ProtectedRoute>
         ),
@@ -88,7 +88,7 @@ export const routesOutlets = [
       {
         path: 'customer/:id',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <CustomerDetail />
           </ProtectedRoute>
         ),
@@ -96,7 +96,7 @@ export const routesOutlets = [
       {
         path: 'user',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
             <UserPage />
           </ProtectedRoute>
         ),
@@ -104,7 +104,7 @@ export const routesOutlets = [
       {
         path: 'user/:id',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
             <CustomerDetail />
           </ProtectedRoute>
         ),
@@ -112,7 +112,7 @@ export const routesOutlets = [
       {
         path: 'create-account',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <CreateAccountAdminPage />
           </ProtectedRoute>
         ),
@@ -120,7 +120,7 @@ export const routesOutlets = [
       {
         path: 'services-package',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <ServicesPackage />
           </ProtectedRoute>
         ),
@@ -128,7 +128,7 @@ export const routesOutlets = [
       {
         path: 'invoices',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <Invoices />
           </ProtectedRoute>
         ),
@@ -136,7 +136,7 @@ export const routesOutlets = [
       {
         path: 'ranking',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <Ranking />
           </ProtectedRoute>
         ),
@@ -144,7 +144,7 @@ export const routesOutlets = [
       {
         path: 'partner',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <Partner />
           </ProtectedRoute>
         ),
@@ -152,7 +152,7 @@ export const routesOutlets = [
       {
         path: 'field',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN]}>
             <FieldPage />
           </ProtectedRoute>
         ),
@@ -160,7 +160,7 @@ export const routesOutlets = [
       {
         path: 'decentralization',
         element: (
-          <ProtectedRoute roles={[ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
             <DecentralizationPage />
           </ProtectedRoute>
         ),

@@ -81,7 +81,7 @@ export const CardWrapper = styled(Card)(
 );
 
 const applyFilters = (bots, query, filters) => {
-  return bots.filter((bot) => {
+  return bots?.filter((bot) => {
     let matches = true;
     if (query) {
       const properties = ['botId', 'botName'];

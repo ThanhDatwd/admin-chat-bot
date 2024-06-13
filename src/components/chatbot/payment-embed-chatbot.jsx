@@ -75,8 +75,6 @@ const PaymentEmbedChatbot = () => {
               size={300}
             />
           </Box>
-          <Typography>- Ngân hàng nhận: {bankInfo.bankName}</Typography>
-          <Typography>- Số tài khoản nhận: {bankInfo.accountNumber}</Typography>
           <Typography>- Phí cần thanh toán: {bankInfo.paymentAmount}</Typography>
           <Typography>- Nội dung chuyển khoản: Số hóa đơn {bankInfo.invoiceNumber}</Typography>
 

@@ -328,7 +328,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
               onClick={handleGrantPermissions}
               disabled={countChange <= 0}
             >
-              Áp dụng {countChange > 0 && `${countChange}`}
+              Áp dụng {countChange > 0 && `(${countChange})`}
             </Button>
             <Button
               variant="contained"
@@ -397,13 +397,16 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                       {botId && (
                         <img
                           style={{ width: '200px' }}
-                          src="empty-data.png"
+                          src="/src/assets/images/all-img/empty-data.png"
                         />
                       )}
                       <Typography
-                        variant="h6"
+                        variant="h5"
                         color="text.secondary"
                         align="center"
+                        sx={{
+                          mt: 1,
+                        }}
                         fontWeight={500}
                       >
                         {botId

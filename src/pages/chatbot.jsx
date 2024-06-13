@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { botsApi } from 'src/api/bots';
 import PageHeading from 'src/components/base/page-heading';
 import { AvatarState } from 'src/components/base/styles/avatar';
@@ -30,6 +31,7 @@ const Chatbot = () => {
   const customization = useCustomization();
   const [bots, setBots] = useState([]);
   const [open, setOpen] = useState(false);
+  const currentAdmin = useSelector((state) => state.auth.admin);
 
   const handleDialogOpen = () => {
     setOpen(true);
@@ -40,9 +42,15 @@ const Chatbot = () => {
 
   const getBots = useCallback(async () => {
     try {
-      const response = await botsApi.getBots({ pageNumber: 0, pageSize: 20 });
+      const response = await botsApi.getBotsByCustomer({
+        customerId: currentAdmin.customerId,
+        pagination: {
+          pageNumber: 0,
+          pageSize: 20,
+        },
+      });
       if (isMountedRef()) {
-        setBots(response);
+        setBots(response.content);
       }
     } catch (err) {
       console.error(err);

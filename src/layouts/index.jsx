@@ -13,7 +13,7 @@ export const Layout = (props) => {
   const customization = useCustomization();
   const isAuth = useSelector((state) => state.auth.isAuth);
   const currentAdmin = useSelector((state) => state.auth.admin);
-  const [currentRole, setCurrentRole] = useState('');
+  const [currentRole, setCurrentRole] = useState([]);
   const dispatch = useDispatch();
 
   if (!isAuth)
@@ -29,7 +29,7 @@ export const Layout = (props) => {
       try {
         // await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
         const response = await dispatch(getCurrentUser());
-        setCurrentRole(response.data?.authorities[0]?.role ?? '');
+        setCurrentRole(response.data?.authorities.map((item) => item.role) ?? []);
       } catch (error) {
         console.error('Error fetching data:', error);
       }

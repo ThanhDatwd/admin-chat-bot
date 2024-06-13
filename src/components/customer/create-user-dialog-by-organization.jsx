@@ -40,14 +40,15 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
           customerId,
           users: newDataUpload,
         };
-        
+
         const response = await usersApi.createUserByOrg(dataRequest);
 
         toast.success(t('Tạo người dùng thành công'));
         setFiles([]);
         setUserDataUpload([]);
         onClose();
-        onUpdate?.(response.data);
+        console.log(response);
+        // onUpdate?.(response.data);
       } else {
         toast.error(t('Please upload user and try again!'));
       }

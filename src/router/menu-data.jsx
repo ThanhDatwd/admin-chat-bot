@@ -18,11 +18,13 @@ import { routes } from './routes';
 export const useMenuItems = (currentRole) => {
   const { t } = useTranslation();
 
-  const filterMenuItemsByRole = (menuItems, role) => {
-    return menuItems.map((menu) => ({
-      ...menu,
-      subMenu: menu.subMenu.filter((item) => item.roles.includes(role)),
-    }));
+  const filterMenuItemsByRole = (menuItems, roles) => {
+    return menuItems
+      .map((menu) => ({
+        ...menu,
+        subMenu: menu.subMenu.filter((item) => roles.some((role) => item.roles.includes(role))),
+      }))
+      .filter((menu) => menu.subMenu.length > 0);
   };
 
   const allMenuItems = useMemo(() => {
@@ -41,7 +43,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.index,
-            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: 'Chatbot',
@@ -54,7 +56,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.chatbot,
-            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: t('Khách hàng tổ chức'),
@@ -67,7 +69,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.customer,
-            roles: [ROLE.ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN],
           },
           {
             title: t('Người dùng'),
@@ -80,7 +82,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.user,
-            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: t('Gán quyền'),
@@ -93,7 +95,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.decentralization,
-            roles: [ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
           },
           {
             title: t('Tạo tài khoản quản trị'),
@@ -106,7 +108,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.createAccountAdmin,
-            roles: [ROLE.ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN],
           },
           {
             title: 'Gói dịch vụ',
@@ -119,7 +121,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.servicesPackage,
-            roles: [ROLE.ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN],
           },
           {
             title: 'Hóa đơn',
@@ -132,7 +134,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.invoices,
-            roles: [ROLE.ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN],
           },
           {
             title: 'Đối tác',
@@ -145,7 +147,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.partner,
-            roles: [ROLE.ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN],
           },
           {
             title: 'Lĩnh vực',
@@ -158,7 +160,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.field,
-            roles: [ROLE.ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN],
           },
           {
             title: 'Xếp hạng',
@@ -171,7 +173,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.ranking,
-            roles: [ROLE.ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN],
           },
         ],
       },

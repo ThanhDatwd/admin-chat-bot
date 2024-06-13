@@ -349,7 +349,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                     </TableHead>
                     <TableBody>
                       {users.map((user, index) => {
-                        const isUserSelected = selectedItems.includes(user.id);
+                        const isUserSelected = selectedItems.includes(user?.id);
                         return (
                           <TableRow
                             hover
@@ -455,7 +455,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                     }}
                   >
                     {users.map((user) => {
-                      const isUserSelected = selectedItems.includes(user.id);
+                      const isUserSelected = selectedItems.includes(user?.id);
                       return (
                         <Grid
                           xs={12}
