@@ -89,7 +89,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState();
   const [searchByNameValue, setSearchByNameValue] = useState('');
@@ -273,9 +273,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
                       </InputAdornment>
                     ),
                     endAdornment: query && (
-                      <InputAdornment
-                        position="end"
-                      >
+                      <InputAdornment position="end">
                         <IconButton
                           color="error"
                           aria-label="clear input"
@@ -472,8 +470,9 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
                                     <LaunchTwoToneIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
-                                    <DialogConfirmDelete
-                                      onConfirm={() => handleDeleteCustomer(user?.customerId)}/>
+                                <DialogConfirmDelete
+                                  onConfirm={() => handleDeleteCustomer(user?.customerId)}
+                                />
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -706,7 +705,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
           onRowsPerPageChange={handleLimitChange}
           page={page}
           rowsPerPage={limit}
-          rowsPerPageOptions={[5, 10, 15]}
+          rowsPerPageOptions={[5, 15, 30, 50]}
           slotProps={{
             select: {
               variant: 'outlined',

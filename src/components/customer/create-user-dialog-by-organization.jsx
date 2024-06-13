@@ -10,14 +10,13 @@ import { setLoading } from 'src/slices/common';
 import { DialogCustom } from '../common/dialog-custom';
 import CreateUserByOrgForm from './create-user-form-by-org';
 import TableUserUpload from './table-user-upload';
-import UserUploadList from './user-upload-list';
 import UserUpload from './user-upload';
+import UserUploadList from './user-upload-list';
 
 const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [userDataUpload, setUserDataUpload] = useState([]);
-  const [selectedGroupUser, setSelectedGroupUser] = useState([]);
   const uploadFileRef = useRef();
   const dispatch = useDispatch();
 
@@ -30,15 +29,21 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
   const handleCreateUser = async () => {
     try {
       dispatch(setLoading(true));
+
       if (userDataUpload.length > 0) {
+        const newDataUpload = userDataUpload.map((item) => {
+          const { fileName, ...data } = item;
+          return data;
+        });
         const customerId = currentAdmin.customerId;
         const dataRequest = {
           customerId,
-          users: userDataUpload,
+          users: newDataUpload,
         };
+        
         const response = await usersApi.createUserByOrg(dataRequest);
 
-        toast.error(t('Tạo người dùng thành công'));
+        toast.success(t('Tạo người dùng thành công'));
         setFiles([]);
         setUserDataUpload([]);
         onClose();
@@ -74,11 +79,11 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
         title={'Thêm mới người dùng'}
         headerAction={
           <UserUpload
-          files={files}
-          setFiles={setFiles}
-          data={userDataUpload}
-          setData={setUserDataUpload}
-        />
+            files={files}
+            setFiles={setFiles}
+            data={userDataUpload}
+            setData={setUserDataUpload}
+          />
         }
         actions={
           <>
@@ -144,8 +149,6 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
           setData={setUserDataUpload}
         />
         <TableUserUpload
-          selectedItems={selectedGroupUser}
-          setSelectedItems={setSelectedGroupUser}
           users={userDataUpload}
           onRemove={handleRemoveUser}
         />

@@ -56,7 +56,7 @@ const DecentralizationPage = () => {
         pagination: { pageNumber: 0, pageSize: 20 },
       });
       if (isMountedRef()) {
-        setBots(response);
+        setBots(response.content);
       }
     } catch (err) {
       console.error(err);

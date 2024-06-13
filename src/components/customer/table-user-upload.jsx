@@ -40,7 +40,7 @@ const applyFilters = (users, query) => {
 const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
-const TableUserUpload = ({ users, onRemove, selectedItems, setSelectedItems }) => {
+const TableUserUpload = ({ users, onRemove }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const [page, setPage] = useState(0);
@@ -94,12 +94,10 @@ const TableUserUpload = ({ users, onRemove, selectedItems, setSelectedItems }) =
                   </TableCell>
                 ) : (
                   paginatedUsers.map((user, index) => {
-                    const isUserSelected = selectedItems.includes(user.id);
                     return (
                       <TableRow
                         hover
                         key={user.id}
-                        selected={isUserSelected}
                       >
                         <TableCell>
                           <Typography variant="h6">{index + 1}</Typography>

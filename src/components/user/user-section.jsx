@@ -86,7 +86,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(15);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState();
   const [searchByNameValue, setSearchByNameValue] = useState('');
@@ -575,13 +575,13 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                 alignItems="center"
                                 justifyContent="space-between"
                               >
-                                <Button
+                                {/* <Button
                                   variant="contained"
                                   onClick={() => router.push(`/user/${user.id}`)}
                                   endIcon={<ArrowForwardTwoToneIcon />}
                                 >
                                   {t('Xem chi tiết ')}
-                                </Button>
+                                </Button> */}
                                 <Checkbox
                                   checked={isUserSelected}
                                   onChange={(event) => handleSelectOneUser(event, user.id)}
@@ -643,7 +643,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
           onRowsPerPageChange={handleLimitChange}
           page={page}
           rowsPerPage={limit}
-          rowsPerPageOptions={[5, 10, 15]}
+          rowsPerPageOptions={[5, 15, 30, 50]}
           slotProps={{
             select: {
               variant: 'outlined',
