@@ -13,7 +13,7 @@ const AuthLayout = () => {
       ) : (
         <Navigate
           replace
-          to="/chatbot"
+          to="/"
         />
       )}
     </>

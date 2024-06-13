@@ -16,27 +16,27 @@ export const Layout = (props) => {
   const [currentRole, setCurrentRole] = useState('');
   const dispatch = useDispatch();
 
-  // if (!isAuth)
-  //   return (
-  //     <Navigate
-  //       replace
-  //       to="/login"
-  //     />
-  //   );
+  if (!isAuth)
+    return (
+      <Navigate
+        replace
+        to="/login"
+      />
+    );
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
-  //       const response = await dispatch(getCurrentUser());
-  //       setCurrentRole(response.data?.authorities[0]?.role ?? '');
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
+        const response = await dispatch(getCurrentUser());
+        setCurrentRole(response.data?.authorities[0]?.role ?? '');
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-  //   fetchData();
-  // }, [dispatch]);
+    fetchData();
+  }, [dispatch]);
 
   const menuItems = useMenuItems(currentRole);
 
@@ -44,7 +44,7 @@ export const Layout = (props) => {
     default:
       return (
         <>
-          {!currentAdmin ? (
+          {currentAdmin ? (
             <VerticalShellsDark
               menuItems={menuItems}
               {...props}

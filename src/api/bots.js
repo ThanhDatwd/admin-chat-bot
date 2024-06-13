@@ -3,7 +3,13 @@ import { getData, postData } from './axios';
 class BotsApi {
   getBots({ pageNumber, pageSize }) {
     const data = getData(
-      import.meta.env.VITE_API_URL_8085 + `bot?&pageNumber=${pageNumber}&pageSize=${pageSize}`
+      import.meta.env.VITE_API_URL_8085 + `bot?pageNumber=${pageNumber}&pageSize=${pageSize}`
+    );
+    return data;
+  }
+  getBotsByCustomer({customerId,pagination}) {
+    const data = getData(
+      import.meta.env.VITE_API_URL_8085 + `bot?customerId=${customerId}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}`
     );
     return data;
   }
