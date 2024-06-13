@@ -6,9 +6,10 @@ const ProtectedRoute = ({ children, roles }) => {
   const currentAdmin = useSelector((state) => state.auth.admin);
   const isAuth = useSelector((state) => state.auth.isAuth);
 
-  if (currentAdmin?.authorities.some(item=>roles.includes(item.role))) {
+  if (roles.includes(currentAdmin?.authorities[0]?.role)) {
     return children;
   }
+
   return (
     <Navigate
       to="/"
