@@ -1,4 +1,5 @@
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
+import SyncOutlinedIcon from '@mui/icons-material/SyncOutlined';
 import {
   alpha,
   Box,
@@ -175,7 +176,9 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
           pageSize: limit,
         },
         filters
-      ).finally(() => dispatch(setLoading(false)));
+      ).finally(() => {
+        dispatch(setLoading(false));
+      });
     }
   };
   const handleSearchByName = async (value) => {
@@ -185,44 +188,43 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
 
   useEffect(() => {
     handleRefresh();
-   
-    
   }, [botId]);
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
+    dispatch(setLoading(true));
     setSelectUsersRole({});
     setSelectedAllUserRoleQuery(false);
     setSelectedAllUserRoleUpdate(false);
     setAggregateUsers([]);
     setCountChange(0);
-    fetchData({ pageNumber: 0, pageSize: limit });
-    setPage(0)
-    
-    
+    fetchData({ pageNumber: 0, pageSize: limit }).finally(() => {
+      dispatch(setLoading(false));
+    });
+    setPage(0);
   };
 
   useEffect(() => {
     let cloneSelectUserRole = { ...selectedUsersRole };
     const currentPage = Math.ceil(Object.keys(cloneSelectUserRole).length / limit);
     // if (currentPage === 0 || currentPage <= page) {
-      users.forEach((item) => {
-        cloneSelectUserRole = {
-          ...cloneSelectUserRole,
-          [item.userId]: {
-            ...cloneSelectUserRole[item.userId],
-            canQuery: cloneSelectUserRole[item.userId]?.canQuery??item.canQuery ?? false,
-            canUpdate: cloneSelectUserRole[item.userId]?.canUpdate??item.canUpdate ?? false,
-            canDelete: cloneSelectUserRole[item.userId]?.canDelete??item.canDelete ?? false,
-            userId: item.userId,
-            customerId: currentAdmin.customerId,
-            botId: currentBotId,
-          },
-        };
-      });
-      setAggregateUsers((prev) => [...prev, ...users]);
-      setSelectUsersRole((prev) => {
-        return { ...prev, ...cloneSelectUserRole };
-      });
+    users.forEach((item) => {
+      cloneSelectUserRole = {
+        ...cloneSelectUserRole,
+        [item.userId]: {
+          ...cloneSelectUserRole[item.userId],
+          canQuery: cloneSelectUserRole[item.userId]?.canQuery ?? item.canQuery ?? false,
+          canUpdate: cloneSelectUserRole[item.userId]?.canUpdate ?? item.canUpdate ?? false,
+          canDelete: cloneSelectUserRole[item.userId]?.canDelete ?? item.canDelete ?? false,
+          userId: item.userId,
+          customerId: currentAdmin.customerId,
+          botId: currentBotId,
+        },
+      };
+    });
+    setAggregateUsers((prev) => [...prev, ...users]);
+    setSelectUsersRole((prev) => {
+      return { ...prev, ...cloneSelectUserRole };
+    });
     // }
     setSelectedAllUserRoleQuery(
       Object.keys(cloneSelectUserRole).length > 0
@@ -265,7 +267,6 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
           state.canUpdate === item.canUpdate &&
           state.canDelete === item.canDelete
         ) {
-          // Xoá các phần tử không thay đổi
           delete compareData[item.userId];
         }
       }
@@ -320,15 +321,29 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
               Tìm kiếm
             </Button>
           </Stack>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleGrantPermissions}
-            disabled={countChange <= 0}
+          <Stack
+            direction="row"
+            gap={'10px'}
           >
-            Áp dụng {countChange > 0 && `${countChange}`}
-          </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={handleGrantPermissions}
+              disabled={countChange <= 0}
+            >
+              Áp dụng {countChange > 0 && `${countChange}`}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={handleRefresh}
+              startIcon={<SyncOutlinedIcon fontSize="small" />}
+            >
+              Làm mới
+            </Button>
+          </Stack>
         </Box>
         <Divider />
         <>
