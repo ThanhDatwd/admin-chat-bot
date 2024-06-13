@@ -58,7 +58,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const [selectedItems, setSelectedUser] = useState([]);
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(6);
+  const [limit, setLimit] = useState(5);
   const [searchValue, setSearchValue] = useState('');
   const [selectedUsersRole, setSelectUsersRole] = useState({});
   const [aggregateUsers, setAggregateUsers] = useState([]);
@@ -72,10 +72,6 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const isRefresh = useSelector((state) => state.common.refresh);
   const currentAdmin = useSelector((state) => state.auth.admin);
 
-  const paginatedUser = applyPagination(users, page, limit);
-  const selectedBulkActions = selectedItems.length > 0;
-  const selectedSomeUser = selectedItems.length > 0 && selectedItems.length < users.length;
-  const selectedAllUser = selectedItems.length === users.length;
   const [currentBotId, setCurrentBotId] = useState('');
   const [selectedAllUserRoleQuery, setSelectedAllUserRoleQuery] = useState(false);
   const [selectedAllUserRoleUpdate, setSelectedAllUserRoleUpdate] = useState(false);
@@ -487,7 +483,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
               onRowsPerPageChange={handleLimitChange}
               page={page}
               rowsPerPage={limit}
-              rowsPerPageOptions={[6, 9, 15]}
+              rowsPerPageOptions={[5, 15, 30, 50]}
               slotProps={{
                 select: {
                   variant: 'outlined',

@@ -23,6 +23,7 @@ const UserPage = () => {
   const [open, setOpen] = useState(false);
   const [isRefresh, setIsRefresh] = useState(false);
   const currentAdmin = useSelector((state) => state.auth.admin);
+  const [totalCount,setTotalCount] = useState(0)
 
   // HANDLE OPEN CREATE USER DIALOG
   const handleDialogOpen = () => {
@@ -37,7 +38,8 @@ const UserPage = () => {
   const getUserByOrg = useCallback(
     async (paginate, filter) => {
       try {
-        const response = await usersApi.getUserByOrg({
+        let response = null
+        response= await usersApi.getUserByOrg({
           customerId: currentAdmin.customerId,
           pagination: {
             pageNumber: paginate.pageNumber,
@@ -45,7 +47,9 @@ const UserPage = () => {
           },
         });
         if (isMountedRef()) {
-          setUsers(response.content);
+          setUsers(response?.content);
+          setTotalCount(response?.totalElements)
+
         }
       } catch (err) {
         console.error(err);
@@ -131,7 +135,7 @@ const UserPage = () => {
           >
             <UserTable
               fetchData={getUserByOrg}
-              totalCount={100}
+              totalCount={totalCount}
               users={users}
               setIsRefresh={setIsRefresh}
             />
