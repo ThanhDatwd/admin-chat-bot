@@ -43,16 +43,18 @@ const DecentralizationPage = () => {
         } catch (err) {
           console.error(err);
         }
-      }
-      else{
-        setUsers([])
+      } else {
+        setUsers([]);
       }
     },
     [isMountedRef, isRefresh, currentBotId]
   );
   const getBots = useCallback(async () => {
     try {
-      const response = await botsApi.getBots({ pageNumber: 0, pageSize: 20 });
+      const response = await botsApi.getBotsByCustomer({
+        customerId: currentAdmin.customerId,
+        pagination: { pageNumber: 0, pageSize: 20 },
+      });
       if (isMountedRef()) {
         setBots(response);
       }
@@ -116,6 +118,7 @@ const DecentralizationPage = () => {
                       })}
                       value={currentBotId}
                       onChange={(item) => {
+                        console.log(item.value)
                         setCurrentBotId(item.value);
                       }}
                     />

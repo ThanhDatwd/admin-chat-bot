@@ -19,7 +19,7 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
@@ -60,7 +60,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const [limit, setLimit] = useState(6);
   const [searchValue, setSearchValue] = useState('');
   const [selectedUsersRole, setSelectUsersRole] = useState({});
-  const [aggregateUsers,setAggregateUsers] = useState([])
+  const [aggregateUsers, setAggregateUsers] = useState([]);
 
   const [filters, setFilters] = useState({
     fieldStatus: null,
@@ -78,7 +78,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const [currentBotId, setCurrentBotId] = useState('');
   const [selectedAllUserRoleQuery, setSelectedAllUserRoleQuery] = useState(false);
   const [selectedAllUserRoleUpdate, setSelectedAllUserRoleUpdate] = useState(false);
-  const [countChange,setCountChange] = useState(0)
+  const [countChange, setCountChange] = useState(0);
 
   const handleSelectAllRole = (event, key) => {
     if (botId && botId !== '') {
@@ -106,8 +106,8 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
           : false
       );
       setSelectUsersRole(cloneSelectUserRole);
-      let dataChange =getChangedItems({...cloneSelectUserRole},aggregateUsers)
-      setCountChange(dataChange.count??0)
+      let dataChange = getChangedItems({ ...cloneSelectUserRole }, aggregateUsers);
+      setCountChange(dataChange.count ?? 0);
     } else {
       toast.error(t('Vui lòng chọn bot để thực hiện'));
     }
@@ -137,8 +137,8 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
           : false
       );
 
-      let dataChange =getChangedItems({...cloneSelectUserRole},aggregateUsers)
-      setCountChange(dataChange.count??0)
+      let dataChange = getChangedItems({ ...cloneSelectUserRole }, aggregateUsers);
+      setCountChange(dataChange.count ?? 0);
     } else {
       toast.error('Vui lòng chọn bot để thực hiện');
     }
@@ -184,18 +184,46 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const debounceHandleSearch = debounce(handleSearchByName, 900);
 
   useEffect(() => {
+    handleRefresh();
+   
+    
+  }, [botId]);
+
+  const handleRefresh = () => {
     setSelectUsersRole({});
     setSelectedAllUserRoleQuery(false);
     setSelectedAllUserRoleUpdate(false);
-    setAggregateUsers([])
-    setCountChange(0)
+    setAggregateUsers([]);
+    setCountChange(0);
     fetchData({ pageNumber: 0, pageSize: limit });
     setPage(0)
-  }, [botId]);
+    
+    
+  };
 
   useEffect(() => {
     let cloneSelectUserRole = { ...selectedUsersRole };
-
+    const currentPage = Math.ceil(Object.keys(cloneSelectUserRole).length / limit);
+    // if (currentPage === 0 || currentPage <= page) {
+      users.forEach((item) => {
+        cloneSelectUserRole = {
+          ...cloneSelectUserRole,
+          [item.userId]: {
+            ...cloneSelectUserRole[item.userId],
+            canQuery: cloneSelectUserRole[item.userId]?.canQuery??item.canQuery ?? false,
+            canUpdate: cloneSelectUserRole[item.userId]?.canUpdate??item.canUpdate ?? false,
+            canDelete: cloneSelectUserRole[item.userId]?.canDelete??item.canDelete ?? false,
+            userId: item.userId,
+            customerId: currentAdmin.customerId,
+            botId: currentBotId,
+          },
+        };
+      });
+      setAggregateUsers((prev) => [...prev, ...users]);
+      setSelectUsersRole((prev) => {
+        return { ...prev, ...cloneSelectUserRole };
+      });
+    // }
     setSelectedAllUserRoleQuery(
       Object.keys(cloneSelectUserRole).length > 0
         ? users.every((item) => cloneSelectUserRole[item.userId]?.canQuery === true)
@@ -207,28 +235,6 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
         : false
     );
 
-    const currentPage = Math.ceil(Object.keys(cloneSelectUserRole).length / limit);
-    if (currentPage === 0 || currentPage <= page) {
-      users.forEach((item) => {
-        cloneSelectUserRole = {
-          ...cloneSelectUserRole,
-          [item.userId]: {
-            ...cloneSelectUserRole[item.userId],
-            canQuery: item.canQuery ?? false,
-            canUpdate: item.canUpdate ?? false,
-            canDelete: item.canDelete ?? false,
-            userId: item.userId,
-            customerId: currentAdmin.customerId,
-            botId: currentBotId,
-          },
-        };
-      });
-      setAggregateUsers(prev=>[...prev,...users])
-      setSelectUsersRole((prev) => {
-        return { ...prev, ...cloneSelectUserRole };
-      });
-    }
-
     // } else {
     //   toast.error('please chose bot');
     // }
@@ -236,38 +242,40 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
 
   const handleGrantPermissions = async () => {
     try {
-      const selectedUsersRoleArray = Object.keys(selectedUsersRole).map(
-        (key) => selectedUsersRole[key]
-      );
-      console.log(selectedUsersRoleArray);
-      const response = await botsApi.grantUserToBot(selectedUsersRoleArray);
-      console.log('this is response when grant::', response);
+      dispatch(setLoading(true));
+      let dataChange = getChangedItems({ ...selectedUsersRole }, aggregateUsers);
+
+      const response = await botsApi.grantUserToBot(dataChange.data);
+      toast.success(t('Cập nhật thành công'));
+      handleRefresh();
+      // fetchData({ pageNumber: page, pageSize: limit });
     } catch (error) {
+      toast.error(t('Cập nhật thất bại!'));
       console.log(error);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
-  const  getChangedItems= (compareData, originalData)=> {
-    originalData.forEach(item => {
-        const state = compareData[item.userId];
-        if (state) {
-            if (
-                state.canQuery === item.canQuery &&
-                state.canUpdate === item.canUpdate &&
-                state.canDelete === item.canDelete
-            ) {
-                // Xoá các phần tử không thay đổi
-                delete compareData[item.userId];
-            }
+  const getChangedItems = (compareData, originalData) => {
+    originalData.forEach((item) => {
+      const state = compareData[item.userId];
+      if (state) {
+        if (
+          state.canQuery === item.canQuery &&
+          state.canUpdate === item.canUpdate &&
+          state.canDelete === item.canDelete
+        ) {
+          // Xoá các phần tử không thay đổi
+          delete compareData[item.userId];
         }
+      }
     });
 
     return {
-      data:Object.keys(compareData).map(
-        (key) => compareData[key]
-      ),
-      count:Object.keys(compareData).length
+      data: Object.keys(compareData).map((key) => compareData[key]),
+      count: Object.keys(compareData).length,
     };
-}
+  };
   return (
     <>
       <Card>
@@ -317,80 +325,84 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
             color="primary"
             size="small"
             onClick={handleGrantPermissions}
-            disabled={countChange<=0}
+            disabled={countChange <= 0}
           >
-            Áp dụng {countChange>0&&(`${countChange}`)}
+            Áp dụng {countChange > 0 && `${countChange}`}
           </Button>
         </Box>
         <Divider />
-        {isLoading ? (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '16px',
-              height: '50vh',
-            }}
-            color="common.white"
-          >
-            {' '}
-            <CircularProgress style={{ height: '30px', width: '30px' }} />
-          </Box>
-        ) :(
-          <>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('Username')}</TableCell>
-                    <TableCell>{t('Email')}</TableCell>
-                    <TableCell>
-                      {t('Role chat')}
-                      <Checkbox
-                        checked={selectedAllUserRoleQuery}
-                        onChange={(event) => handleSelectAllRole(event, 'canQuery')}
-                        disabled={users.length === 0}
-                      />{' '}
-                    </TableCell>
-                    <TableCell>
-                      {t('Role training')}
-                      <Checkbox
-                        checked={selectedAllUserRoleUpdate}
-                        onChange={(event) => handleSelectAllRole(event, 'canUpdate')}
-                        disabled={users.length === 0}
-                      />
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                { users.length === 0 ? (
-                  <TableCell colSpan={4}>
-                  <Box
-            sx={{ minHeight: '50vh' }}
-            display={'flex'}
-            justifyContent={'center'}
-            flexDirection={'column'}
-            alignItems={'center'}
-          >
-            {' '}
-            {botId &&<img
-              style={{ width: '200px' }}
-              src="empty-data.png"
-            />}
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              align="center"
-              fontWeight={500}
-            >
-              {botId ? t('Không có dữ liệu người dùng') : t('Cần chọn một bot để thực hiện')}
-            </Typography>
-          </Box>
-                  
-                  
+        <>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('Username')}</TableCell>
+                  <TableCell>{t('Email')}</TableCell>
+                  <TableCell>
+                    {t('Role chat')}
+                    <Checkbox
+                      checked={selectedAllUserRoleQuery}
+                      onChange={(event) => handleSelectAllRole(event, 'canQuery')}
+                      disabled={users.length === 0}
+                    />{' '}
                   </TableCell>
-        ) : users.map((user, index) => {
+                  <TableCell>
+                    {t('Role training')}
+                    <Checkbox
+                      checked={selectedAllUserRoleUpdate}
+                      onChange={(event) => handleSelectAllRole(event, 'canUpdate')}
+                      disabled={users.length === 0}
+                    />
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {isLoading ? (
+                  <TableCell colSpan={4}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '16px',
+                        height: '50vh',
+                      }}
+                      color="common.white"
+                    >
+                      {' '}
+                      <CircularProgress style={{ height: '30px', width: '30px' }} />
+                    </Box>
+                  </TableCell>
+                ) : users.length === 0 ? (
+                  <TableCell colSpan={4}>
+                    <Box
+                      sx={{ minHeight: '50vh' }}
+                      display={'flex'}
+                      justifyContent={'center'}
+                      flexDirection={'column'}
+                      alignItems={'center'}
+                    >
+                      {' '}
+                      {botId && (
+                        <img
+                          style={{ width: '200px' }}
+                          src="empty-data.png"
+                        />
+                      )}
+                      <Typography
+                        variant="h6"
+                        color="text.secondary"
+                        align="center"
+                        fontWeight={500}
+                      >
+                        {botId
+                          ? t('Không có dữ liệu người dùng')
+                          : t('Cần chọn một bot để thực hiện')}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                ) : (
+                  users.map((user, index) => {
                     const userSelected = selectedUsersRole[user.userId];
                     return (
                       <TableRow
@@ -440,39 +452,39 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                         </TableCell>
                       </TableRow>
                     );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Box
-              p={2}
-              sx={{
-                '.MuiTablePagination-select': {
-                  py: 0.55,
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Box
+            p={2}
+            sx={{
+              '.MuiTablePagination-select': {
+                py: 0.55,
+              },
+            }}
+          >
+            <TablePagination
+              component="div"
+              count={totalCount}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleLimitChange}
+              page={page}
+              rowsPerPage={limit}
+              rowsPerPageOptions={[6, 9, 15]}
+              slotProps={{
+                select: {
+                  variant: 'outlined',
+                  size: 'small',
+                  sx: {
+                    p: 0,
+                  },
                 },
               }}
-            >
-              <TablePagination
-                component="div"
-                count={totalCount}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleLimitChange}
-                page={page}
-                rowsPerPage={limit}
-                rowsPerPageOptions={[6, 9, 15]}
-                slotProps={{
-                  select: {
-                    variant: 'outlined',
-                    size: 'small',
-                    sx: {
-                      p: 0,
-                    },
-                  },
-                }}
-              />
-            </Box>
-          </>
-        )}
+            />
+          </Box>
+        </>
       </Card>
     </>
   );

@@ -72,7 +72,7 @@ function LoginForm() {
       localStorage.setItem('accessToken', response.data.accessToken);
       localStorage.setItem('refreshToken', response.data.refreshToken);
       localStorage.setItem('expiration', response.data.expiration);
-      navigate('/chatbot');
+      navigate('/');
       toast.success(t('Login successfully'));
     } catch (error) {
       toast.error(t('Something wrong please try again!'));
