@@ -575,13 +575,13 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                 alignItems="center"
                                 justifyContent="space-between"
                               >
-                                {/* <Button
+                                <Button
                                   variant="contained"
                                   onClick={() => router.push(`/user/${user.id}`)}
                                   endIcon={<ArrowForwardTwoToneIcon />}
                                 >
                                   {t('Xem chi tiết ')}
-                                </Button> */}
+                                </Button>
                                 <Checkbox
                                   checked={isUserSelected}
                                   onChange={(event) => handleSelectOneUser(event, user.id)}
