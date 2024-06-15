@@ -89,7 +89,7 @@ const TableUserUpload = ({ users, onRemove }) => {
                   >
                     <img
                       style={{ width: '200px' }}
-                      src="empty-data.png"
+                      src="/src/assets/images/all-img/empty-data.png"
                     />
                   </TableCell>
                 ) : (

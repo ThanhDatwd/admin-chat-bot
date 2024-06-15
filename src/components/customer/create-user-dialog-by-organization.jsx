@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { usersApi } from 'src/api/user';
-import { setLoading } from 'src/slices/common';
+import { setLoading, setRefresh } from 'src/slices/common';
 import { DialogCustom } from '../common/dialog-custom';
 import CreateUserByOrgForm from './create-user-form-by-org';
 import TableUserUpload from './table-user-upload';
@@ -47,8 +47,7 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
         setFiles([]);
         setUserDataUpload([]);
         onClose();
-        console.log(response);
-        // onUpdate?.(response.data);
+        dispatch(setRefresh(!isRefresh))
       } else {
         toast.error(t('Please upload user and try again!'));
       }

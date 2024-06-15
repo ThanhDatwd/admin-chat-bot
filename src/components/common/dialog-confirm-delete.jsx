@@ -25,7 +25,7 @@ import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import AlertDialogContent from './alert-dialog-content';
 
 const DialogConfirmDelete = (props) => {
-  const { onConfirm } = props;
+  const { onConfirm, children } = props;
   const { t } = useTranslation();
   const theme = useTheme();
   const smUp = useMediaQuery(theme.breakpoints.up('sm'));
@@ -143,12 +143,21 @@ const DialogConfirmDelete = (props) => {
         title={t('Xoá')}
         arrow
       >
-        <IconButton
-          color="error"
-          onClick={handleClickOpen}
-        >
-          <DeleteTwoToneIcon fontSize="small" />
-        </IconButton>
+        {children ? (
+          <Box
+            sx={{ width: '100%' }}
+            onClick={handleClickOpen}
+          >
+            {children}
+          </Box>
+        ) : (
+          <IconButton
+            color="error"
+            onClick={handleClickOpen}
+          >
+            {children ? children : <DeleteTwoToneIcon fontSize="small" />}
+          </IconButton>
+        )}
       </Tooltip>
       <Dialog
         open={open}

@@ -214,6 +214,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
           userId: item.userId,
           customerId: currentAdmin.customerId,
           botId: currentBotId,
+          userBotId:item.userBotId
         },
       };
     });
