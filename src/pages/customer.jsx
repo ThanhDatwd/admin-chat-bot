@@ -41,7 +41,7 @@ const CustomerPage = () => {
         const response = await customersApi.getCustomers({
           pageNumber: paginate.pageNumber,
           pageSize: paginate.pageSize,
-        });
+        },filter);
         if (isMountedRef()) {
           setCustomers(response.content);
           setTotalCount(response.totalElements)

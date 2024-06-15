@@ -1,16 +1,12 @@
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import ArrowForwardTwoToneIcon from '@mui/icons-material/ArrowForwardTwoTone';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import GridViewTwoToneIcon from '@mui/icons-material/GridViewTwoTone';
 import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded';
-import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
 import {
   Avatar,
   Box,
-  Button,
   Card,
   Checkbox,
   Chip,
@@ -36,23 +32,22 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { customersApi } from 'src/api/customer';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { useRouter } from 'src/hooks/use-router';
-import { setRefresh } from 'src/slices/common';
 import { useDispatch } from 'src/store';
 import { debounce } from 'src/utils';
 import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
+import UpdateUserDialog from './user-update-dialog';
+import UserFooterDropdown from './userFooterDropdown';
 
 export const CardWrapper = styled(Card)(
   ({ theme }) => `
@@ -90,6 +85,8 @@ const UserTable = ({ users, fetchData, totalCount }) => {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState();
   const [searchByNameValue, setSearchByNameValue] = useState('');
+  const [currentUser, setCurrentUser] = useState();
+  const [openDialogUpdate, setOpenDialogUpdate] = useState(false);
 
   const paginatedUsers = applyPagination(users, page, limit);
   const selectedBulkActions = selectedItems.length > 0;
@@ -158,18 +155,17 @@ const UserTable = ({ users, fetchData, totalCount }) => {
     handleChangeFilter({ username: value });
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
-  const handleDeleteCustomer = async (userId) => {
-    try {
-      const response = await customersApi.deleteCustomer(userId);
-
-      toast.success(t(response.data));
-      dispatch(setRefresh(!isRefresh));
-    } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
-      console.log(error);
-    }
+  const handleDeleteUser = async (userId) => {
+    // try {
+    //   const response = await customersApi.deleteCustomer(userId);
+    //   toast.success(t(response.data));
+    //   dispatch(setRefresh(!isRefresh));
+    // } catch (error) {
+    //   toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+    //   console.log(error);
+    // }
   };
-
+ console.log(currentUser)
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
@@ -312,7 +308,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
             {' '}
             <img
               style={{ width: '200px' }}
-              src="empty-data.png"
+              src="/src/assets/images/all-img/empty-data.png"
             />
             <Typography
               variant="h6"
@@ -401,20 +397,21 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                             <TableCell align="center">
                               <Typography noWrap>
                                 <Tooltip
-                                  title={t('Xem chi tiết')}
+                                  title={t('Cập nhật')}
                                   arrow
                                 >
                                   <IconButton
                                     onClick={() => {
-                                      navigate(`/user/${user.customerId}`);
+                                      setCurrentUser(user);
+                                    setOpenDialogUpdate(true);
                                     }}
                                     color="primary"
                                   >
-                                    <LaunchTwoToneIcon fontSize="small" />
+                                    <EditTwoToneIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <DialogConfirmDelete
-                                  onConfirm={() => handleDeleteCustomer(user?.customerId)}
+                                  onConfirm={() => handleDeleteUser(user?.customerId)}
                                 />
                               </Typography>
                             </TableCell>
@@ -486,13 +483,13 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                   color={user.active ? 'info' : 'error'}
                                   label={user.active ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                                 />
-                                {/* <CustomerFooterDropdown
-                                  onDelete={() => handleDeleteCustomer(user.customerId)}
-                                  onCreate={() => {
-                                    setCurrentCustomer(user);
-                                    setOpenDialogCreateAdminAccount(true);
+                                <UserFooterDropdown
+                                  onDelete={() => handleDeleteUser(user.id)}
+                                  onUpdate={() => {
+                                    setCurrentUser(user);
+                                    setOpenDialogUpdate(true);
                                   }}
-                                /> */}
+                                />
                               </Box>
                               <Box
                                 p={2}
@@ -575,13 +572,13 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                 alignItems="center"
                                 justifyContent="space-between"
                               >
-                                <Button
+                                {/* <Button
                                   variant="contained"
                                   onClick={() => router.push(`/user/${user.id}`)}
                                   endIcon={<ArrowForwardTwoToneIcon />}
                                 >
                                   {t('Xem chi tiết ')}
-                                </Button>
+                                </Button> */}
                                 <Checkbox
                                   checked={isUserSelected}
                                   onChange={(event) => handleSelectOneUser(event, user.id)}
@@ -655,6 +652,13 @@ const UserTable = ({ users, fetchData, totalCount }) => {
           }}
         />
       </Box>
+      {currentUser && (
+        <UpdateUserDialog
+          user={currentUser}
+          open={openDialogUpdate}
+          onClose={() => setOpenDialogUpdate(false)}
+        />
+      )}
     </>
   );
 };

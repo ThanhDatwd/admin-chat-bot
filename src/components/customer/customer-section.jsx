@@ -6,6 +6,7 @@ import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded';
 import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
+import * as qs from "qs";
 import {
   Avatar,
   Box,
@@ -54,6 +55,7 @@ import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
 import CreateAdminOrgDialog from './create-admin-org-dialog';
 import CustomerFooterDropdown from './customer-footer-dropdown';
+import { isVietnameseTones } from 'src/utils/validateString';
 
 // import ChatuserFooterDropdown from './user-footer-dropdown';
 
@@ -144,30 +146,32 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
-
+    
     for (const key in newFilter) {
       if (newFilter[key] === '' || newFilter[key] === undefined) {
         delete newFilter[key];
       }
     }
 
-    setFilters(newFilter);
+    setFilters({...newFilter,accent:isVietnameseTones(newFilter.customerName)});
     return newFilter;
   };
 
   const handleFilter = async () => {
     if (fetchData && filters) {
       dispatch(setLoading(true));
+      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.customerName)});
       fetchData(
         {
           pageNumber: page,
           pageSize: limit,
         },
-        filters
+        
+        queryParams
       ).finally(() => dispatch(setLoading(false)));
     }
 
-    // const queryParams = qs.stringify(filters);
+
     // window.history.pushState(null, '', `?${queryParams.toString()}`);
   };
 
@@ -352,7 +356,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
             {' '}
             <img
               style={{ width: '200px' }}
-              src="empty-data.png"
+              src="/src/assets/images/all-img/empty-data.png"
             />
             <Typography
               variant="h6"

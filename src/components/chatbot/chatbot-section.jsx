@@ -409,7 +409,7 @@ const ChatbotSection = ({ bots }) => {
             {' '}
             <img
               style={{ width: '200px' }}
-              src="empty-data.png"
+              src="/src/assets/images/all-img/empty-data.png"
             />
             <Typography
               variant="h6"

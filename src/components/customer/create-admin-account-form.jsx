@@ -57,7 +57,6 @@ const CreateAdminAccountForm = ({ open, onClose, onUpdate, organizations = [] })
       }
       onUpdate?.(data);
       reset();
-      onClose();
     } catch (error) {
       toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
       console.error('Error creating bot:', error);

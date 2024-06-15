@@ -1,4 +1,4 @@
-import { getData, postData } from './axios';
+import api, { getData, postData } from './axios';
 
 class UserApi {
   async getUserByOrg({ customerId, pagination }) {
@@ -34,6 +34,10 @@ class UserApi {
       import.meta.env.VITE_API_AUTH_URL_8080 + 'users/customers',
       data
     );
+    return response;
+  }
+  async UpdateUser(data) {
+    const response = await api.put(import.meta.env.VITE_API_AUTH_URL_8080 + `users`,data);
     return response;
   }
 }
