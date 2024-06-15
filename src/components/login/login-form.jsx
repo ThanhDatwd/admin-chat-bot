@@ -19,6 +19,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { jwtDecode } from 'jwt-decode';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -27,6 +28,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import api from 'src/api/axios';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
+import { ROLE_ACCESS_ADMIN_PAGE } from 'src/constants/role';
 import { setAmin } from 'src/slices/auth';
 import { setLoading } from 'src/slices/common';
 import { useSelector } from 'src/store';
@@ -67,13 +69,19 @@ function LoginForm() {
         import.meta.env.VITE_API_AUTH_URL_8080 + 'auth/login',
         requestData
       );
-      dispatch(setAmin(response.data));
 
-      localStorage.setItem('accessToken', response.data.accessToken);
-      localStorage.setItem('refreshToken', response.data.refreshToken);
-      localStorage.setItem('expiration', response.data.expiration);
-      navigate('/');
-      toast.success(t('Login successfully'));
+      const infoExtract = jwtDecode(response.data.accessToken);
+      if (infoExtract?.roles.some((item) => ROLE_ACCESS_ADMIN_PAGE.includes(item.authority))) {
+        dispatch(setAmin(response.data));
+
+        localStorage.setItem('accessToken', response.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+        localStorage.setItem('expiration', response.data.expiration);
+        toast.success(t('Login successfully'));
+        navigate('/');
+      } else {
+        toast.error(t('You do have not permission to access'));
+      }
     } catch (error) {
       toast.error(t('Something wrong please try again!'));
       console.error('Login failed:', error);
