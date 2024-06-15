@@ -83,37 +83,22 @@ const applyPagination = (packages, page, limit) => {
   return packages.slice(page * limit, page * limit + limit);
 };
 
-const ServicesPackageTable = () => {
-  const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const ServicesPackageTable = ({
+  loading,
+  error,
+  page,
+  limit,
+  packages,
+  onPageChange,
+  onRowsPerPageChange,
+  onUpdate,
+}) => {
   const [selectedItems, setSelectedPackages] = useState([]);
   const { t } = useTranslation();
-  const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(6);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({
     status: null,
   });
-
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        setLoading(true);
-        const data = await packageBasesApi.getPackageBases({
-          pageNumber: page,
-          pageSize: limit,
-        });
-        setPackages(data.content);
-        setLoading(false);
-      } catch (err) {
-        setError(err);
-        setLoading(false);
-      }
-    };
-
-    fetchPackages();
-  }, [page, limit]);
 
   const statusOptions = [
     { id: 'all', name: 'Tất cả' },
@@ -148,14 +133,6 @@ const ServicesPackageTable = () => {
     } else {
       setSelectedPackages((prevSelected) => prevSelected.filter((id) => id !== packageId));
     }
-  };
-
-  const handlePageChange = (_event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleLimitChange = (event) => {
-    setLimit(parseInt(event.target.value));
   };
 
   const filteredPackages = applyFilters(packages, query, filters);
@@ -414,7 +391,10 @@ const ServicesPackageTable = () => {
                                 />
                               </IconButton>
                             </Tooltip>
-                            <UpdatePackageDialog selectedItem={pkg} />
+                            <UpdatePackageDialog
+                              selectedItem={pkg}
+                              onUpdate={onUpdate}
+                            />
                             <Tooltip
                               title={t('Xóa')}
                               arrow
@@ -445,8 +425,8 @@ const ServicesPackageTable = () => {
               <TablePagination
                 component="div"
                 count={filteredPackages.length}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleLimitChange}
+                onPageChange={onPageChange}
+                onRowsPerPageChange={onRowsPerPageChange}
                 page={page}
                 rowsPerPage={limit}
                 rowsPerPageOptions={[6, 9, 15]}

@@ -2,7 +2,7 @@ import { getData } from './axios';
 
 class ModelsApi {
   getModels() {
-    const data = getData(import.meta.env.VITE_API_URL_8087 + `model-chat`);
+    const data = getData(import.meta.env.VITE_API_URL_8088 + `model-chat`);
     return data;
   }
 }

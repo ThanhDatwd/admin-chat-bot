@@ -22,8 +22,12 @@ import { DatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
 import { forwardRef, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import api from 'src/api/axios';
 import { modelsApi } from 'src/api/model';
+import { packageBasesApi } from 'src/api/package-base';
 import { periodsApi } from 'src/api/period';
+import { setLoading } from 'src/slices/common';
 import { z } from 'zod';
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -47,14 +51,15 @@ const formSchema = z.object({
     .number()
     .positive('Số lượng request phải là số nguyên dương')
     .max(1e12, 'Số lượng request tối đa 1 triệu tỷ'),
-  modelChatId: z.string().min(1, 'Chat model là bắt buộc'),
+  modelChatId: z.coerce.number().min(1, 'Chat model là bắt buộc'),
   maxToken: z.coerce.number().positive('Số lượng token tối đa phải là số nguyên dương'),
-  periodId: z.string().min(1, 'Chu kì là bắt buộc'),
+  periodId: z.coerce.number().min(1, 'Chu kì là bắt buộc'),
   fromDate: z.string().min(1, 'Ngày bắt đầu là bắt buộc'),
 });
 
 const CreatePackageDialog = ({ open, onClose, onUpdate }) => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [selectedFromDate, setSelectedFromDate] = useState(null);
   const [periodOptions, setPeriodOptions] = useState([]);
@@ -113,18 +118,32 @@ const CreatePackageDialog = ({ open, onClose, onUpdate }) => {
       fetchPeriods();
       fetchModels();
       reset();
+      setSelectedFromDate(null);
     }
   }, [open]);
 
   const onSubmit = async (data) => {
     console.log(data);
     try {
+      dispatch(setLoading(true));
+      const response = await packageBasesApi.createPackageBase(data);
       onUpdate?.(data);
       reset();
+      setSelectedFromDate(null);
       onClose();
     } catch (error) {
       console.error('Error creating package:', error);
     }
+  };
+
+  const handleModelChange = (event) => {
+    console.log('Selected model:', event.target.value);
+    setValue('modelChatId', event.target.value);
+  };
+
+  const handlePeriodChange = (event) => {
+    console.log('Selected period:', event.target.value);
+    setValue('periodId', event.target.value);
   };
 
   return (
@@ -336,6 +355,10 @@ const CreatePackageDialog = ({ open, onClose, onUpdate }) => {
                           {...field}
                           id="modelChatId-select"
                           fullWidth
+                          onChange={(event) => {
+                            field.onChange(event);
+                            handleModelChange(event);
+                          }}
                         >
                           {modelChatOptions.map((option) => (
                             <MenuItem
@@ -412,6 +435,10 @@ const CreatePackageDialog = ({ open, onClose, onUpdate }) => {
                           {...field}
                           id="periodId-select"
                           fullWidth
+                          onChange={(event) => {
+                            field.onChange(event);
+                            handlePeriodChange(event);
+                          }}
                         >
                           {periodOptions.map((option) => (
                             <MenuItem
@@ -455,7 +482,7 @@ const CreatePackageDialog = ({ open, onClose, onUpdate }) => {
                             value={selectedFromDate}
                             onChange={(date) => {
                               setSelectedFromDate(date);
-                              setValue('fromDate', date ? format(date, 'yyyy-MM-dd') : '');
+                              setValue('fromDate', date ? format(date, 'dd/MM/yyyy') : '');
                             }}
                             renderInput={(params) => (
                               <OutlinedInput

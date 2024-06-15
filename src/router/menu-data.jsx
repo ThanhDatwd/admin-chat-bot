@@ -43,7 +43,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.index,
-            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN, ROLE.ORG_USER, ROLE.USER],
           },
           {
             title: 'Chatbot',
@@ -56,7 +56,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.chatbot,
-            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN, ROLE.ORG_USER, ROLE.USER],
           },
           {
             title: t('Khách hàng tổ chức'),

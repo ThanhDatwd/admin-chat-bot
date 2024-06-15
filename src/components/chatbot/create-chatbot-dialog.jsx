@@ -73,6 +73,7 @@ const CreateChatbotDialog = ({ open, onClose, onUpdate }) => {
         icon: data.icon,
         knowId: data.field[0],
         createUserId: currentAdmin.id,
+        customerId: currentAdmin?.customerId,
       });
       onUpdate?.(data);
       reset();

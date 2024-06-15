@@ -74,13 +74,15 @@ const EmbeddingSection = ({ onEmbed }) => {
           }}
         >
           <PaymentEmbedChatbot />
-          <Button
-            variant="contained"
-            color="success"
-            onClick={() => handleEmbedBot()}
-          >
-            Embed
-          </Button>
+          {files.length > 0 && (
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => handleEmbedBot()}
+            >
+              Embed
+            </Button>
+          )}
         </CardActionsLight>
       </Card>
     </>

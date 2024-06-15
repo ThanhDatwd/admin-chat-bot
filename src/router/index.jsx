@@ -64,7 +64,9 @@ export const routesOutlets = [
       {
         path: 'chatbot',
         element: (
-          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute
+            roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN, ROLE.ORG_USER, ROLE.USER]}
+          >
             <Chatbot />
           </ProtectedRoute>
         ),
@@ -72,7 +74,9 @@ export const routesOutlets = [
       {
         path: 'chatbot/:id',
         element: (
-          <ProtectedRoute roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN]}>
+          <ProtectedRoute
+            roles={[ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN, ROLE.ORG_USER, ROLE.USER]}
+          >
             <ChatbotDetail />
           </ProtectedRoute>
         ),

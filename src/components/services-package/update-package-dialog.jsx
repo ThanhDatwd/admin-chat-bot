@@ -26,8 +26,11 @@ import { format } from 'date-fns';
 import { forwardRef, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { modelsApi } from 'src/api/model';
+import { packageBasesApi } from 'src/api/package-base';
 import { periodsApi } from 'src/api/period';
+import { setLoading } from 'src/slices/common';
 import { z } from 'zod';
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -41,6 +44,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const formSchema = z.object({
+  pkgId: z.string(),
   pkgName: z.string().min(1, 'Tên gói là bắt buộc').max(500, 'Tên gói tối đa 500 ký tự'),
   pkgDescription: z.string(),
   amount: z.coerce
@@ -51,14 +55,15 @@ const formSchema = z.object({
     .number()
     .positive('Số lượng request phải là số nguyên dương')
     .max(1e12, 'Số lượng request tối đa 1 triệu tỷ'),
-  modelChatId: z.string().min(1, 'Chat model là bắt buộc'),
+  modelChatId: z.coerce.number().min(1, 'Chat model là bắt buộc'),
   maxToken: z.coerce.number().positive('Số lượng token tối đa phải là số nguyên dương'),
-  periodId: z.string().min(1, 'Chu kì là bắt buộc'),
+  periodId: z.coerce.number().min(1, 'Chu kì là bắt buộc'),
   fromDate: z.string().min(1, 'Ngày bắt đầu là bắt buộc'),
 });
 
 const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
@@ -75,12 +80,13 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      pkgId: '',
       pkgName: '',
       pkgDescription: '',
-      amount: 0,
-      request: 0,
+      amount: '',
+      request: '',
       modelChatId: '',
-      maxToken: 0,
+      maxToken: '',
       periodId: '',
       fromDate: '',
     },
@@ -120,6 +126,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
       fetchModels();
       if (selectedItem) {
         reset({
+          pkgId: selectedItem.pkgId,
           pkgName: selectedItem.pkgName,
           pkgDescription: selectedItem.pkgDescription,
           amount: selectedItem.amount,
@@ -128,11 +135,12 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
           maxToken: selectedItem.maxToken,
           periodId: selectedItem.periodId,
           fromDate: selectedItem.fromDate
-            ? format(new Date(selectedItem.fromDate), 'yyyy-MM-dd')
+            ? format(new Date(selectedItem.fromDate), 'dd/MM/yyyy')
             : '',
         });
         setSelectedFromDate(selectedItem.fromDate ? new Date(selectedItem.fromDate) : null);
       } else {
+        setSelectedFromDate(null);
         reset();
       }
     }
@@ -141,12 +149,25 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
   const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
     try {
+      dispatch(setLoading(true));
+      const response = await packageBasesApi.updatePackageBase(data);
       await onUpdate?.(data);
       reset();
+      setSelectedFromDate(null);
       setOpen(false);
     } catch (error) {
       console.error('Error updating package:', error);
     }
+  };
+
+  const handleModelChange = (event) => {
+    console.log('Selected model:', event.target.value);
+    setValue('modelChatId', event.target.value);
+  };
+
+  const handlePeriodChange = (event) => {
+    console.log('Selected period:', event.target.value);
+    setValue('periodId', event.target.value);
   };
 
   return (
@@ -213,7 +234,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="pkg-name-input"
+                        htmlFor="pkgName-input"
                         fontWeight={500}
                       >
                         Tên gói
@@ -225,7 +246,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                           <>
                             <OutlinedInput
                               {...field}
-                              id="pkg-name-input"
+                              id="pkgName-input"
                               fullWidth
                             />
                             {fieldState.error && (
@@ -248,7 +269,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="pkg-description-input"
+                        htmlFor="pkgDescription-input"
                         fontWeight={500}
                       >
                         Mô tả gói dịch vụ
@@ -260,7 +281,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                           <>
                             <OutlinedInput
                               {...field}
-                              id="pkg-description-input"
+                              id="pkgDescription-input"
                               multiline
                               maxRows={6}
                               minRows={2}
@@ -300,8 +321,6 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                             <OutlinedInput
                               {...field}
                               id="amount-input"
-                              type="number"
-                              onChange={(e) => field.onChange(e.target.value)}
                               fullWidth
                             />
                             {fieldState.error && (
@@ -338,8 +357,6 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                             <OutlinedInput
                               {...field}
                               id="request-input"
-                              type="number"
-                              onChange={(e) => field.onChange(e.target.value)}
                               fullWidth
                             />
                             {fieldState.error && (
@@ -363,7 +380,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="model-chat-select"
+                        htmlFor="modelChatId-select"
                         fontWeight={500}
                       >
                         Chat model
@@ -374,8 +391,12 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         render={({ field }) => (
                           <Select
                             {...field}
-                            id="model-chat-select"
+                            id="modelChatId-select"
                             fullWidth
+                            onChange={(event) => {
+                              field.onChange(event);
+                              handleModelChange(event);
+                            }}
                           >
                             {modelChatOptions.map((option) => (
                               <MenuItem
@@ -403,7 +424,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="max-token-input"
+                        htmlFor="maxToken-input"
                         fontWeight={500}
                       >
                         Số lượng token tối đa
@@ -415,9 +436,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                           <>
                             <OutlinedInput
                               {...field}
-                              id="max-token-input"
-                              type="number"
-                              onChange={(e) => field.onChange(e.target.value)}
+                              id="maxToken-input"
                               fullWidth
                             />
                             {fieldState.error && (
@@ -441,7 +460,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="period-select"
+                        htmlFor="periodId-select"
                         fontWeight={500}
                       >
                         Chu kì
@@ -452,8 +471,12 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         render={({ field }) => (
                           <Select
                             {...field}
-                            id="period-select"
+                            id="periodId-select"
                             fullWidth
+                            onChange={(event) => {
+                              field.onChange(event);
+                              handlePeriodChange(event);
+                            }}
                           >
                             {periodOptions.map((option) => (
                               <MenuItem
@@ -481,7 +504,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                         variant="h6"
                         gutterBottom
                         component="label"
-                        htmlFor="from-date-input"
+                        htmlFor="fromDate-input"
                         fontWeight={500}
                       >
                         Ngày bắt đầu
@@ -497,7 +520,7 @@ const UpdatePackageDialog = ({ selectedItem, onUpdate }) => {
                               value={selectedFromDate}
                               onChange={(date) => {
                                 setSelectedFromDate(date);
-                                setValue('fromDate', date ? format(date, 'yyyy-MM-dd') : '');
+                                setValue('fromDate', date ? format(date, 'dd/MM/yyyy') : '');
                               }}
                               renderInput={(params) => (
                                 <OutlinedInput

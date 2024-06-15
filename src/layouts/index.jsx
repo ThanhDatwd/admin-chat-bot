@@ -27,7 +27,7 @@ export const Layout = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
+        await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
         const response = await dispatch(getCurrentUser());
         setCurrentRole(response.data?.authorities.map((item) => item.role) ?? []);
       } catch (error) {
