@@ -31,6 +31,7 @@ const Chatbot = () => {
   const customization = useCustomization();
   const [bots, setBots] = useState([]);
   const [open, setOpen] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const currentAdmin = useSelector((state) => state.auth.admin);
 
   const handleDialogOpen = () => {
@@ -40,26 +41,24 @@ const Chatbot = () => {
     setOpen(false);
   };
 
-  const getBots = useCallback(async () => {
+  const getBots = useCallback(async (paginate, filter) => {
     try {
       const response = await botsApi.getBotsByCustomer({
         customerId: currentAdmin.customerId,
         pagination: {
-          pageNumber: 0,
-          pageSize: 20,
+          pageNumber: paginate.pageNumber,
+          pageSize: paginate.pageSize,
         },
+        filter
       });
       if (isMountedRef()) {
         setBots(response.content);
+        setTotalCount(response.totalElements);
       }
     } catch (err) {
       console.error(err);
     }
   }, [isMountedRef]);
-
-  useEffect(() => {
-    getBots();
-  }, [getBots]);
 
   return (
     <>
@@ -130,7 +129,11 @@ const Chatbot = () => {
               }
             />
           </Box>
-          <ChatbotSection bots={bots} />
+          <ChatbotSection
+            bots={bots}
+            totalCount={totalCount}
+            fetchData={getBots}
+          />
         </Container>
       </Box>
       <CreateChatbotDialog

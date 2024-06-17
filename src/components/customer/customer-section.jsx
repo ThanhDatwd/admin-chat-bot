@@ -225,7 +225,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
             >
               <Checkbox
                 edge="start"
-                disabled={paginatedUsers.length === 0}
+                disabled={users.length === 0}
                 checked={selectedAllUsers}
                 indeterminate={selectedSomeUsers}
                 onChange={handleSelectAllUsers}
@@ -297,7 +297,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
                     debounceHandleSearch(event.target.value);
                     setSearchByNameValue(event.target.value);
                   }}
-                  placeholder={t('Tên/ mã / người đại diện')}
+                  placeholder={t('Tên / người đại diện')}
                   value={searchByNameValue}
                   size="small"
                   variant="outlined"

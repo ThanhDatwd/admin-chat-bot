@@ -9,6 +9,7 @@ import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
+import * as qs from "qs";
 import {
   alpha,
   Avatar,
@@ -56,6 +57,9 @@ import { useDispatch } from 'src/store';
 import BulkDelete from '../common/bulk-delete';
 import AuthorizeChatbotQuery from './authorize-chatbot-query';
 import ChatbotFooterDropdown from './chatbot-footer-dropdown';
+import { debounce } from 'src/utils';
+import { setLoading } from 'src/slices/common';
+import { isVietnameseTones } from 'src/utils/validateString';
 
 export const CardWrapper = styled(Card)(
   ({ theme }) => `
@@ -80,37 +84,7 @@ export const CardWrapper = styled(Card)(
   `
 );
 
-const applyFilters = (bots, query, filters) => {
-  return bots?.filter((bot) => {
-    let matches = true;
-    if (query) {
-      const properties = ['botId', 'botName'];
-      let containsQuery = false;
-      properties.forEach((property) => {
-        if (bot[property].toLowerCase().includes(query.toLowerCase())) {
-          containsQuery = true;
-        }
-      });
-      if (filters.knowId && bot.knowId !== filters.knowId) {
-        matches = false;
-      }
-      if (!containsQuery) {
-        matches = false;
-      }
-    }
-    Object.keys(filters).forEach((key) => {
-      const value = filters[key];
-      if (value && bot[key] !== value) {
-        matches = false;
-      }
-    });
-    return matches;
-  });
-};
-const applyPagination = (bots, page, limit) => {
-  return bots.slice(page * limit, page * limit + limit);
-};
-const ChatbotSection = ({ bots }) => {
+const ChatbotSection = ({ bots,fetchData,totalCount }) => {
   const [selectedBot, setSelectedBot] = useState({});
   const [selectedItems, setSelectedItems] = useState([]);
   const [knowledges, setKnowledges] = useState([]);
@@ -118,11 +92,19 @@ const ChatbotSection = ({ bots }) => {
   const theme = useTheme();
   const mdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(6);
+  const [limit, setLimit] = useState(15);
+  const [searchByNameValue, setSearchByNameValue] = useState('');
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({
     knowId: null,
   });
+
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { knowledges: knowledgeData } = useSelector((state) => state.knowledge);
+  const [openAuthorizeChatbotQuery, setOpenAuthorizeChatbotQuery] = useState(false);
 
   const getBotRoleLabel = (labelName) => {
     return (
@@ -155,11 +137,7 @@ const ChatbotSection = ({ bots }) => {
     setSelectedItems([]);
   };
 
-  const handleQueryChange = (event) => {
-    event.persist();
-    setQuery(event.target.value);
-  };
-
+ 
   const handleSelectAllBots = (event) => {
     setSelectedItems(event.target.checked ? bots.map((bot) => bot.botId) : []);
   };
@@ -172,16 +150,7 @@ const ChatbotSection = ({ bots }) => {
     }
   };
 
-  const handlePageChange = (_event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleLimitChange = (event) => {
-    setLimit(parseInt(event.target.value));
-  };
-
-  const filteredBots = applyFilters(bots, query, filters);
-  const paginatedBots = applyPagination(filteredBots, page, limit);
+ 
   const selectedBulkActions = selectedItems.length > 0;
   const selectedSomeBots = selectedItems.length > 0 && selectedItems.length < bots.length;
   const selectedAllBots = selectedItems.length === bots.length;
@@ -189,10 +158,7 @@ const ChatbotSection = ({ bots }) => {
   const handleViewOrientation = (_event, newValue) => {
     setToggleView(newValue);
   };
-  const router = useRouter();
-  const dispatch = useDispatch();
-  const { knowledges: knowledgeData } = useSelector((state) => state.knowledge);
-  const [openAuthorizeChatbotQuery, setOpenAuthorizeChatbotQuery] = useState(false);
+ 
 
   useEffect(() => {
     const fetchKnowledgeData = async () => {
@@ -225,6 +191,66 @@ const ChatbotSection = ({ bots }) => {
     if (bots.length && knowledgeData) fetchKnowledgeData();
   }, [bots, knowledgeData]);
 
+
+  // HANDLE FILTER 
+  const handlePageChange = (_event, newPage) => {
+    setPage(newPage);
+    fetchData({ pageNumber: newPage, pageSize: limit }, filters);
+  };
+
+  const handleLimitChange = (event) => {
+    setLimit(parseInt(event.target.value));
+    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
+  };
+  const handleSearchByName = async (value) => {
+    handleChangeFilter({ search: value });
+  };
+  const debounceHandleSearch = debounce(handleSearchByName, 900);
+
+  const handleChangeFilter = (data) => {
+    let newFilter = { ...filters, ...data };
+    
+    for (const key in newFilter) {
+      if (newFilter[key] === '' || newFilter[key] === undefined) {
+        delete newFilter[key];
+      }
+    }
+
+    setFilters({...newFilter,accent:isVietnameseTones(newFilter.search)});
+    if (fetchData && filters) {
+      dispatch(setLoading(true));
+      const queryParams = qs.stringify({...newFilter,accent:isVietnameseTones(newFilter?.search)});
+      fetchData(
+        {
+          pageNumber: page,
+          pageSize: limit,
+        },
+        
+        queryParams
+      )
+      .finally(() => dispatch(setLoading(false)));
+    }
+    return newFilter;
+
+  };
+  const handleFilter = async () => {
+    if (fetchData && filters) {
+      dispatch(setLoading(true));
+      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.search)});
+      fetchData(
+        {
+          pageNumber: page,
+          pageSize: limit,
+        },
+        
+        queryParams
+      )
+      .finally(() => dispatch(setLoading(false)));
+    }
+  };
+  useEffect(() => {
+    fetchData({ pageNumber: page, pageSize: limit });
+  }, [isRefresh]);
   return (
     <>
       {mdUp ? (
@@ -299,6 +325,7 @@ const ChatbotSection = ({ bots }) => {
         <Box
           display="flex"
           alignItems="center"
+          width={'100%'}
         >
           {toggleView === 'grid_view' && (
             <Tooltip
@@ -311,7 +338,7 @@ const ChatbotSection = ({ bots }) => {
                 sx={{
                   mr: 1,
                 }}
-                disabled={paginatedBots.length === 0}
+                disabled={bots.length === 0}
                 checked={selectedAllBots}
                 indeterminate={selectedSomeBots}
                 onChange={handleSelectAllBots}
@@ -341,42 +368,64 @@ const ChatbotSection = ({ bots }) => {
               </Tooltip>
             </Stack>
           ) : (
-            <TextField
-              margin="none"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchTwoToneIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: query && (
-                  <InputAdornment
-                    sx={{
-                      mr: -0.7,
-                    }}
-                    position="end"
-                  >
-                    <IconButton
-                      color="error"
-                      aria-label="clear input"
-                      onClick={() => setQuery('')}
-                      edge="end"
-                      size="small"
-                      sx={{
-                        color: 'error.main',
-                      }}
-                    >
-                      <ClearRoundedIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              onChange={handleQueryChange}
-              placeholder={t('Filter results')}
-              value={query}
-              size="small"
-              variant="outlined"
-            />
+            <Stack
+              direction="row"
+              // flexWrap={'wrap'}
+              gap={'10px'}
+              width={'100%'}
+            >
+              <Box
+                width={{
+                  xs: '100%',
+                  md: '50%',
+                }}
+              >
+                <TextField
+                  margin="none"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchTwoToneIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: query && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          color="error"
+                          aria-label="clear input"
+                          onClick={() => setQuery('')}
+                          edge="end"
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                          }}
+                        >
+                          <ClearRoundedIcon fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  onChange={(event) => {
+                    debounceHandleSearch(event.target.value);
+                    setSearchByNameValue(event.target.value);
+                  }}
+                  placeholder={t('Tên bot')}
+                  value={searchByNameValue}
+                  size="small"
+                  variant="outlined"
+                />
+              </Box>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                sx={{ whiteSpace: 'nowrap' }}
+                onClick={handleFilter}
+              >
+                Tìm kiếm
+              </Button>
+            </Stack>
           )}
         </Box>
         <ToggleButtonGroup
@@ -397,7 +446,7 @@ const ChatbotSection = ({ bots }) => {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
-      {paginatedBots.length === 0 ? (
+      {bots.length === 0 ? (
         <>
           <Box
             sx={{ minHeight: '50vh' }}
@@ -445,7 +494,7 @@ const ChatbotSection = ({ bots }) => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {paginatedBots.map((bot) => {
+                      {bots.map((bot) => {
                         const isBotSelected = selectedItems.includes(bot.botId);
                         return (
                           <TableRow
@@ -538,38 +587,12 @@ const ChatbotSection = ({ bots }) => {
                   </Table>
                 </TableContainer>
               </Card>
-              <Box
-                pt={2}
-                sx={{
-                  '.MuiTablePagination-select': {
-                    py: 0.55,
-                  },
-                }}
-              >
-                <TablePagination
-                  component="div"
-                  count={filteredBots.length}
-                  onPageChange={handlePageChange}
-                  onRowsPerPageChange={handleLimitChange}
-                  page={page}
-                  rowsPerPage={limit}
-                  rowsPerPageOptions={[6, 9, 15]}
-                  slotProps={{
-                    select: {
-                      variant: 'outlined',
-                      size: 'small',
-                      sx: {
-                        p: 0,
-                      },
-                    },
-                  }}
-                />
-              </Box>
+              
             </>
           )}
           {toggleView === 'grid_view' && (
             <>
-              {paginatedBots.length === 0 ? (
+              {bots.length === 0 ? (
                 <Typography
                   sx={{
                     py: {
@@ -594,7 +617,7 @@ const ChatbotSection = ({ bots }) => {
                       sm: 3,
                     }}
                   >
-                    {paginatedBots.map((bot) => {
+                    {bots.map((bot) => {
                       const isBotSelected = selectedItems.includes(bot.botId);
                       return (
                         <Grid
@@ -713,51 +736,37 @@ const ChatbotSection = ({ bots }) => {
                       );
                     })}
                   </Grid>
-                  <Card
-                    sx={{
-                      p: 2,
-                      mt: 3,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      '.MuiTablePagination-select': {
-                        py: 0.55,
-                      },
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        component="span"
-                        variant="subtitle1"
-                      >
-                        {t('Showing')}
-                      </Typography>{' '}
-                      <b>{Math.min(limit, filteredBots.length)}</b> {t('of')}{' '}
-                      <b>{filteredBots.length}</b> <b>{t('bots')}</b>
-                    </Box>
-                    <TablePagination
-                      component="div"
-                      count={filteredBots.length}
-                      onPageChange={handlePageChange}
-                      onRowsPerPageChange={handleLimitChange}
-                      page={page}
-                      rowsPerPage={limit}
-                      labelRowsPerPage=""
-                      rowsPerPageOptions={[6, 9, 15]}
-                      slotProps={{
-                        select: {
-                          variant: 'outlined',
-                          size: 'small',
-                          sx: {
-                            p: 0,
-                          },
-                        },
-                      }}
-                    />
-                  </Card>
                 </>
               )}
+              <Box
+                pt={2}
+                sx={{
+                  '.MuiTablePagination-select': {
+                    py: 0.55,
+                  },
+                }}
+              >
+               <TablePagination
+          component="div"
+          count={totalCount}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleLimitChange}
+          page={page}
+          rowsPerPage={limit}
+          rowsPerPageOptions={[5, 15, 30, 50]}
+          slotProps={{
+            select: {
+              variant: 'outlined',
+              size: 'small',
+              sx: {
+                p: 0,
+              },
+            },
+          }}
+        />
+              </Box>
             </>
+            
           )}
           {!toggleView && (
             <Box

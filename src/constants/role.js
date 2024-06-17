@@ -6,3 +6,11 @@ export const ROLE = {
   USER: 'USER',
   PARTNER: 'PARTNER',
 };
+
+export const ROLE_ACCESS_ADMIN_PAGE = [
+  ROLE.ADMIN,
+  ROLE.SUPER_ADMIN,
+  ROLE.ORG_ADMIN,
+  ROLE.ORG_USER,
+  ROLE.PARTNER,
+];

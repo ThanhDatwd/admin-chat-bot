@@ -82,7 +82,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.user,
-            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.ORG_ADMIN],
           },
           {
             title: t('Gán quyền'),
@@ -95,7 +95,7 @@ export const useMenuItems = (currentRole) => {
               </Box>
             ),
             route: routes.decentralization,
-            roles: [ROLE.SUPER_ADMIN, ROLE.ADMIN, ROLE.ORG_ADMIN],
+            roles: [ROLE.ORG_ADMIN],
           },
           {
             title: t('Tạo tài khoản quản trị'),

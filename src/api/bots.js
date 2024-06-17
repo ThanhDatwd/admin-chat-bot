@@ -7,10 +7,10 @@ class BotsApi {
     );
     return data;
   }
-  getBotsByCustomer({ customerId, pagination }) {
+  getBotsByCustomer({ customerId, pagination ,filter}) {
     const data = getData(
       import.meta.env.VITE_API_URL_8085 +
-        `bot/customer?customerId=${customerId}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}`
+        `bot/customer/search?customerId=${customerId}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}&${filter}`
     );
     return data;
   }
