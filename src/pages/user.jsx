@@ -39,8 +39,9 @@ const UserPage = () => {
     async (paginate, filter) => {
       try {
         let response = null
-        response= await usersApi.getUserByOrg({
+         response = await usersApi.getUserByOrgWithGranted({
           customerId: currentAdmin.customerId,
+          botId: currentAdmin.customerId,
           pagination: {
             pageNumber: paginate.pageNumber,
             pageSize: paginate.pageSize,
