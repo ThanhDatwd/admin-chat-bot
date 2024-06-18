@@ -27,6 +27,7 @@ import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { CardAddActionDashed } from 'src/components/base/styles/card';
 import fileIcon from '../base/fileIcon';
+import { useSelector } from 'react-redux';
 
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
@@ -39,6 +40,8 @@ const formatBytes = (bytes, decimals = 2) => {
 
 const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
   const [uploadProgress, setUploadProgress] = useState({});
+  const currentAdmin = useSelector((state) => state.auth.admin);
+
   const { id } = useParams();
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -69,7 +72,7 @@ const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
             const nextProgress = Math.min(currentProgress + 10, 100);
             if (nextProgress === 100) {
               clearInterval(progressInterval);
-              handleUploadFile(file);
+              // handleUploadFile(file);
             }
             return {
               ...prevProgress,
@@ -89,7 +92,7 @@ const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
       const uploadResponse = await uploadFile({
         file: file,
         botId: id,
-        userId: 'ac140002-8f4e-1c14-818f-58c164f6000a',
+        userId: currentAdmin.id,
         isPublic: false,
       });
 
