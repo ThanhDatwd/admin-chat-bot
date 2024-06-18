@@ -37,6 +37,8 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
 
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
+  const currentAdmin = useSelector((state) => state.auth.admin);
+
   const theme = useTheme();
   const {
     control,
@@ -109,7 +111,7 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
     try {
       const uploadResponse = await uploadFile({
         file: file,
-        userId: 'ac140002-8f4e-1c14-818f-58c164f6000a',
+        userId: currentAdmin.id,
         isPublic: false,
         jsonData: json,
       });

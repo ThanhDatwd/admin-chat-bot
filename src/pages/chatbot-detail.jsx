@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import { botsApi } from 'src/api/bots';
 import { fetchUserFiles } from 'src/api/files';
@@ -33,6 +34,7 @@ const ChatbotDetail = () => {
   const { id } = useParams();
   const [botData, setBotData] = useState({});
   const [tableData, setTableData] = useState([]);
+  const currentAdmin = useSelector((state) => state.auth.admin);
   const getBots = useCallback(async () => {
     try {
       const response = await botsApi.getBot({ botId: id });
@@ -52,7 +54,7 @@ const ChatbotDetail = () => {
     try {
       const data = await fetchUserFiles({
         botId: id,
-        userId: 'ac140002-8f4e-1c14-818f-58c164f6000a',
+        userId: currentAdmin.id,
       });
       setTableData(data);
     } catch (error) {
