@@ -21,25 +21,29 @@ const UploadIconChatbot = ({ onUpload }) => {
   const [loading, setLoading] = useState(false);
   const currentAdmin = useSelector((state) => state.auth.admin);
 
+  const handleUploadFile = async (file) => {
+    try {
+      const response = await uploadFile({
+        file,
+        userId: currentAdmin.id,
+        isPublic: true,
+      });
+      console.log('File uploaded successfully:', response);
+
+      setAvatar(URL.createObjectURL(file));
+      onUpload(response?.fileLink);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onDrop = useCallback(async (acceptedFiles) => {
     setLoading(true);
     const file = acceptedFiles[0];
     if (file) {
-      try {
-        const response = await uploadFile({
-          file,
-          userId: currentAdmin.id,
-          isPublic: true,
-        });
-        console.log('File uploaded successfully:', response);
-
-        setAvatar(URL.createObjectURL(file));
-        onUpload(response?.fileLink);
-      } catch (error) {
-        console.error('Error uploading file:', error);
-      } finally {
-        setLoading(false);
-      }
+      handleUploadFile(file);
     }
   }, []);
   const { getRootProps, getInputProps } = useDropzone({

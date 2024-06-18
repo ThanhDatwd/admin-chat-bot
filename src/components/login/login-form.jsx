@@ -36,7 +36,7 @@ import { z } from 'zod';
 
 const schema = z.object({
   username: z.string().min(1, 'Invalid username '),
-  password: z.string().min(6, 'Password must be at least 6 characters long'), // Add password validation
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 function LoginForm() {
   const navigate = useNavigate();

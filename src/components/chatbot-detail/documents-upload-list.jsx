@@ -21,13 +21,13 @@ import {
 import { id } from 'date-fns/locale';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import { uploadFile } from 'src/api/files';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { CardAddActionDashed } from 'src/components/base/styles/card';
 import fileIcon from '../base/fileIcon';
-import { useSelector } from 'react-redux';
 
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
@@ -38,7 +38,7 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
+const DocumentsUploadList = ({ files, setFiles }) => {
   const [uploadProgress, setUploadProgress] = useState({});
   const currentAdmin = useSelector((state) => state.auth.admin);
 
@@ -72,7 +72,6 @@ const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
             const nextProgress = Math.min(currentProgress + 10, 100);
             if (nextProgress === 100) {
               clearInterval(progressInterval);
-              // handleUploadFile(file);
             }
             return {
               ...prevProgress,
@@ -86,23 +85,6 @@ const DocumentsUploadList = ({ files, setFiles, setUploadFiles }) => {
       simulateProgress(file);
     });
   }, []);
-
-  const handleUploadFile = async (file) => {
-    try {
-      const uploadResponse = await uploadFile({
-        file: file,
-        botId: id,
-        userId: currentAdmin.id,
-        isPublic: false,
-      });
-
-      delete uploadResponse.fileLink;
-
-      setUploadFiles((prevUploadFiles) => [...prevUploadFiles, uploadResponse]);
-    } catch (error) {
-      console.error('Error upload file:', error);
-    }
-  };
 
   const { getRootProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     onDrop,
