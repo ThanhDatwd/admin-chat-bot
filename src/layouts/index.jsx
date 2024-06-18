@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useCustomization } from 'src/hooks/use-customization';
 import { useMenuItems } from 'src/router/menu-data';
-import { getCurrentUser } from 'src/slices/auth';
+import { getCurrentUser, setAdminRole } from 'src/slices/auth';
 import { getKnowledge } from 'src/slices/knowledge';
 import { VerticalShellsDark } from './vertical-shells-dark';
 
@@ -13,6 +13,7 @@ export const Layout = (props) => {
   const customization = useCustomization();
   const isAuth = useSelector((state) => state.auth.isAuth);
   const currentAdmin = useSelector((state) => state.auth.admin);
+  const adminRoles = useSelector((state) => state.auth.adminRoles);
   const [currentRole, setCurrentRole] = useState([]);
   const dispatch = useDispatch();
 
@@ -29,7 +30,8 @@ export const Layout = (props) => {
       try {
         await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
         const response = await dispatch(getCurrentUser());
-        setCurrentRole(response.data?.authorities.map((item) => item.role) ?? []);
+        dispatch(setAdminRole(response.data?.authorities.map((item) => item.role) ?? []));
+
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -38,7 +40,7 @@ export const Layout = (props) => {
     fetchData();
   }, [dispatch]);
 
-  const menuItems = useMenuItems(currentRole);
+  const menuItems = useMenuItems(adminRoles);
 
   switch (customization.layout) {
     default:
