@@ -8,6 +8,7 @@ export const authSlice = createSlice({
   initialState: {
     admin: null,
     isAuth: !!storedUser,
+    adminRoles: [],
   },
   reducers: {
     setAmin: (state, action) => {
@@ -17,6 +18,9 @@ export const authSlice = createSlice({
     logOut: (state, action) => {
       state.admin = null;
       state.isAuth = false;
+    },
+    setAdminRole: (state, action) => {
+      state.adminRoles = action.payload;
     },
     // refreshToken: (state, action) => {
     //   refreshToken()
@@ -45,6 +49,6 @@ export const getCurrentUser = () => async (dispatch) => {
   }
 };
 
-export const { setAmin, logOut } = authSlice.actions;
+export const { setAmin, logOut ,setAdminRole } = authSlice.actions;
 export const { reducer } = authSlice;
 export default authSlice;

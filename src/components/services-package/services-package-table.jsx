@@ -286,14 +286,14 @@ const ServicesPackageTable = ({
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t('STT')}</TableCell>
-                    <TableCell>{t('Tên gói')}</TableCell>
-                    <TableCell>{t('Mã gói')}</TableCell>
-                    <TableCell>{t('Phí dịch vụ ( VNĐ )')}</TableCell>
-                    <TableCell>{t('Số lượng sử dụng')}</TableCell>
-                    <TableCell>{t('Hạn đăng ký')}</TableCell>
-                    <TableCell>{t('Trạng thái')}</TableCell>
-                    <TableCell>{t('Ngày tạo')}</TableCell>
+                    <TableCell >{t('STT')}</TableCell>
+                    <TableCell >{t('Tên gói')}</TableCell>
+                    <TableCell >{t('Mã gói')}</TableCell>
+                    <TableCell >{t('Phí dịch vụ (VNĐ)')}</TableCell>
+                    <TableCell >{t('Số lượng sử dụng')}</TableCell>
+                    <TableCell >{t('Hạn đăng ký')}</TableCell>
+                    <TableCell >{t('Trạng thái')}</TableCell>
+                    <TableCell >{t('Ngày tạo')}</TableCell>
                     <TableCell align="center">{t('Hành động')}</TableCell>
                   </TableRow>
                 </TableHead>

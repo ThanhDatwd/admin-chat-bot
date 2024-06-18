@@ -285,16 +285,17 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
           alignItems="center"
           justifyContent="space-between"
           flexWrap={'wrap'}
+          gap={'10px'}
         >
           <Stack
             direction="row"
-            flexWrap={'wrap'}
+            flexWrap={'nowrap'}
             gap={'10px'}
           >
             <TextField
               size="small"
-              style={{ width: 210 }}
-              placeholder="Tên / Mã lĩnh vực"
+              style={{ width: '100%',maxWidth:'100%' }}
+              placeholder="Tên / email người dùng"
               value={searchValue}
               onChange={(event) => {
                 debounceHandleSearch(event.target.value);
@@ -313,6 +314,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
               variant="contained"
               color="primary"
               size="small"
+              sx={{whiteSpace:'nowrap'}}
               onClick={handleFilter}
             >
               Tìm kiếm
