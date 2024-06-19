@@ -1,6 +1,5 @@
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import SyncOutlinedIcon from '@mui/icons-material/SyncOutlined';
-import * as qs from "qs";
 import {
   alpha,
   Box,
@@ -24,6 +23,7 @@ import {
   Typography,
 } from '@mui/material';
 import PropTypes from 'prop-types';
+import * as qs from 'qs';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -154,27 +154,27 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
-    
+
     for (const key in newFilter) {
       if (newFilter[key] === '' || newFilter[key] === undefined) {
         delete newFilter[key];
       }
     }
 
-    setFilters({...newFilter,accent:isVietnameseTones(newFilter.search)});
+    setFilters({ ...newFilter, accent: isVietnameseTones(newFilter.search) });
     return newFilter;
   };
 
   const handleFilter = async () => {
     if (fetchData && filters) {
       dispatch(setLoading(true));
-      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.search)});
+      const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
       fetchData(
         {
           pageNumber: page,
           pageSize: limit,
         },
-        
+
         queryParams
       ).finally(() => dispatch(setLoading(false)));
     }
@@ -183,11 +183,13 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   const handleSearchByName = async (value) => {
     handleChangeFilter({ search: value });
   };
-  const debounceHandleSearch = debounce(handleSearchByName, 900);
-
-  useEffect(() => {
-    handleRefresh();
-  }, [botId]);
+  const handleEnter = (event) => {
+    let enterKey = 13;
+    if (event.which == enterKey) {
+      event.preventDefault();
+      handleFilter();
+    }
+  };
 
   const handleRefresh = async () => {
     dispatch(setLoading(true));
@@ -196,51 +198,12 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
     setSelectedAllUserRoleUpdate(false);
     setAggregateUsers([]);
     setCountChange(0);
+    setSearchValue('');
     fetchData({ pageNumber: 0, pageSize: limit }).finally(() => {
       dispatch(setLoading(false));
     });
     setPage(0);
   };
-
-  useEffect(() => {
-    let cloneSelectUserRole = { ...selectedUsersRole };
-    const currentPage = Math.ceil(Object.keys(cloneSelectUserRole).length / limit);
-    // if (currentPage === 0 || currentPage <= page) {
-    users.forEach((item) => {
-      cloneSelectUserRole = {
-        ...cloneSelectUserRole,
-        [item.userId]: {
-          ...cloneSelectUserRole[item.userId],
-          canQuery: cloneSelectUserRole[item.userId]?.canQuery ?? item.canQuery ?? false,
-          canUpdate: cloneSelectUserRole[item.userId]?.canUpdate ?? item.canUpdate ?? false,
-          canDelete: cloneSelectUserRole[item.userId]?.canDelete ?? item.canDelete ?? false,
-          userId: item.userId,
-          customerId: currentAdmin.customerId,
-          botId: currentBotId,
-          userBotId:item.userBotId
-        },
-      };
-    });
-    setAggregateUsers((prev) => [...prev, ...users]);
-    setSelectUsersRole((prev) => {
-      return { ...prev, ...cloneSelectUserRole };
-    });
-    // }
-    setSelectedAllUserRoleQuery(
-      Object.keys(cloneSelectUserRole).length > 0
-        ? users.every((item) => cloneSelectUserRole[item.userId]?.canQuery === true)
-        : false
-    );
-    setSelectedAllUserRoleUpdate(
-      Object.keys(cloneSelectUserRole).length > 0
-        ? users.every((item) => cloneSelectUserRole[item.userId]?.canUpdate === true)
-        : false
-    );
-
-    // } else {
-    //   toast.error('please chose bot');
-    // }
-  }, [users]);
 
   const handleGrantPermissions = async () => {
     try {
@@ -277,6 +240,47 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
       count: Object.keys(compareData).length,
     };
   };
+
+  useEffect(() => {
+    handleRefresh();
+  }, [botId]);
+
+  useEffect(() => {
+    let cloneSelectUserRole = { ...selectedUsersRole };
+    const currentPage = Math.ceil(Object.keys(cloneSelectUserRole).length / limit);
+    // if (currentPage === 0 || currentPage <= page) {
+    users.forEach((item) => {
+      cloneSelectUserRole = {
+        ...cloneSelectUserRole,
+        [item.userId]: {
+          ...cloneSelectUserRole[item.userId],
+          canQuery: cloneSelectUserRole[item.userId]?.canQuery ?? item.canQuery ?? false,
+          canUpdate: cloneSelectUserRole[item.userId]?.canUpdate ?? item.canUpdate ?? false,
+          canDelete: cloneSelectUserRole[item.userId]?.canDelete ?? item.canDelete ?? false,
+          userId: item.userId,
+          customerId: currentAdmin.customerId,
+          botId: currentBotId,
+          userBotId: item.userBotId,
+        },
+      };
+    });
+    setAggregateUsers((prev) => [...prev, ...users]);
+    setSelectUsersRole((prev) => {
+      return { ...prev, ...cloneSelectUserRole };
+    });
+    // }
+    setSelectedAllUserRoleQuery(
+      Object.keys(cloneSelectUserRole).length > 0
+        ? users.every((item) => cloneSelectUserRole[item.userId]?.canQuery === true)
+        : false
+    );
+    setSelectedAllUserRoleUpdate(
+      Object.keys(cloneSelectUserRole).length > 0
+        ? users.every((item) => cloneSelectUserRole[item.userId]?.canUpdate === true)
+        : false
+    );
+  }, [users]);
+
   return (
     <>
       <Card>
@@ -297,13 +301,14 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
           >
             <TextField
               size="small"
-              style={{ width: '100%',maxWidth:'100%' }}
+              style={{ width: '100%', maxWidth: '100%' }}
               placeholder="Tên / email người dùng"
               value={searchValue}
               onChange={(event) => {
-                debounceHandleSearch(event.target.value);
+                handleSearchByName(event.target.value);
                 setSearchValue(event.target.value);
               }}
+              onKeyPress={handleEnter}
               variant="outlined"
               InputProps={{
                 startAdornment: (
@@ -317,7 +322,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
               variant="contained"
               color="primary"
               size="small"
-              sx={{whiteSpace:'nowrap'}}
+              sx={{ whiteSpace: 'nowrap' }}
               onClick={handleFilter}
             >
               Tìm kiếm
