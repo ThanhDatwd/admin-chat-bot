@@ -145,12 +145,15 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
-    fetchData({ pageNumber: newPage, pageSize: limit }, filters);
+    const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
+    fetchData({ pageNumber: newPage, pageSize: limit }, queryParams);
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
-    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
+    setPage(0);
+    const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
+    fetchData({ pageNumber: 0, pageSize: parseInt(event.target.value) }, queryParams);
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
@@ -322,7 +325,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
               variant="contained"
               color="primary"
               size="small"
-              sx={{ whiteSpace: 'nowrap' }}
+              sx={{ whiteSpace: 'nowrap', minWidth: 'unset' }}
               onClick={handleFilter}
             >
               Tìm kiếm

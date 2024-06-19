@@ -9,7 +9,6 @@ import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
-import * as qs from "qs";
 import {
   alpha,
   Avatar,
@@ -45,6 +44,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+import * as qs from 'qs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -52,14 +52,14 @@ import { knowledgesApi } from 'src/api/knowledges';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { TabsShadow } from 'src/components/base/styles/tabs';
 import { useRouter } from 'src/hooks/use-router';
+import { setLoading } from 'src/slices/common';
 import { getKnowledge, setKnowledge } from 'src/slices/knowledge';
 import { useDispatch } from 'src/store';
+import { debounce } from 'src/utils';
+import { isVietnameseTones } from 'src/utils/validateString';
 import BulkDelete from '../common/bulk-delete';
 import AuthorizeChatbotQuery from './authorize-chatbot-query';
 import ChatbotFooterDropdown from './chatbot-footer-dropdown';
-import { debounce } from 'src/utils';
-import { setLoading } from 'src/slices/common';
-import { isVietnameseTones } from 'src/utils/validateString';
 
 export const CardWrapper = styled(Card)(
   ({ theme }) => `
@@ -84,7 +84,7 @@ export const CardWrapper = styled(Card)(
   `
 );
 
-const ChatbotSection = ({ bots,fetchData,totalCount }) => {
+const ChatbotSection = ({ bots, fetchData, totalCount }) => {
   const [selectedBot, setSelectedBot] = useState({});
   const [selectedItems, setSelectedItems] = useState([]);
   const [knowledges, setKnowledges] = useState([]);
@@ -137,7 +137,6 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
     setSelectedItems([]);
   };
 
- 
   const handleSelectAllBots = (event) => {
     setSelectedItems(event.target.checked ? bots.map((bot) => bot.botId) : []);
   };
@@ -150,7 +149,6 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
     }
   };
 
- 
   const selectedBulkActions = selectedItems.length > 0;
   const selectedSomeBots = selectedItems.length > 0 && selectedItems.length < bots.length;
   const selectedAllBots = selectedItems.length === bots.length;
@@ -158,7 +156,6 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
   const handleViewOrientation = (_event, newValue) => {
     setToggleView(newValue);
   };
- 
 
   useEffect(() => {
     const fetchKnowledgeData = async () => {
@@ -191,61 +188,63 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
     if (bots.length && knowledgeData) fetchKnowledgeData();
   }, [bots, knowledgeData]);
 
-
-  // HANDLE FILTER 
+  // HANDLE FILTER
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
-    fetchData({ pageNumber: newPage, pageSize: limit }, filters);
+    const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
+    fetchData({ pageNumber: newPage, pageSize: limit }, queryParams);
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
-    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
+    setPage(0);
+    const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
+    fetchData({ pageNumber: 0, pageSize: parseInt(event.target.value) }, queryParams);
   };
+
   const handleSearchByName = async (value) => {
     handleChangeFilter({ search: value });
   };
-  const debounceHandleSearch = debounce(handleSearchByName, 900);
 
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
-    
+
     for (const key in newFilter) {
       if (newFilter[key] === '' || newFilter[key] === undefined) {
         delete newFilter[key];
       }
     }
 
-    setFilters({...newFilter,accent:isVietnameseTones(newFilter.search)});
+    setFilters({ ...newFilter, accent: isVietnameseTones(newFilter.search) });
     if (fetchData && filters) {
       dispatch(setLoading(true));
-      const queryParams = qs.stringify({...newFilter,accent:isVietnameseTones(newFilter?.search)});
+      const queryParams = qs.stringify({
+        ...newFilter,
+        accent: isVietnameseTones(newFilter?.search),
+      });
       fetchData(
         {
           pageNumber: page,
           pageSize: limit,
         },
-        
+
         queryParams
-      )
-      .finally(() => dispatch(setLoading(false)));
+      ).finally(() => dispatch(setLoading(false)));
     }
     return newFilter;
-
   };
   const handleFilter = async () => {
     if (fetchData && filters) {
       dispatch(setLoading(true));
-      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.search)});
+      const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
       fetchData(
         {
           pageNumber: page,
           pageSize: limit,
         },
-        
+
         queryParams
-      )
-      .finally(() => dispatch(setLoading(false)));
+      ).finally(() => dispatch(setLoading(false)));
     }
   };
   const handleEnter = (event) => {
@@ -428,10 +427,10 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
                 variant="contained"
                 color="primary"
                 size="small"
-                sx={{ whiteSpace: 'nowrap' }}
+                sx={{ whiteSpace: 'nowrap', minWidth: 'unset' }}
                 onClick={handleFilter}
               >
-                {t("Tìm kiếm")}
+                {t('Tìm kiếm')}
               </Button>
             </Stack>
           )}
@@ -595,7 +594,6 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
                   </Table>
                 </TableContainer>
               </Card>
-              
             </>
           )}
           {toggleView === 'grid_view' && (
@@ -754,27 +752,26 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
                   },
                 }}
               >
-               <TablePagination
-          component="div"
-          count={totalCount}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleLimitChange}
-          page={page}
-          rowsPerPage={limit}
-          rowsPerPageOptions={[5, 15, 30, 50]}
-          slotProps={{
-            select: {
-              variant: 'outlined',
-              size: 'small',
-              sx: {
-                p: 0,
-              },
-            },
-          }}
-        />
+                <TablePagination
+                  component="div"
+                  count={totalCount}
+                  onPageChange={handlePageChange}
+                  onRowsPerPageChange={handleLimitChange}
+                  page={page}
+                  rowsPerPage={limit}
+                  rowsPerPageOptions={[5, 15, 30, 50]}
+                  slotProps={{
+                    select: {
+                      variant: 'outlined',
+                      size: 'small',
+                      sx: {
+                        p: 0,
+                      },
+                    },
+                  }}
+                />
               </Box>
             </>
-            
           )}
           {!toggleView && (
             <Box
