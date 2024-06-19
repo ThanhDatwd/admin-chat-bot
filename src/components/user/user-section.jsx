@@ -174,7 +174,13 @@ const UserTable = ({ users, fetchData, totalCount }) => {
   const handleSearchByName = async (value) => {
     handleChangeFilter({ search: value });
   };
-  const debounceHandleSearch = debounce(handleSearchByName, 900);
+  const handleEnter = (event) => {
+    let enterKey = 13;
+    if (event.which == enterKey) {
+      event.preventDefault();
+      handleFilter();
+    }
+  };
 
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
@@ -273,9 +279,10 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                     ),
                   }}
                   onChange={(event) => {
-                    debounceHandleSearch(event.target.value);
+                    handleSearchByName(event.target.value);
                     setSearchByNameValue(event.target.value);
                   }}
+                  onKeyPress={handleEnter}
                   placeholder={t('Tên / người đại diện')}
                   value={searchByNameValue}
                   size="small"
@@ -289,7 +296,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                 sx={{ whiteSpace: 'nowrap' }}
                 onClick={handleFilter}
               >
-                Tìm kiếm
+                {t('Tìm kiếm')}
               </Button>
             </Stack>
           )}
@@ -681,13 +688,14 @@ const UserTable = ({ users, fetchData, totalCount }) => {
           }}
         />
       </Box>
-      {currentUser && (
-        {/* <UpdateUserDialog
+      {currentUser &&
+        {
+          /* <UpdateUserDialog
           user={currentUser}
           open={openDialogUpdate}
           onClose={() => setOpenDialogUpdate(false)}
-        /> */}
-      )}
+        /> */
+        }}
     </>
   );
 };

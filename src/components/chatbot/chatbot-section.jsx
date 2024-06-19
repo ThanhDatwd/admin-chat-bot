@@ -248,6 +248,13 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
       .finally(() => dispatch(setLoading(false)));
     }
   };
+  const handleEnter = (event) => {
+    let enterKey = 13;
+    if (event.which == enterKey) {
+      event.preventDefault();
+      handleFilter();
+    }
+  };
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
@@ -407,9 +414,10 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
                     ),
                   }}
                   onChange={(event) => {
-                    debounceHandleSearch(event.target.value);
+                    handleSearchByName(event.target.value);
                     setSearchByNameValue(event.target.value);
                   }}
+                  onKeyPress={handleEnter}
                   placeholder={t('Tên bot')}
                   value={searchByNameValue}
                   size="small"
@@ -423,7 +431,7 @@ const ChatbotSection = ({ bots,fetchData,totalCount }) => {
                 sx={{ whiteSpace: 'nowrap' }}
                 onClick={handleFilter}
               >
-                Tìm kiếm
+                {t("Tìm kiếm")}
               </Button>
             </Stack>
           )}
