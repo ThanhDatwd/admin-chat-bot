@@ -41,11 +41,11 @@ const UserPage = () => {
         let response = null
          response = await usersApi.getUserByOrgWithGranted({
           customerId: currentAdmin.customerId,
-          botId: currentAdmin.customerId,
           pagination: {
             pageNumber: paginate.pageNumber,
             pageSize: paginate.pageSize,
           },
+          filter
         });
         if (isMountedRef()) {
           setUsers(response?.content);

@@ -7,6 +7,7 @@ import {
   alpha,
   AppBar,
   Avatar,
+  Box,
   Divider,
   IconButton,
   Stack,
@@ -19,6 +20,7 @@ import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { Logo } from 'src/components/base/logo';
 import { PulseBadge } from 'src/components/base/styles/pulse-badge';
+import { ProfileDropdown } from 'src/components/user/profile-dropdown';
 import { useSidebarContext } from 'src/contexts/sidebar-context';
 import { useDialog } from 'src/hooks/use-dialog';
 import { usePopover } from 'src/hooks/use-popover';
@@ -116,7 +118,6 @@ export const Header = (props) => {
         >
           <Stack
             display="flex"
-            spacing={0.5}
             direction="row"
             alignItems="center"
           >
@@ -193,37 +194,39 @@ export const Header = (props) => {
               </>
             )}
           </Stack>
-          <Stack
-            gap={1}
-            alignItems={'center'}
-            direction={'row'}
-          >
-            <IconButton
+          <Box>
+            <Stack
+              gap={1}
+              alignItems={'center'}
+              direction={'row'}
               id="profile-button"
-              sx={{
-                p: 0,
-                '&:hover': {
-                  boxShadow: `0 0 0 3px ${theme.palette.primary.main}`,
-                },
-              }}
-              color="inherit"
-              aria-controls={popover.open ? 'profile-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={popover.open ? 'true' : undefined}
               onClick={popover.handleOpen}
               ref={popover.anchorRef}
             >
-              <Avatar
-                src={''}
+               <Avatar
+                src={currentAmin.avatarUrl}
                 sx={{
                   borderRadius: 'inherit',
                   height: 36,
                   width: 36,
                 }}
               />
-            </IconButton>
-            <Typography>{currentAmin?.username}</Typography>
-          </Stack>
+              {lgUp &&<Typography>{currentAmin?.username}</Typography>}
+            </Stack>
+            <ProfileDropdown
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'center',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+              anchorEl={popover.anchorRef.current}
+              onClose={popover.handleClose}
+              open={popover.open}
+            />
+          </Box>
           {!lgUp && (
             <IconButton
               onClick={onMobileNav}

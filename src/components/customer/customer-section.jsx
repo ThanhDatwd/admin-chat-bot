@@ -153,14 +153,14 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
       }
     }
 
-    setFilters({...newFilter,accent:isVietnameseTones(newFilter.customerName)});
+    setFilters({...newFilter,accent:isVietnameseTones(newFilter.search)});
     return newFilter;
   };
 
   const handleFilter = async () => {
     if (fetchData && filters) {
       dispatch(setLoading(true));
-      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.customerName)});
+      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.search)});
       fetchData(
         {
           pageNumber: page,
@@ -176,7 +176,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
   };
 
   const handleSearchByName = async (value) => {
-    handleChangeFilter({ customerName: value });
+    handleChangeFilter({ search: value });
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
   const handleDeleteCustomer = async (customerId) => {
@@ -186,7 +186,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
       toast.success(t(response.data));
       dispatch(setRefresh(!isRefresh));
     } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      toast.error(t('Something wrong please try again!'));
       console.log(error);
     }
   };
@@ -297,7 +297,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
                     debounceHandleSearch(event.target.value);
                     setSearchByNameValue(event.target.value);
                   }}
-                  placeholder={t('Tên / người đại diện')}
+                  placeholder={t('Họ tên / email người dùng ')}
                   value={searchByNameValue}
                   size="small"
                   variant="outlined"

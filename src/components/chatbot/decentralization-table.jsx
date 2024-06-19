@@ -1,7 +1,3 @@
-import { DeleteRounded } from '@mui/icons-material';
-import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import {
   alpha,
@@ -11,16 +7,10 @@ import {
   CardContent,
   CardHeader,
   Checkbox,
-  Chip,
   CircularProgress,
   debounce,
   Divider,
-  FormControl,
-  Grid,
-  IconButton,
   InputAdornment,
-  MenuItem,
-  Select,
   Stack,
   styled,
   Table,
@@ -31,18 +21,13 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Tooltip,
-  Typography,
+  Typography
 } from '@mui/material';
-import { format } from 'date-fns';
-import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLoading, setRefresh } from 'src/slices/common';
-import DialogConfirmDelete from '../common/dialog-confirm-delete';
+import { setLoading } from 'src/slices/common';
 
 // import CreateUserDialog from './create-user-dialog';
 // import { UpdateUser } from './update-user';
@@ -159,18 +144,7 @@ const BotUsersTable = ({ users = [], fetchData, totalCount }) => {
     handleChangeFilter({ customerName: value });
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
-  const handleDeleteUser = async (customerId) => {
-    try {
-      // const response = await customersApi.deleteCustomer(customerId);
-
-      // toast.success(t(response.data));
-      dispatch(setRefresh(!isRefresh));
-    } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
-      console.log(error);
-    }
-  };
-
+  
   useEffect(() => {
     fetchData&&fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);

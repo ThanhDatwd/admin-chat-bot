@@ -1,5 +1,6 @@
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import SyncOutlinedIcon from '@mui/icons-material/SyncOutlined';
+import * as qs from "qs";
 import {
   alpha,
   Box,
@@ -29,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { botsApi } from 'src/api/bots';
 import { setLoading } from 'src/slices/common';
+import { isVietnameseTones } from 'src/utils/validateString';
 
 // import CreateUserDialog from './create-field-dialog';
 // import { UpdateUser } from './update-field';
@@ -152,33 +154,34 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
-
+    
     for (const key in newFilter) {
       if (newFilter[key] === '' || newFilter[key] === undefined) {
         delete newFilter[key];
       }
     }
 
-    setFilters(newFilter);
+    setFilters({...newFilter,accent:isVietnameseTones(newFilter.search)});
     return newFilter;
   };
 
   const handleFilter = async () => {
     if (fetchData && filters) {
       dispatch(setLoading(true));
+      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.search)});
       fetchData(
         {
           pageNumber: page,
           pageSize: limit,
         },
-        filters
-      ).finally(() => {
-        dispatch(setLoading(false));
-      });
+        
+        queryParams
+      ).finally(() => dispatch(setLoading(false)));
     }
   };
+
   const handleSearchByName = async (value) => {
-    handleChangeFilter({ customerName: value });
+    handleChangeFilter({ search: value });
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
 

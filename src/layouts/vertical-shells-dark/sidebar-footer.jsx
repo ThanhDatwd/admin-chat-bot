@@ -5,6 +5,7 @@ import { alpha, Box, IconButton, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { authApi } from 'src/api/auth';
 import api from 'src/api/axios';
 import { TooltipLight } from 'src/components/base/styles/tooltips';
 import { logOut } from 'src/slices/auth';
@@ -46,7 +47,7 @@ const SidebarFooter = () => {
 
   const handleLogout = async () => {
     try {
-      await api.post(import.meta.env.VITE_API_AUTH_URL_8080 + 'auth/logout');
+      await authApi.logout();
       dispatch(logOut());
 
       localStorage.removeItem('accessToken');

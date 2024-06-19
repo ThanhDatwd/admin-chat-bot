@@ -15,10 +15,10 @@ class UserApi {
     );
     return response;
   }
-  async getUserByOrgWithGranted({ customerId, botId, pagination }) {
+  async getUserByOrgWithGranted({ customerId, botId, pagination,filter }) {
     const response = await getData(
       import.meta.env.VITE_API_URL_8086 +
-        `customer/users?customerId=${customerId}&botId=${botId}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}`
+        `customer/users/search?customerId=${customerId}&${botId?`botId=${botId}&`:'&'}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}&${filter}`
     );
     return response;
   }

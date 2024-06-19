@@ -98,7 +98,7 @@ function RegisterForm() {
 
       navigate('/login');
     } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      toast.error(t('Something wrong please try again!'));
       console.error('Login failed:', error);
     } finally {
       dispatch(setLoading(false));

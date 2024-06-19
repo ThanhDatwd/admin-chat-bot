@@ -35,6 +35,7 @@ const DecentralizationPage = () => {
               pageNumber: paginate.pageNumber,
               pageSize: paginate.pageSize,
             },
+            filter
           });
           if (isMountedRef()) {
             setUsers(response.content);
