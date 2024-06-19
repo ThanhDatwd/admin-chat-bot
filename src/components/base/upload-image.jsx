@@ -1,6 +1,9 @@
 import { CloseRounded } from '@mui/icons-material';
+import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
+import AutoFixHighRoundedIcon from '@mui/icons-material/AutoFixHighRounded';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {
+  alpha,
   Badge,
   Box,
   Button,
@@ -9,34 +12,20 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useSelector } from 'react-redux';
 import { uploadFile } from 'src/api/files';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 
-const UploadImage = ({ file, setFile }) => {
-  const [avatar, setAvatar] = useState('');
+const UploadImage = ({ currentUrl, setFile, label }) => {
+  const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
-  const currentAdmin = useSelector((state) => state.auth.admin);
 
-  const handleUploadFile = async (file) => {
-    try {
-      const response = await uploadFile({
-        file,
-        userId: currentAdmin.id,
-        isPublic: true,
-      });
-      console.log('File uploaded successfully:', response);
-
-      //   onUpload(response?.fileLink);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    setImagePreview(currentUrl);
+  }, [currentUrl]);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     setLoading(true);
@@ -44,7 +33,7 @@ const UploadImage = ({ file, setFile }) => {
     if (file) {
       setFile(file);
       setTimeout(() => {
-        setAvatar(URL.createObjectURL(file));
+        setImagePreview(URL.createObjectURL(file));
         setLoading(false);
       }, 2000);
     }
@@ -57,8 +46,8 @@ const UploadImage = ({ file, setFile }) => {
     maxFiles: 1,
   });
   const removeImage = () => {
-    setAvatar('');
-    if (avatar) URL.revokeObjectURL(avatar);
+    setImagePreview('');
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
   };
   return (
     <FormControl
@@ -71,7 +60,7 @@ const UploadImage = ({ file, setFile }) => {
         component="label"
         fontWeight={500}
       >
-        Icon
+        {label}
       </Typography>
       <Stack
         spacing={2}
@@ -79,22 +68,28 @@ const UploadImage = ({ file, setFile }) => {
         alignItems="center"
       >
         <Badge
-          overlap="circular"
           anchorOrigin={{
-            vertical: 'bottom',
+            vertical: 'top',
             horizontal: 'right',
           }}
+          sx={{
+            '& .MuiBadge-badge': {
+              top: 10,
+              right: 10,
+            },
+          }}
           badgeContent={
-            avatar && (
+            imagePreview && (
               <ButtonIcon
                 variant="contained"
-                color="secondary"
+                color="warning"
+                size="small"
                 startIcon={<CloseRounded fontSize="inherit" />}
                 sx={{
                   borderRadius: '50%',
-                  boxShadow: (theme) => theme.shadows[18],
+                  boxShadow: (theme) =>
+                    theme.palette.mode === 'dark' ? theme.shadows[13] : theme.shadows[18],
                 }}
-                size="small"
                 onClick={removeImage}
               />
             )
@@ -102,84 +97,77 @@ const UploadImage = ({ file, setFile }) => {
         >
           <AvatarState
             {...getRootProps()}
-            src={avatar}
-            state="primary"
+            src={imagePreview}
+            variant="rounded"
             isSoft
             sx={{
-              width: 74,
-              height: 74,
+              width: 124,
+              height: 124,
+              boxShadow: (theme) =>
+                theme.palette.mode === 'dark' ? theme.shadows[13] : theme.shadows[18],
               border: '2px solid transparent',
+              borderColor: 'background.paper',
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark' ? 'neutral.900' : 'neutral.50',
               '&:hover': {
-                borderStyle: 'dashed',
-                borderColor: 'currentcolor',
+                borderColor: 'currentColor',
                 cursor: 'pointer',
               },
             }}
             alt="Avatar Preview"
           >
-            {!avatar && loading ? (
-              <CircularProgress size={34} />
-            ) : (
-              <CloudUploadIcon fontSize="small" />
-            )}
+            {!imagePreview &&
+              (loading ? (
+                <CircularProgress size={34} />
+              ) : (
+                <AccountCircleRoundedIcon
+                  sx={{
+                    fontSize: 44,
+                    color: 'neutral.500',
+                  }}
+                />
+              ))}
           </AvatarState>
+          {imagePreview && (
+            <Box
+              {...getRootProps()}
+              sx={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                borderRadius: (theme) => theme.shape.borderRadius + 'px',
+                left: 0,
+                top: 0,
+                backgroundColor: (theme) => alpha(theme.palette.neutral[900], 0.7),
+                zIndex: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                opacity: loading ? 1 : 0,
+                '&:hover': {
+                  cursor: 'pointer',
+                  opacity: 1,
+                },
+              }}
+            >
+              {loading ? (
+                <CircularProgress
+                  sx={{
+                    color: 'common.white',
+                  }}
+                  size={34}
+                />
+              ) : (
+                <AutoFixHighRoundedIcon
+                  fontSize="large"
+                  sx={{
+                    color: 'common.white',
+                  }}
+                />
+              )}
+            </Box>
+          )}
         </Badge>
-
-        <Box>
-          <input {...getInputProps()} />
-          <Button
-            variant="outlined"
-            color="secondary"
-            size="small"
-            component="span"
-            {...getRootProps()}
-            disabled={loading}
-            sx={{
-              px: loading && 0,
-            }}
-          >
-            {loading ? 'Please wait...' : 'Upload'}
-          </Button>
-          <Typography
-            variant="subtitle2"
-            color="text.secondary"
-            sx={{
-              mt: 0.5,
-            }}
-          >
-            Accepted files:{' '}
-            <Typography
-              color="text.primary"
-              fontWeight={500}
-              component="span"
-            >
-              .jpeg
-            </Typography>
-            ,{' '}
-            <Typography
-              color="text.primary"
-              fontWeight={500}
-              component="span"
-            >
-              .jpg
-            </Typography>
-            ,{' '}
-            <Typography
-              color="text.primary"
-              fontWeight={500}
-              component="span"
-            >
-              .png
-            </Typography>
-            .
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'inline-block',
-            position: 'relative',
-          }}
-        ></Box>
       </Stack>
     </FormControl>
   );

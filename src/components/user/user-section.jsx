@@ -287,7 +287,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                     setSearchByNameValue(event.target.value);
                   }}
                   onKeyPress={handleEnter}
-                  placeholder={t('Tên / người đại diện')}
+                  placeholder={t('Họ và tên / email người dùng')}
                   value={searchByNameValue}
                   size="small"
                   variant="outlined"

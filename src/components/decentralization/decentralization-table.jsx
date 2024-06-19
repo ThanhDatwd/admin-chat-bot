@@ -301,11 +301,15 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
             direction="row"
             flexWrap={'nowrap'}
             gap={'10px'}
+            width={{
+                  xs: '100%',
+                  md: '50%',
+                }}
           >
             <TextField
               size="small"
-              style={{ width: '100%', maxWidth: '100%' }}
-              placeholder="Tên / email người dùng"
+              style={{width:'100%',maxWidth: '100%' }}
+              placeholder="Họ và tên  / email người dùng"
               value={searchValue}
               onChange={(event) => {
                 handleSearchByName(event.target.value);

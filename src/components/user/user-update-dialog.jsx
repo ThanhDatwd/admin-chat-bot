@@ -21,13 +21,13 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import api from 'src/api/axios';
+import { uploadFile } from 'src/api/files';
 import { usersApi } from 'src/api/user';
+import { getCurrentUser } from 'src/slices/auth';
 import { setLoading, setRefresh } from 'src/slices/common';
 import { z } from 'zod';
 import UploadImage from '../base/upload-image';
 import { DialogCustom } from '../common/dialog-custom';
-import { uploadFile } from 'src/api/files';
-import { getCurrentUser } from 'src/slices/auth';
 
 const schema = z.object({
   firstname: z
@@ -61,8 +61,7 @@ function UpdateUserDialog({ open, onClose }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [file, setFile] = useState();
-  
-  
+
   const currentAdmin = useSelector((state) => state.auth.admin);
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.isRefresh);
@@ -90,18 +89,16 @@ function UpdateUserDialog({ open, onClose }) {
       if (file) {
         uploadResponse = await handleUploadFile(file);
       }
-      console.log(uploadResponse)
-      const dataRequest ={
+      console.log(uploadResponse);
+      const dataRequest = {
         ...data,
-        avatar:uploadResponse?.fileLink??currentAdmin?.avatarUrl??null
-      }
-      console.log(dataRequest)
+        avatar: uploadResponse?.fileLink ?? currentAdmin?.avatarUrl ?? null,
+      };
       const response = await usersApi.UpdateUser(dataRequest);
-      dispatch(getCurrentUser())
+      dispatch(getCurrentUser());
       dispatch(setRefresh(!isRefresh));
       toast.success(t('Cập nhật thành công'));
-      onClose()
-
+      onClose();
     } catch (error) {
       toast.error(t('Something wrong please try again!'));
       console.error('Login failed:', error);
@@ -305,7 +302,8 @@ function UpdateUserDialog({ open, onClose }) {
           </Grid>
           <Grid xs={12}>
             <UploadImage
-              file={file}
+              label={'Avatar'}
+              currentUrl={currentAdmin?.avatarUrl}
               setFile={setFile}
             />
           </Grid>

@@ -39,7 +39,6 @@ export const getCurrentUser = () => async (dispatch) => {
   try {
     const response = await authApi.whoami();
     dispatch(setAmin(response.data));
-    console.log('this is whoami', response.data);
     return response;
   } catch (error) {
     dispatch(logOut());
