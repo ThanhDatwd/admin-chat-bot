@@ -77,8 +77,8 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
         endDate: data.endDate,
         beforeTax: data.beforeTax,
         taxRate: Number(data.taxRate) / 100,
-        fileId: uploadResponse?.objectId ?? null,
-        fileName: uploadResponse?.fileName ?? null,
+        fileId: uploadResponse?.objectId ?? contract?.objectId??null,
+        fileName: uploadResponse?.fileName ??contract?.fileName?? null,
       };
 
       let res = null;
@@ -89,7 +89,6 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
           contractId: contract.id,
         });
       } else {
-        console.log(dataRequest);
         res = await customersApi.createCustomerContract(dataRequest);
       }
       if (res.metadata.message === 'OK') {
@@ -101,7 +100,7 @@ const CreateCustomerContractDialog = ({ open, onClose, onUpdate, customer, contr
       onClose();
       setFiles([]);
     } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      toast.error(t('Something wrong please try again!'));
       console.error('Error customer:', error);
     } finally {
       dispatch(setLoading(false));

@@ -24,7 +24,10 @@ import api from 'src/api/axios';
 import { usersApi } from 'src/api/user';
 import { setLoading, setRefresh } from 'src/slices/common';
 import { z } from 'zod';
+import UploadImage from '../base/upload-image';
 import { DialogCustom } from '../common/dialog-custom';
+import { uploadFile } from 'src/api/files';
+import { getCurrentUser } from 'src/slices/auth';
 
 const schema = z.object({
   firstname: z
@@ -53,9 +56,14 @@ const schema = z.object({
 //   message: 'Passwords do not match',
 //   path: ['repeatPassword'], // Set the path to the field that should cause the error
 // });
-function UpdateUserDialog({ open, onClose, onUpdate, user }) {
+function UpdateUserDialog({ open, onClose }) {
+  const currentAmin = useSelector((state) => state.auth.admin);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [file, setFile] = useState();
+  
+  
+  const currentAdmin = useSelector((state) => state.auth.admin);
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.isRefresh);
   const {
@@ -74,36 +82,55 @@ function UpdateUserDialog({ open, onClose, onUpdate, user }) {
       email: '',
     },
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const password = watch('password');
-  const handlePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
   const { t } = useTranslation();
   const onSubmit = async (data) => {
     try {
       dispatch(setLoading(true));
-      const response = await usersApi.UpdateUser(data);
+      let uploadResponse = null;
+      if (file) {
+        uploadResponse = await handleUploadFile(file);
+      }
+      console.log(uploadResponse)
+      const dataRequest ={
+        ...data,
+        avatar:uploadResponse?.fileLink??currentAdmin?.avatarUrl??null
+      }
+      console.log(dataRequest)
+      const response = await usersApi.UpdateUser(dataRequest);
+      dispatch(getCurrentUser())
       dispatch(setRefresh(!isRefresh));
+      toast.success(t('Cập nhật thành công'));
+      onClose()
 
-      reset();
     } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      toast.error(t('Something wrong please try again!'));
       console.error('Login failed:', error);
     } finally {
       dispatch(setLoading(false));
     }
   };
-  useEffect(() => {
-    if (user) {
-      console.log('this is userr');
-      setValue('firstname', user.firstName);
-      setValue('lastname', user.lastName);
-      setValue('email', user.email);
-      setValue('phoneNumber', user.phoneNumber);
+  const handleUploadFile = async (file, json = null) => {
+    try {
+      const uploadResponse = await uploadFile({
+        file: file,
+        userId: currentAdmin.id,
+        isPublic: false,
+        jsonData: json,
+      });
+
+      return uploadResponse;
+    } catch (error) {
+      console.error('Error upload file:', error);
     }
-  }, [user, open]);
-  console.log('xin chaof', user);
+  };
+  useEffect(() => {
+    if (currentAmin) {
+      setValue('firstname', currentAmin.firstName);
+      setValue('lastname', currentAmin.lastName);
+      setValue('email', currentAmin.email);
+      setValue('phoneNumber', currentAmin.phoneNumber);
+    }
+  }, [currentAmin, open]);
 
   return (
     <DialogCustom
@@ -275,6 +302,12 @@ function UpdateUserDialog({ open, onClose, onUpdate, user }) {
               />
               <FormHelperText>{errors.phoneNumber?.message}</FormHelperText>
             </FormControl>
+          </Grid>
+          <Grid xs={12}>
+            <UploadImage
+              file={file}
+              setFile={setFile}
+            />
           </Grid>
         </Grid>
       </form>

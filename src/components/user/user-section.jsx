@@ -7,6 +7,7 @@ import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
 import {
   Avatar,
   Box,
+  Button,
   Card,
   Checkbox,
   Chip,
@@ -32,18 +33,21 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
-  useTheme
+  useTheme,
 } from '@mui/material';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+import * as qs from 'qs';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { useRouter } from 'src/hooks/use-router';
+import { setLoading } from 'src/slices/common';
 import { useDispatch } from 'src/store';
 import { debounce } from 'src/utils';
+import { isVietnameseTones } from 'src/utils/validateString';
 import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
 import UpdateUserDialog from './user-update-dialog';
@@ -132,12 +136,12 @@ const UserTable = ({ users, fetchData, totalCount }) => {
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
-    fetchData({ pageNumber: newPage, pageSize: limit });
+    fetchData({ pageNumber: newPage, pageSize: limit }, filters);
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
-    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) });
+    fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
@@ -148,24 +152,30 @@ const UserTable = ({ users, fetchData, totalCount }) => {
       }
     }
 
-    setFilters(newFilter);
+    setFilters({ ...newFilter, accent: isVietnameseTones(newFilter.search) });
     return newFilter;
   };
+
+  const handleFilter = async () => {
+    if (fetchData && filters) {
+      dispatch(setLoading(true));
+      const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
+      fetchData(
+        {
+          pageNumber: page,
+          pageSize: limit,
+        },
+
+        queryParams
+      ).finally(() => dispatch(setLoading(false)));
+    }
+  };
+
   const handleSearchByName = async (value) => {
-    handleChangeFilter({ username: value });
+    handleChangeFilter({ search: value });
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
-  const handleDeleteUser = async (userId) => {
-    // try {
-    //   const response = await customersApi.deleteCustomer(userId);
-    //   toast.success(t(response.data));
-    //   dispatch(setRefresh(!isRefresh));
-    // } catch (error) {
-    //   toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
-    //   console.log(error);
-    // }
-  };
- console.log(currentUser)
+
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
@@ -181,6 +191,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
         <Box
           display="flex"
           alignItems="center"
+          width={'100%'}
         >
           {toggleView === 'grid_view' && (
             <Tooltip
@@ -223,45 +234,64 @@ const UserTable = ({ users, fetchData, totalCount }) => {
               </Tooltip>
             </Stack>
           ) : (
-            <TextField
-              margin="none"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchTwoToneIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: query && (
-                  <InputAdornment
-                    sx={{
-                      mr: -0.7,
-                    }}
-                    position="end"
-                  >
-                    <IconButton
-                      color="error"
-                      aria-label="clear input"
-                      onClick={() => setQuery('')}
-                      edge="end"
-                      size="small"
-                      sx={{
-                        color: 'error.main',
-                      }}
-                    >
-                      <ClearRoundedIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              onChange={(event) => {
-                debounceHandleSearch(event.target.value);
-                setSearchByNameValue(event.target.value);
-              }}
-              placeholder={t('Filter results')}
-              value={searchByNameValue}
-              size="small"
-              variant="outlined"
-            />
+            <Stack
+              direction="row"
+              // flexWrap={'wrap'}
+              gap={'10px'}
+              width={'100%'}
+            >
+              <Box
+                width={{
+                  xs: '100%',
+                  md: '50%',
+                }}
+              >
+                <TextField
+                  margin="none"
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchTwoToneIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: query && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          color="error"
+                          aria-label="clear input"
+                          onClick={() => setQuery('')}
+                          edge="end"
+                          size="small"
+                          sx={{
+                            color: 'error.main',
+                          }}
+                        >
+                          <ClearRoundedIcon fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  onChange={(event) => {
+                    debounceHandleSearch(event.target.value);
+                    setSearchByNameValue(event.target.value);
+                  }}
+                  placeholder={t('Tên / người đại diện')}
+                  value={searchByNameValue}
+                  size="small"
+                  variant="outlined"
+                />
+              </Box>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                sx={{ whiteSpace: 'nowrap' }}
+                onClick={handleFilter}
+              >
+                Tìm kiếm
+              </Button>
+            </Stack>
           )}
         </Box>
         <ToggleButtonGroup
@@ -375,7 +405,9 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                             </TableCell>
                             <TableCell>
                               {' '}
-                              <Typography fontWeight={600}>{user.username}</Typography>
+                              <Typography fontWeight={600}>
+                                {user.firstName} {user.lastName}{' '}
+                              </Typography>
                             </TableCell>
                             {/* <TableCell>
                               <Chip
@@ -403,16 +435,13 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                   <IconButton
                                     onClick={() => {
                                       setCurrentUser(user);
-                                    setOpenDialogUpdate(true);
+                                      setOpenDialogUpdate(true);
                                     }}
                                     color="primary"
                                   >
                                     <EditTwoToneIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
-                                <DialogConfirmDelete
-                                  onConfirm={() => handleDeleteUser(user?.customerId)}
-                                />
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -484,7 +513,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                   label={user.active ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                                 />
                                 <UserFooterDropdown
-                                  onDelete={() => handleDeleteUser(user.id)}
+                                  onDelete={() => {}}
                                   onUpdate={() => {
                                     setCurrentUser(user);
                                     setOpenDialogUpdate(true);
@@ -528,7 +557,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                       variant="body2"
                                       color="text.secondary"
                                     >
-                                      {user.username}
+                                      {user.firstName} {user.lastName}
                                     </Typography>
                                   </Box>
                                   <Typography
@@ -653,11 +682,11 @@ const UserTable = ({ users, fetchData, totalCount }) => {
         />
       </Box>
       {currentUser && (
-        <UpdateUserDialog
+        {/* <UpdateUserDialog
           user={currentUser}
           open={openDialogUpdate}
           onClose={() => setOpenDialogUpdate(false)}
-        />
+        /> */}
       )}
     </>
   );

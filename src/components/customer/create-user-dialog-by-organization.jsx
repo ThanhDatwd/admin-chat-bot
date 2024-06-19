@@ -52,7 +52,7 @@ const CreateUserByOrganizationDialog = ({ open, onClose, onUpdate }) => {
         toast.error(t('Please upload user and try again!'));
       }
     } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      toast.error(t('Something wrong please try again!'));
       console.log(error);
     } finally {
       dispatch(setLoading(false));

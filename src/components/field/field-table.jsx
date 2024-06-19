@@ -168,7 +168,7 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
       // toast.success(t(response.data));
       dispatch(setRefresh(!isRefresh));
     } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      toast.error(t('Something wrong please try again!'));
       console.log(error);
     }
   };

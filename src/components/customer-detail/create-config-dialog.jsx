@@ -75,7 +75,7 @@ const CreateCustomerConfigDialog = ({ open, onClose, onUpdate, customer, config 
       reset();
       onClose();
     } catch (error) {
-      toast.error(error?.response?.data?.error?.message ?? t('Something wrong please try again!'));
+      toast.error(t('Something wrong please try again!'));
       console.error('Error creating bot:', error);
     } finally {
       dispatch(setLoading(false));
