@@ -1,21 +1,17 @@
 import { CloseRounded } from '@mui/icons-material';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import AutoFixHighRoundedIcon from '@mui/icons-material/AutoFixHighRounded';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {
   alpha,
   Badge,
   Box,
-  Button,
   CircularProgress,
   FormControl,
   Stack,
-  Typography,
+  Typography
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useSelector } from 'react-redux';
-import { uploadFile } from 'src/api/files';
 import { AvatarState } from 'src/components/base/styles/avatar';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 
