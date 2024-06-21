@@ -3,7 +3,7 @@ import { Helmet as Head } from 'react-helmet-async';
 
 export const Helmet = (props) => {
   const { heading } = props;
-  const pageTitle = heading ? heading + ' - UIFort' : 'Katech | Chatbot Admin';
+  const pageTitle = heading ? heading + ' - Katech' : 'Katech | Chatbot Admin';
   return (
     <Head>
       <title>{pageTitle}</title>
