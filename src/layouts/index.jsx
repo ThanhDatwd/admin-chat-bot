@@ -30,7 +30,7 @@ export const Layout = (props) => {
       try {
         await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
         const response = await dispatch(getCurrentUser());
-        dispatch(setAdminRole(response.data?.authorities.map((item) => item.role) ?? []));
+        dispatch(setAdminRole(response?.data?.authorities.map((item) => item.role) ?? []));
 
       } catch (error) {
         console.error('Error fetching data:', error);
