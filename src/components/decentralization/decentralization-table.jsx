@@ -22,6 +22,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import PropTypes from 'prop-types';
 import * as qs from 'qs';
 import { useEffect, useState } from 'react';
@@ -302,13 +303,13 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
             flexWrap={'nowrap'}
             gap={'10px'}
             width={{
-                  xs: '100%',
-                  md: '50%',
-                }}
+              xs: '100%',
+              md: '50%',
+            }}
           >
             <TextField
               size="small"
-              style={{width:'100%',maxWidth: '100%' }}
+              style={{ width: '100%', maxWidth: '100%' }}
               placeholder="Họ và tên  / email người dùng"
               value={searchValue}
               onChange={(event) => {
@@ -415,7 +416,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                       {botId && (
                         <img
                           style={{ width: '200px' }}
-                          src="/src/assets/images/all-img/empty-data.png"
+                          src={EmptyDataImage}
                         />
                       )}
                       <Typography

@@ -35,6 +35,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import * as qs from 'qs';
@@ -349,7 +350,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
             {' '}
             <img
               style={{ width: '200px' }}
-              src="/src/assets/images/all-img/empty-data.png"
+              src={EmptyDataImage}
             />
             <Typography
               variant="h6"

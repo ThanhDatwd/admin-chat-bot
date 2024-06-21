@@ -6,7 +6,6 @@ import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded';
 import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
-import * as qs from "qs";
 import {
   Avatar,
   Box,
@@ -38,8 +37,10 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+import * as qs from 'qs';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -51,11 +52,11 @@ import { useRouter } from 'src/hooks/use-router';
 import { setLoading, setRefresh } from 'src/slices/common';
 import { useDispatch } from 'src/store';
 import { debounce } from 'src/utils';
+import { isVietnameseTones } from 'src/utils/validateString';
 import BulkDelete from '../common/bulk-delete';
 import DialogConfirmDelete from '../common/dialog-confirm-delete';
 import CreateAdminOrgDialog from './create-admin-org-dialog';
 import CustomerFooterDropdown from './customer-footer-dropdown';
-import { isVietnameseTones } from 'src/utils/validateString';
 
 // import ChatuserFooterDropdown from './user-footer-dropdown';
 
@@ -146,31 +147,30 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
-    
+
     for (const key in newFilter) {
       if (newFilter[key] === '' || newFilter[key] === undefined) {
         delete newFilter[key];
       }
     }
 
-    setFilters({...newFilter,accent:isVietnameseTones(newFilter.search)});
+    setFilters({ ...newFilter, accent: isVietnameseTones(newFilter.search) });
     return newFilter;
   };
 
   const handleFilter = async () => {
     if (fetchData && filters) {
       dispatch(setLoading(true));
-      const queryParams = qs.stringify({...filters,accent:isVietnameseTones(filters?.search)});
+      const queryParams = qs.stringify({ ...filters, accent: isVietnameseTones(filters?.search) });
       fetchData(
         {
           pageNumber: page,
           pageSize: limit,
         },
-        
+
         queryParams
       ).finally(() => dispatch(setLoading(false)));
     }
-
 
     // window.history.pushState(null, '', `?${queryParams.toString()}`);
   };
@@ -356,7 +356,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
             {' '}
             <img
               style={{ width: '200px' }}
-              src="/src/assets/images/all-img/empty-data.png"
+              src={EmptyDataImage}
             />
             <Typography
               variant="h6"

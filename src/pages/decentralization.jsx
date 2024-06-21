@@ -35,7 +35,7 @@ const DecentralizationPage = () => {
               pageNumber: paginate.pageNumber,
               pageSize: paginate.pageSize,
             },
-            filter
+            filter,
           });
           if (isMountedRef()) {
             setUsers(response.content);
@@ -119,7 +119,7 @@ const DecentralizationPage = () => {
                       })}
                       value={currentBotId}
                       onChange={(item) => {
-                        console.log(item.value)
+                        console.log(item.value);
                         setCurrentBotId(item.value);
                       }}
                     />

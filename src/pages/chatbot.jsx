@@ -41,24 +41,38 @@ const Chatbot = () => {
     setOpen(false);
   };
 
-  const getBots = useCallback(async (paginate, filter) => {
-    try {
-      const response = await botsApi.getBotsByCustomer({
-        customerId: currentAdmin.customerId,
-        pagination: {
-          pageNumber: paginate.pageNumber,
-          pageSize: paginate.pageSize,
-        },
-        filter
-      });
-      if (isMountedRef()) {
-        setBots(response.content);
-        setTotalCount(response.totalElements);
+  const getBots = useCallback(
+    async (paginate, filter) => {
+      try {
+        if (!currentAdmin.customerId) {
+          const data = await botsApi.getBots({
+            pageNumber: paginate.pageNumber,
+            pageSize: paginate.pageSize,
+          });
+          if (isMountedRef()) {
+            setBots(data.content);
+            setTotalCount(data.totalElements);
+          }
+        } else {
+          const response = await botsApi.getBotsByCustomer({
+            customerId: currentAdmin.customerId,
+            pagination: {
+              pageNumber: paginate.pageNumber,
+              pageSize: paginate.pageSize,
+            },
+            filter,
+          });
+          if (isMountedRef()) {
+            setBots(response.content);
+            setTotalCount(response.totalElements);
+          }
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [isMountedRef]);
+    },
+    [isMountedRef, currentAdmin.customerId]
+  );
 
   return (
     <>

@@ -9,6 +9,7 @@ import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
+import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import {
   alpha,
   Avatar,
@@ -465,7 +466,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
             {' '}
             <img
               style={{ width: '200px' }}
-              src="/src/assets/images/all-img/empty-data.png"
+              src={EmptyDataImage}
             />
             <Typography
               variant="h6"

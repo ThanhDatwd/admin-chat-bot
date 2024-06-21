@@ -3,6 +3,7 @@ import {
   Box,
   Card,
   IconButton,
+  styled,
   Table,
   TableBody,
   TableCell,
@@ -12,9 +13,9 @@ import {
   TableRow,
   Tooltip,
   Typography,
-  styled,
-  useTheme
+  useTheme,
 } from '@mui/material';
+import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,7 +46,7 @@ const TableUserUpload = ({ users, onRemove }) => {
   const theme = useTheme();
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(5);
-  
+
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
   };
@@ -54,12 +55,12 @@ const TableUserUpload = ({ users, onRemove }) => {
   };
   const paginatedUsers = applyPagination(users, page, limit);
 
-  useEffect(()=>{
-    const count = Math.ceil(users.length/limit)
-    if(page>0&&page>count-1){
-      setPage(count-1)
+  useEffect(() => {
+    const count = Math.ceil(users.length / limit);
+    if (page > 0 && page > count - 1) {
+      setPage(count - 1);
     }
-  },[users])
+  }, [users]);
 
   return (
     <Box mt={3}>
@@ -89,7 +90,7 @@ const TableUserUpload = ({ users, onRemove }) => {
                   >
                     <img
                       style={{ width: '200px' }}
-                      src="/src/assets/images/all-img/empty-data.png"
+                      src={EmptyDataImage}
                     />
                   </TableCell>
                 ) : (

@@ -1,1 +1,0 @@
-import{j as e,bK as n,g as o}from"./index-8egQHEDr.js";const i=s=>{const{heading:t}=s,r=t?t+" - UIFort":"Katech | Chatbot Admin";return e.jsx(n,{children:e.jsx("title",{children:r})})};i.propTypes={heading:o.string};export{i as H};
