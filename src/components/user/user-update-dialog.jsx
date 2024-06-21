@@ -127,8 +127,10 @@ function UpdateUserDialog({ open, onClose }) {
       setValue('email', currentAmin.email);
       setValue('phoneNumber', currentAmin.phoneNumber);
     }
+    if (!open) {
+      reset();
+    }
   }, [currentAmin, open]);
-
   return (
     <DialogCustom
       open={open}
