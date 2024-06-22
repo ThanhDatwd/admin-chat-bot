@@ -26,6 +26,7 @@ import BotInfo from 'src/components/chatbot-detail/bot-info';
 import EmbeddingHistory from 'src/components/chatbot-detail/embedding-history';
 import EmbeddingSection from 'src/components/chatbot-detail/embedding-section';
 import UserAccessTable from 'src/components/chatbot-detail/user-access-table';
+import { BOT_STATUS } from 'src/constants/bot';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 import { setLoading } from 'src/slices/common';
 
@@ -51,18 +52,21 @@ const ChatbotDetail = () => {
   }, [id, isMountedRef]);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    let intervalId = null
+   if(botData.botStatus===BOT_STATUS.SYNCING.value){
+    intervalId = setInterval(() => {
       getBot();
     }, 3000);
+   }
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [botData]);
 
   const loadUserFilesData = async () => {
     try {
       const data = await fetchUserFiles({
         botId: id,
-        userId: currentAdmin.id,
+        customerId: currentAdmin.customerId,
       });
       setTableData(data);
     } catch (error) {
@@ -84,7 +88,7 @@ const ChatbotDetail = () => {
 
   return (
     <>
-      {isLoading ? (
+      {/* {isLoading ? (
         <Box
           sx={{
             display: 'flex',
@@ -98,7 +102,7 @@ const ChatbotDetail = () => {
           {' '}
           <CircularProgress style={{ height: '30px', width: '30px' }} />
         </Box>
-      ) : (
+      ) : ( */}
         <Box
           px={{
             xs: 2,
@@ -172,7 +176,7 @@ const ChatbotDetail = () => {
             </Box>
           </Container>
         </Box>
-      )}
+      {/* )} */}
     </>
   );
 };
