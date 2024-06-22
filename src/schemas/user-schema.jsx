@@ -48,17 +48,30 @@ export const userOrganizationSchema = z.object({
   //   .min(1, { message: 'Tài khoản là bắt buộc' }).transform((val) => val.trim())
   //   .refine((val) => val !== '', { message: 'Tài khoản không được để trống' }),
 
-  firstname: z.string().min(1, { message: 'Họ là bắt buộc' }).transform((val) => val.trim())
+  firstname: z
+    .string()
+    .min(1, { message: 'Họ là bắt buộc' })
+    .max(500, { message: 'Họ không được quá 500 ký tự' })
+    .transform((val) => val.trim())
     .refine((val) => val !== '', { message: 'Họ không hợp lệ' }),
-  lastname: z.string().min(1, { message: 'Tên là bắt buộc' }).transform((val) => val.trim())
+  lastname: z
+    .string()
+    .min(1, { message: 'Tên là bắt buộc' })
+    .max(500, { message: 'Tên không được quá 500 ký tự' })
+    .transform((val) => val.trim())
     .refine((val) => val !== '', { message: 'Tên không hợp lệ' }),
   email: z
     .string()
     .min(1, 'Email là bắt buộc')
+    .max(500, { message: 'Email không được quá 500 ký tự' })
     .email({ message: 'Địa chỉ email không hợp lệ' })
-    .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/, { message: 'Địa chỉ email không hợp lệ' }).transform((val) => val.trim())
+    .regex(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/, { message: 'Địa chỉ email không hợp lệ' })
+    .transform((val) => val.trim())
     .refine((val) => val !== '', { message: 'Địa chỉ không hợp lệ' }),
-  phoneNumber: z.string().min(1, { message: 'Số điện thoại là bắt buộc' }).transform((val) => val.trim())
+  phoneNumber: z
+    .string()
+    .min(1, { message: 'Số điện thoại là bắt buộc' })
+    .transform((val) => val.trim())
     .refine((val) => val !== '', { message: 'Số điện thoại không hợp lệ' }),
 });
 
