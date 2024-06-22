@@ -67,12 +67,13 @@ export const DialogCustom = (props) => {
             <Stack
               spacing={0}
               direction="row"
-              height="100%"
+              height="auto"
+              maxHeight={'100%'}
               overflow="hidden"
             >
               <DialogContent
                 sx={{
-                  overflowX: 'hidden',
+                  overflowX: 'auto',
                   p: 3,
                 }}
               >

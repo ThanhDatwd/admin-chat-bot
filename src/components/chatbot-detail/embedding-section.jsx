@@ -1,14 +1,26 @@
-import { Button, Card, CardContent, CardHeader, Container, Divider, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  Container,
+  Divider,
+  useTheme,
+} from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import { embedBot } from 'src/api/embed';
 import { uploadFile } from 'src/api/files';
 import { ButtonLight } from 'src/components/base/styles/button';
 import { CardActionsLight } from 'src/components/base/styles/card';
+import { setLoading, setRefresh } from 'src/slices/common';
 import PaymentEmbedChatbot from '../chatbot/payment-embed-chatbot';
 import DocumentsUploadList from './documents-upload-list';
+import toast from 'react-hot-toast';
 
 const EmbeddingSection = ({ onEmbed }) => {
   const theme = useTheme();
@@ -18,6 +30,9 @@ const EmbeddingSection = ({ onEmbed }) => {
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const currentAdmin = useSelector((state) => state.auth.admin);
   const { id } = useParams();
+  const dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
 
   const handleUploadFile = async (file) => {
     try {
@@ -29,6 +44,7 @@ const EmbeddingSection = ({ onEmbed }) => {
       });
 
       delete uploadResponse.fileLink;
+      delete uploadResponse.tags;
       return uploadResponse;
     } catch (error) {
       console.error('Error upload file:', error);
@@ -36,12 +52,15 @@ const EmbeddingSection = ({ onEmbed }) => {
   };
 
   const handleEmbedBot = async () => {
+    dispatch(setLoading(true));
+    let uploadFiles = [];
     try {
-      files.forEach((file) => {
-        const uploadResponse = handleUploadFile(file?.file);
-        setUploadFiles((prevUploadFiles) => [...prevUploadFiles, uploadResponse]);
-      });
-
+      uploadFiles = await Promise.all(
+        files.map(async (file) => {
+          return await handleUploadFile(file?.file);
+        })
+      );
+      console.log('asdad', uploadFiles);
       try {
         const data = {
           botId: id,
@@ -50,18 +69,19 @@ const EmbeddingSection = ({ onEmbed }) => {
           fileIds: uploadFiles,
         };
 
-        console.log(data);
-
         const response = await embedBot(data);
-        console.log('Embed bot response:', response);
         setFiles([]);
         setUploadFiles([]);
         onEmbed();
+        toast.success(t('Đang tải dữ liệu vui lòng đợi'));
+        dispatch(setRefresh(!isRefresh));
       } catch (error) {
         console.error('Error embedding bot:', error);
       }
     } catch (error) {
       console.error('Error upload file:', error);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -107,9 +127,32 @@ const EmbeddingSection = ({ onEmbed }) => {
             <Button
               variant="contained"
               color="success"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '16px',
+              }}
               onClick={() => handleEmbedBot()}
             >
               Embed
+              {isLoading && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '16px',
+                  }}
+                  color="common.white"
+                >
+                  {' '}
+                  <CircularProgress
+                    style={{ height: '20px', width: '20px' }}
+                    color={'inherit'}
+                  />
+                </Box>
+              )}
             </Button>
           )}
         </CardActionsLight>

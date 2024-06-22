@@ -1,8 +1,8 @@
-import { getData, postData } from './axios';
+import api, { getData, postData } from './axios';
 
-export const fetchUserFiles = async ({ botId, userId }) => {
+export const fetchUserFiles = async ({ botId, customerId }) => {
   try {
-    const url = import.meta.env.VITE_API_URL_8085 + `file/${botId}/users/${userId}`;
+    const url = import.meta.env.VITE_API_URL_8085 + `file/${botId}/customer/${customerId}`;
     const response = await getData(url);
 
     return response;
@@ -46,4 +46,9 @@ export const downloadFile = async ({ fileKey, fileName }) => {
     console.error('Error download files:', error);
     throw error;
   }
+
 };
+export const  deleteFileByBot = async({ botId, customerId })=> {
+  const response = await api.delete(import.meta.env.VITE_API_URL_8085 + `file/${botId}/customer/${customerId}`);
+  return response;
+}

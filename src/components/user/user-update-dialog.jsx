@@ -89,7 +89,6 @@ function UpdateUserDialog({ open, onClose }) {
       if (file) {
         uploadResponse = await handleUploadFile(file);
       }
-      console.log(uploadResponse);
       const dataRequest = {
         ...data,
         avatar: uploadResponse?.fileLink ?? currentAdmin?.avatarUrl ?? null,

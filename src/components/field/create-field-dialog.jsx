@@ -2,43 +2,43 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
   Button,
-  Chip,
   CircularProgress,
-  DialogContent,
   FormControl,
   Grid,
   OutlinedInput,
   Stack,
-  Switch,
   Typography,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { setLoading } from 'src/slices/common';
+import { uploadFile } from 'src/api/files';
+import { knowledgesApi } from 'src/api/knowledges';
+import { setLoading, setRefresh } from 'src/slices/common';
 import { useSelector } from 'src/store';
 import { z } from 'zod';
+import UploadImage from '../base/upload-image';
 import { DialogCustom } from '../common/dialog-custom';
 
 const formSchema = z.object({
-  fieldName: z
+  knowName: z
     .string()
     .min(1, 'Tên lĩnh vực là bắt buộc')
     .max(200, 'Tên lĩnh vực tối đa 200 ký tự'),
-  fieldCode: z.string().min(1, 'Mã lĩnh vực là bắt buộc').max(200, 'Mã lĩnh vực tối đa 200 ký tự'),
-  tags: z.array(z.string()).optional(),
-  status: z.enum(['active', 'inactive']).default('active'),
+  icon: z.string().optional(),
 });
 
 const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
   const { t } = useTranslation();
   const [tagValue, setTagValue] = useState();
+  const [file, setFile] = useState();
   const [tagList, setTagList] = useState([]);
   const dispatch = useDispatch();
   const [fieldStatus, setFieldStatus] = useState(true);
+  const currentAdmin = useSelector((state) => state.auth.admin);
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
 
@@ -46,7 +46,7 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
   const { control, setValue, getValues, handleSubmit, reset } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fieldName: '',
+      knowName: '',
       fieldCode: '',
       tags: [],
       status: 'active',
@@ -54,16 +54,39 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
   });
 
   const onSubmit = async (data) => {
+    dispatch(setLoading(true));
     try {
-      // dispatch(setLoading(true));
-      // onUpdate?.(data);
-      // reset();
-      // onClose();
-      // dispatch(setRefresh(!isRefresh));
+      let uploadResponse = null;
+      if (file) {
+        uploadResponse = await handleUploadFile(file);
+      }
+      const dataRequest = {
+        ...data,
+        icon: uploadResponse?.fileLink ?? null,
+      };
+      const response = await knowledgesApi.createKnowledges(dataRequest);
+      onUpdate?.(data);
+      reset();
+      onClose();
+      dispatch(setRefresh(!isRefresh));
     } catch (error) {
       console.error('Error creating bot:', error);
     } finally {
       dispatch(setLoading(false));
+    }
+  };
+  const handleUploadFile = async (file, json = null) => {
+    try {
+      const uploadResponse = await uploadFile({
+        file: file,
+        userId: currentAdmin.id,
+        isPublic: true,
+        jsonData: json,
+      });
+
+      return uploadResponse;
+    } catch (error) {
+      console.error('Error upload file:', error);
     }
   };
 
@@ -92,7 +115,7 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
 
   useEffect(() => {
     if (field) {
-      setValue('fieldName', field.fieldName);
+      setValue('knowName', field.knowName);
       setValue('fieldCode', field.fieldCode);
       setValue('tags', field.tags);
       setValue('status', field.status);
@@ -155,18 +178,9 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
         </>
       }
     >
-      <Stack
-        spacing={0}
-        direction="row"
-        height="100%"
-        overflow="hidden"
-      >
-        <DialogContent sx={{ overflowX: 'hidden', p: 3 }}>
-          <Stack spacing={{ xs: 2, sm: 3 }}>
-            <Box>
               <Grid
                 container
-                spacing={{ xs: 2, md: 3 }}
+                gap={{ xs: 2 }}
               >
                 <Grid
                   item
@@ -186,7 +200,7 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
                       Tên lĩnh vực
                     </Typography>
                     <Controller
-                      name="fieldName"
+                      name="knowName"
                       control={control}
                       render={({ field, fieldState }) => (
                         <>
@@ -203,41 +217,11 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
                     />
                   </FormControl>
                 </Grid>
-
-                <Grid
-                  item
-                  xs={12}
-                >
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                  >
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      component="label"
-                      htmlFor="field-code-input"
-                      fontWeight={500}
-                    >
-                      Mã lĩnh vực
-                    </Typography>
-                    <Controller
-                      name="fieldCode"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <>
-                          <OutlinedInput
-                            {...field}
-                            id="bot-description-input"
-                            fullWidth
-                          />
-                          {fieldState.error && (
-                            <Typography color="error">{fieldState.error.message}</Typography>
-                          )}
-                        </>
-                      )}
-                    />
-                  </FormControl>
+                <Grid xs={12}>
+                  <UploadImage
+                    label={'Avatar'}
+                    setFile={setFile}
+                  />
                 </Grid>
                 {/* <Grid
                   item
@@ -308,53 +292,9 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
                     />
                   </FormControl>
                 </Grid> */}
-                <Grid
-                  item
-                  xs={12}
-                >
-                  <Box
-                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <Box overflow="hidden">
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        htmlFor="switch-spatial-audio"
-                        component="label"
-                        fontWeight={500}
-                      >
-                        Trạng thái
-                      </Typography>
-                      <Typography
-                        variant="body1"
-                        color="text.secondary"
-                        noWrap
-                      >
-                        {getValues('status') === 'inactive' ? 'Không hoat động' : 'Hoạt động'}
-                      </Typography>
-                    </Box>
-                    {/* <Controller
-                      name="status"
-                      control={control}
-                      render={({ field, fieldState }) => ( */}
-                    <>
-                      <Switch
-                        defaultChecked={fieldStatus}
-                        checked={fieldStatus}
-                        onChange={(e) => {
-                          setFieldStatus(e.target.checked);
-                          setValue('status', e.target.checked ? 'active' : 'inactive');
-                        }}
-                        id="switch-spatial-audio"
-                      />
-                    </>
-                  </Box>
-                </Grid>
+
+                
               </Grid>
-            </Box>
-          </Stack>
-        </DialogContent>
-      </Stack>
     </DialogCustom>
   );
 };

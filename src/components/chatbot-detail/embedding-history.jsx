@@ -15,6 +15,7 @@ import {
   CardActions,
   CardContent,
   CardHeader,
+  Chip,
   Divider,
   IconButton,
   Link,
@@ -34,13 +35,20 @@ import {
 import { formatDistance, subDays } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { downloadFile, fetchUserFiles } from 'src/api/files';
+import { deleteFileByBot, downloadFile, fetchUserFiles } from 'src/api/files';
 import fileIcon from '../base/fileIcon';
 import { ButtonIcon } from '../base/styles/button-icon';
+import DialogConfirmDelete from '../common/dialog-confirm-delete';
+import toast from 'react-hot-toast';
+import { useParams } from 'react-router';
+import { useSelector } from 'react-redux';
 
 const EmbeddingHistory = ({ tableData }) => {
   const { t } = useTranslation();
   const theme = useTheme();
+
+  const { id } = useParams();
+  const currentAdmin = useSelector((state) => state.auth.admin);
   const [sortConfig, setSortConfig] = useState({
     key: 'dateCreated',
     direction: 'ascending',
@@ -113,7 +121,20 @@ const EmbeddingHistory = ({ tableData }) => {
     }
   };
 
-  const handleDelete = () => {};
+  const handleDeleteFile = (fileId) => {
+    try {
+      const response = deleteFileByBot({
+        botId: id,
+        customerId: currentAdmin.customerId,
+      });
+
+      toast.success(t(response.data));
+      // dispatch(setRefresh(!isRefresh));
+    } catch (error) {
+      toast.error(t('Something wrong please try again!'));
+      console.log(error);
+    }
+  };
 
   return (
     <Card
@@ -153,6 +174,17 @@ const EmbeddingHistory = ({ tableData }) => {
                     alignItems="center"
                   >
                     {t('Người training')} {renderSortIcon('owner')}
+                  </Box>
+                </TableCell>
+                <TableCell onClick={() => requestSort('owner')}>
+                  <Box
+                    sx={{
+                      cursor: 'pointer',
+                    }}
+                    display="flex"
+                    alignItems="center"
+                  >
+                    {t('Tags')} {renderSortIcon('owner')}
                   </Box>
                 </TableCell>
                 <TableCell onClick={() => requestSort('dateCreated')}>
@@ -219,6 +251,17 @@ const EmbeddingHistory = ({ tableData }) => {
                     </Box>
                   </TableCell>
                   <TableCell>
+                          {row?.tags.map((tag, index) => (
+                            <Chip
+                              sx={{ margin: '5px' }}
+                              key={tag.tagId}
+                              label={tag.tagName}
+                              size="small"
+                              variant="outlined"
+                            />
+                          ))}
+                        </TableCell>
+                  <TableCell>
                     <Typography
                       variant="h6"
                       fontWeight={400}
@@ -235,7 +278,7 @@ const EmbeddingHistory = ({ tableData }) => {
                     }}
                     align="right"
                   >
-                    <Tooltip
+                    {/* <Tooltip
                       title={t('Xem')}
                       arrow
                     >
@@ -254,25 +297,10 @@ const EmbeddingHistory = ({ tableData }) => {
                       >
                         <LaunchTwoToneIcon fontSize="small" />
                       </IconButton>
-                    </Tooltip>
-                    <Tooltip
-                      title={t('Xóa')}
-                      arrow
-                    >
-                      <IconButton
-                        sx={{
-                          '&:hover': {
-                            background: alpha(theme.palette.error.main, 0.08),
-                          },
-                          color: theme.palette.error.main,
-                        }}
-                        color="inherit"
-                        size="small"
-                        onClick={() => handleDelete()}
-                      >
-                        <DeleteTwoToneIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    </Tooltip> */}
+                    <DialogConfirmDelete
+                                  onConfirm={() => handleDeleteFile(row?.botId)}
+                                />
                   </TableCell>
                 </TableRow>
               ))}

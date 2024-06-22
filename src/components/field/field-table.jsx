@@ -1,24 +1,17 @@
-import { DeleteRounded } from '@mui/icons-material';
-import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import { useTheme } from '@emotion/react';
+import { Image } from '@mui/icons-material';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
+import TopicIcon from '@mui/icons-material/Topic';
 import {
   alpha,
+  Avatar,
   Box,
   Button,
   Card,
-  Checkbox,
-  Chip,
   CircularProgress,
   debounce,
   Divider,
-  FormControl,
-  Grid,
-  IconButton,
   InputAdornment,
-  MenuItem,
-  Select,
   Stack,
   styled,
   Table,
@@ -29,20 +22,15 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { format } from 'date-fns';
-import numeral from 'numeral';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLoading, setRefresh } from 'src/slices/common';
-import DialogConfirmDelete from '../common/dialog-confirm-delete';
-import CreateFieldDialog from './create-field-dialog';
-import { UpdateField } from './update-field';
+import { setLoading } from 'src/slices/common';
+import { AvatarState } from '../base/styles/avatar';
 
 export const ButtonSoft = styled(Button)(({ theme, color }) => {
   const computedColor = color ? theme.palette[color].main : theme.palette.primary.main;
@@ -59,18 +47,15 @@ export const ButtonSoft = styled(Button)(({ theme, color }) => {
   };
 });
 
-const applyPagination = (fields, page, limit) => {
-  return fields.slice(page * limit, page * limit + limit);
-};
-
 const FieldTable = ({ fields = [], fetchData, totalCount }) => {
   const dispatch = useDispatch();
 
   const [selectedItems, setSelectedField] = useState([]);
   const { t } = useTranslation();
+  const theme = useTheme();
+
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(6);
-  const [query, setQuery] = useState();
+  const [limit, setLimit] = useState(15);
   const [searchValue, setSearchValue] = useState('');
 
   const [filters, setFilters] = useState({
@@ -80,35 +65,6 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
 
   const isLoading = useSelector((state) => state.common.loading);
   const isRefresh = useSelector((state) => state.common.refresh);
-
-  const paginatedField = applyPagination(fields, page, limit);
-  const selectedBulkActions = selectedItems.length > 0;
-  const selectedSomeField = selectedItems.length > 0 && selectedItems.length < fields.length;
-  const selectedAllField = selectedItems.length === fields.length;
-
-  const fieldStatusOptions = [
-    { id: 'all', name: 'Tất cả' },
-    { id: 'active', name: 'Hoạt động' },
-    { id: 'inactive', name: 'Không hoạt động' },
-  ];
-
-  const handleQueryChange = (field) => (event) => {
-    setQuery((prevQuery) => ({
-      ...prevQuery,
-      [field]: event.target.value,
-    }));
-  };
-
-  const handleStatusChange = (field) => (event) => {
-    let value = null;
-    if (event.target.value !== 'all') {
-      value = event.target.value;
-    }
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [field]: value,
-    }));
-  };
 
   const handleSelectAllField = (event) => {
     setSelectedField(event.target.checked ? fields.map((field) => field.id) : []);
@@ -161,21 +117,11 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
     handleChangeFilter({ customerName: value });
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
-  const handleDeleteField = async (customerId) => {
-    try {
-      // const response = await customersApi.deleteCustomer(customerId);
-
-      // toast.success(t(response.data));
-      dispatch(setRefresh(!isRefresh));
-    } catch (error) {
-      toast.error(t('Something wrong please try again!'));
-      console.log(error);
-    }
-  };
 
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
+  console.log('adad', fields);
 
   return (
     <>
@@ -194,40 +140,21 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
             alignItems="center"
             flexWrap={'wrap'}
           >
-            <Checkbox
-              checked={selectedAllField}
-              indeterminate={selectedSomeField}
-              onChange={handleSelectAllField}
-              disabled={paginatedField.length === 0}
-            />
-            {selectedBulkActions ? (
-              <ButtonSoft
-                color="error"
-                variant="contained"
-                size="small"
-                startIcon={<DeleteRounded />}
+            <Box>
+              <Typography
+                sx={{
+                  display: {
+                    xs: 'none',
+                    md: 'inline-flex',
+                  },
+                }}
+                component="span"
+                variant="subtitle1"
               >
-                Delete selected
-              </ButtonSoft>
-            ) : (
-              <>
-                <Box>
-                  <Typography
-                    sx={{
-                      display: {
-                        xs: 'none',
-                        md: 'inline-flex',
-                      },
-                    }}
-                    component="span"
-                    variant="subtitle1"
-                  >
-                    {t('Hiển thị')}:
-                  </Typography>{' '}
-                  <b>{paginatedField.length}</b> <b>{t('lĩnh vực')}</b>
-                </Box>
-              </>
-            )}
+                {t('Hiển thị')}:
+              </Typography>{' '}
+              <b>{fields.length}</b> <b>{t('lĩnh vực')}</b>
+            </Box>
           </Stack>
           <Stack
             direction="row"
@@ -252,25 +179,6 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
                 ),
               }}
             />
-            <FormControl
-              size="small"
-              variant="outlined"
-            >
-              <Select
-                value={filters.fieldStatus || 'all'}
-                onChange={handleStatusChange('fieldStatus')}
-                label=""
-              >
-                {fieldStatusOptions.map((statusOption) => (
-                  <MenuItem
-                    key={statusOption.id}
-                    value={statusOption.id}
-                  >
-                    {statusOption.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
 
             <Button
               variant="contained"
@@ -320,12 +228,9 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t('#')}</TableCell>
+                    <TableCell>{t('Ảnh')}</TableCell>
                     <TableCell>{t('Tên lĩnh vực')}</TableCell>
-                    <TableCell>{t('Mã lĩnh vực')}</TableCell>
-                    <TableCell>{t('Tag')}</TableCell>
-                    <TableCell>{t('Trạng thái')}</TableCell>
-                    <TableCell align="center">{t('Hành động')}</TableCell>
+                    <TableCell>{t('Ngày tạo')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -334,58 +239,51 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
                     return (
                       <TableRow
                         hover
-                        key={field.id}
+                        key={field.knowId}
                         selected={isInvoiceSelected}
                       >
                         <TableCell>
-                          <Checkbox
-                            checked={isInvoiceSelected}
-                            onChange={(event) => handleSelectOneInvoice(event, field.id)}
-                            value={isInvoiceSelected}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            noWrap
-                            variant="subtitle2"
-                          >
-                            {field.fieldName}
-                          </Typography>
-                        </TableCell>
-
-                        <TableCell>
-                          <Typography
-                            noWrap
-                            variant="subtitle2"
-                          >
-                            {field.fieldCode}
-                          </Typography>
-                        </TableCell>
-
-                        <TableCell>
-                          {field.tags.map((tag, index) => (
-                            <Chip
-                              sx={{ margin: '5px' }}
-                              key={index}
-                              label={tag}
-                              size="small"
-                              variant="outlined"
+                          {!field.icon ? (
+                            <AvatarState
+                              isSoft
+                              variant="rounded"
+                              state="primary"
+                              sx={{
+                                height: theme.spacing(4),
+                                width: theme.spacing(4),
+                                svg: {
+                                  height: theme.spacing(2),
+                                  width: theme.spacing(2),
+                                  minWidth: theme.spacing(2),
+                                },
+                              }}
+                            >
+                              <TopicIcon />
+                            </AvatarState>
+                          ) : (
+                            <Image
+                              sx={{
+                                height: theme.spacing(4),
+                                width: theme.spacing(4),
+                              }}
+                              src={field.icon}
                             />
-                          ))}
+                          )}
                         </TableCell>
                         <TableCell>
                           <Typography
                             noWrap
                             variant="subtitle2"
                           >
-                            {field.status === 'inactive' ? 'Không hoat động' : 'Hoạt động'}
+                            {field.knowName}
                           </Typography>
                         </TableCell>
-
-                        <TableCell align="center">
-                          <Typography noWrap>
-                            <UpdateField field={field} />
-                            <DialogConfirmDelete onConfirm={() => handleDeleteField(field?.id)} />
+                        <TableCell>
+                          <Typography
+                            noWrap
+                            variant="subtitle2"
+                          >
+                            {format(new Date(field.createDate), 'dd-MM-yyyy')}
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -404,13 +302,13 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
             >
               <TablePagination
                 component="div"
-                count={100}
+                count={fields.length}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleLimitChange}
                 page={page}
                 rowsPerPage={limit}
                 labelRowsPerPage="Số hàng mỗi trang"
-                rowsPerPageOptions={[6, 9, 15]}
+                rowsPerPageOptions={[5, 15, 30, 50]}
                 slotProps={{
                   select: {
                     variant: 'outlined',
