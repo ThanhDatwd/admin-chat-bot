@@ -409,6 +409,7 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
                 onRowsPerPageChange={handleLimitChange}
                 page={page}
                 rowsPerPage={limit}
+                labelRowsPerPage="Số hàng mỗi trang"
                 rowsPerPageOptions={[6, 9, 15]}
                 slotProps={{
                   select: {

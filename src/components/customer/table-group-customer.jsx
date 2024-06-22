@@ -60,7 +60,7 @@ const applyFilters = (users, query) => {
 const applyPagination = (users, page, limit) => {
   return users.slice(page * limit, page * limit + limit);
 };
-const TableGroupUser = ({ users,selectedItems ,setSelectedItems }) => {
+const TableGroupUser = ({ users, selectedItems, setSelectedItems }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const [page, setPage] = useState(0);
@@ -100,43 +100,42 @@ const TableGroupUser = ({ users,selectedItems ,setSelectedItems }) => {
         alignItems="center"
         justifyContent="space-between"
       >
-        
+        <Box
+          flex={1}
+          display={{
+            xs: 'block',
+            md: 'flex',
+          }}
+          alignItems="center"
+          justifyContent="space-between"
+        >
           <Box
-            flex={1}
-            display={{
-              xs: 'block',
-              md: 'flex',
+            sx={{
+              mb: {
+                xs: 2,
+                md: 0,
+              },
             }}
-            alignItems="center"
-            justifyContent="space-between"
           >
-            <Box
-              sx={{
-                mb: {
-                  xs: 2,
-                  md: 0,
-                },
+            <TextField
+              size="small"
+              fullWidth={mobile}
+              onChange={handleQueryChange}
+              value={query}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchTwoToneIcon />
+                  </InputAdornment>
+                ),
               }}
-            >
-              <TextField
-                size="small"
-                fullWidth={mobile}
-                onChange={handleQueryChange}
-                value={query}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchTwoToneIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  my: '2px',
-                }}
-                placeholder={t('Filter by user name')}
-              />
-            </Box>
+              sx={{
+                my: '2px',
+              }}
+              placeholder={t('Filter by user name')}
+            />
           </Box>
+        </Box>
       </Box>
 
       {paginatedUsers.length === 0 ? (
@@ -223,6 +222,7 @@ const TableGroupUser = ({ users,selectedItems ,setSelectedItems }) => {
               onRowsPerPageChange={handleLimitChange}
               page={page}
               rowsPerPage={limit}
+              labelRowsPerPage="Số hàng mỗi trang"
               rowsPerPageOptions={[5, 10, 15]}
               slotProps={{
                 select: {

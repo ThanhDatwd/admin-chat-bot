@@ -153,6 +153,7 @@ const TableUserUpload = ({ users, onRemove }) => {
             onRowsPerPageChange={handleLimitChange}
             page={page}
             rowsPerPage={limit}
+            labelRowsPerPage="Số hàng mỗi trang"
             rowsPerPageOptions={[5, 10, 15]}
             slotProps={{
               select: {

@@ -436,6 +436,7 @@ const InvoicesTable = ({ invoices }) => {
                 page={page}
                 rowsPerPage={limit}
                 rowsPerPageOptions={[6, 9, 15]}
+                labelRowsPerPage="Số hàng mỗi trang"
                 slotProps={{
                   select: {
                     variant: 'outlined',

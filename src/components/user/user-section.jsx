@@ -37,6 +37,7 @@ import {
 } from '@mui/material';
 import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import clsx from 'clsx';
+import { isNull } from 'lodash';
 import PropTypes from 'prop-types';
 import * as qs from 'qs';
 import { useEffect, useState } from 'react';
@@ -90,7 +91,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState();
   const [searchByNameValue, setSearchByNameValue] = useState('');
-  const [currentUser, setCurrentUser] = useState();
+  const [currentUser, setCurrentUser] = useState({});
   const [openDialogUpdate, setOpenDialogUpdate] = useState(false);
 
   const paginatedUsers = applyPagination(users, page, limit);
@@ -527,6 +528,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
                                 <UserFooterDropdown
                                   onDelete={() => {}}
                                   onUpdate={() => {
+                                    console.log(user);
                                     setCurrentUser(user);
                                     setOpenDialogUpdate(true);
                                   }}
@@ -681,6 +683,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
           onRowsPerPageChange={handleLimitChange}
           page={page}
           rowsPerPage={limit}
+          labelRowsPerPage="Số hàng mỗi trang"
           rowsPerPageOptions={[5, 15, 30, 50]}
           slotProps={{
             select: {
@@ -693,7 +696,7 @@ const UserTable = ({ users, fetchData, totalCount }) => {
           }}
         />
       </Box>
-      {currentUser &&
+      {isNull(currentUser) &&
         {
           /* <UpdateUserDialog
           user={currentUser}

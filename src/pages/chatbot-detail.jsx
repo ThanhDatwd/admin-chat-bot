@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Container,
   Divider,
   Grid,
@@ -17,7 +18,7 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import { botsApi } from 'src/api/bots';
 import { fetchUserFiles } from 'src/api/files';
@@ -26,6 +27,7 @@ import EmbeddingHistory from 'src/components/chatbot-detail/embedding-history';
 import EmbeddingSection from 'src/components/chatbot-detail/embedding-section';
 import UserAccessTable from 'src/components/chatbot-detail/user-access-table';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
+import { setLoading } from 'src/slices/common';
 
 const ChatbotDetail = () => {
   const theme = useTheme();
@@ -35,7 +37,9 @@ const ChatbotDetail = () => {
   const [botData, setBotData] = useState({});
   const [tableData, setTableData] = useState([]);
   const currentAdmin = useSelector((state) => state.auth.admin);
-  const getBots = useCallback(async () => {
+  const isLoading = useSelector((state) => state.common.loading);
+  const dispatch = useDispatch();
+  const getBot = useCallback(async () => {
     try {
       const response = await botsApi.getBot({ botId: id });
       if (isMountedRef()) {
@@ -44,11 +48,15 @@ const ChatbotDetail = () => {
     } catch (err) {
       console.error(err);
     }
-  }, [isMountedRef]);
+  }, [id, isMountedRef]);
 
   useEffect(() => {
-    getBots();
-  }, [getBots]);
+    const intervalId = setInterval(() => {
+      getBot();
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const loadUserFilesData = async () => {
     try {
@@ -63,84 +71,108 @@ const ChatbotDetail = () => {
   };
 
   useEffect(() => {
-    loadUserFilesData();
+    dispatch(setLoading(true));
+    try {
+      getBot();
+      loadUserFilesData();
+    } catch (error) {
+      console.error('Error', error);
+    } finally {
+      dispatch(setLoading(false));
+    }
   }, [id]);
 
   return (
     <>
-      <Box
-        px={{
-          xs: 2,
-          sm: 3,
-        }}
-        pt={{
-          xs: 2,
-          sm: 3,
-        }}
-        component="main"
-        flex={1}
-        display="flex"
-        flexDirection="column"
-      >
-        <Container
-          disableGutters
-          maxWidth="xl"
+      {isLoading ? (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '16px',
+            height: '50vh',
+          }}
+          color="common.white"
         >
-          <Box>
-            <Stack
-              spacing={{
-                xs: 2,
-                sm: 3,
-              }}
-              direction={{
-                xs: 'column',
-                sm: 'row',
-              }}
-            >
-              <BotInfo data={botData} />
-              <EmbeddingSection onEmbed={() => loadUserFilesData()} />
-            </Stack>
-          </Box>
-          <Box
-            pt={{
-              xs: 2,
-              sm: 3,
-            }}
+          {' '}
+          <CircularProgress style={{ height: '30px', width: '30px' }} />
+        </Box>
+      ) : (
+        <Box
+          px={{
+            xs: 2,
+            sm: 3,
+          }}
+          pt={{
+            xs: 2,
+            sm: 3,
+          }}
+          component="main"
+          flex={1}
+          display="flex"
+          flexDirection="column"
+        >
+          <Container
+            disableGutters
+            maxWidth="xl"
           >
-            <Stack
-              spacing={{
+            <Box>
+              <Stack
+                spacing={{
+                  xs: 2,
+                  sm: 3,
+                }}
+                direction={{
+                  xs: 'column',
+                  sm: 'row',
+                }}
+              >
+                <BotInfo data={botData} />
+                <EmbeddingSection onEmbed={() => loadUserFilesData()} />
+              </Stack>
+            </Box>
+            <Box
+              pt={{
                 xs: 2,
                 sm: 3,
               }}
-              direction={{
-                xs: 'column',
-                sm: 'row',
-              }}
             >
-              <EmbeddingHistory tableData={tableData} />
-            </Stack>
-          </Box>
-          <Box
-            pt={{
-              xs: 2,
-              sm: 3,
-            }}
-          >
-            <Stack
-              spacing={{
+              <Stack
+                spacing={{
+                  xs: 2,
+                  sm: 3,
+                }}
+                direction={{
+                  xs: 'column',
+                  sm: 'row',
+                }}
+              >
+                <EmbeddingHistory tableData={tableData} />
+              </Stack>
+            </Box>
+            <Box
+              pt={{
                 xs: 2,
                 sm: 3,
               }}
-              direction={{
-                xs: 'column',
-                sm: 'row',
-              }}
             >
-              <UserAccessTable botId={id} />
-            </Stack>
-          </Box>
-        </Container>
-      </Box>
+              <Stack
+                spacing={{
+                  xs: 2,
+                  sm: 3,
+                }}
+                direction={{
+                  xs: 'column',
+                  sm: 'row',
+                }}
+              >
+                <UserAccessTable botId={id} />
+              </Stack>
+            </Box>
+          </Container>
+        </Box>
+      )}
     </>
   );
 };

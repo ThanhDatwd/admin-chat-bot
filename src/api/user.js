@@ -15,17 +15,19 @@ class UserApi {
     );
     return response;
   }
-  async getUserByOrgWithGranted({ customerId, botId, pagination,filter }) {
+  async getUserByOrgWithGranted({ customerId, botId, pagination, filter }) {
     const response = await getData(
       import.meta.env.VITE_API_URL_8086 +
-        `customer/users/search?customerId=${customerId}&${botId?`botId=${botId}&`:'&'}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}&${filter}`
+        `customer/users/search?customerId=${customerId}&${
+          botId ? `botId=${botId}&` : '&'
+        }&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}&${filter}`
     );
     return response;
   }
   async getUserWithGranted({ customerId, botId, pagination }) {
     const response = await getData(
       import.meta.env.VITE_API_URL_8086 +
-        `customer/users/granted?customerId=${customerId}&botId=${botId}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}`
+        `customer/users/granted/search?customerId=${customerId}&botId=${botId}&pageNumber=${pagination.pageNumber}&pageSize=${pagination.pageSize}`
     );
     return response;
   }
@@ -37,7 +39,7 @@ class UserApi {
     return response;
   }
   async UpdateUser(data) {
-    const response = await api.put(import.meta.env.VITE_API_AUTH_URL_8080 + `users`,data);
+    const response = await api.put(import.meta.env.VITE_API_AUTH_URL_8080 + `users`, data);
     return response;
   }
 }

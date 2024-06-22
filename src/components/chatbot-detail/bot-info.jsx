@@ -14,12 +14,24 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { BOT_STATUS } from 'src/constants/bot';
 import { ButtonIcon } from '../base/styles/button-icon';
 
 const BotInfo = ({ data }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const { knowledges } = useSelector((state) => state.knowledge);
+
+  const getBotStatus = (status) => {
+    const botStatus = BOT_STATUS[status];
+    return (
+      <Chip
+        style={{ maxWidth: '80%' }}
+        color={botStatus?.color}
+        label={botStatus?.label}
+      />
+    );
+  };
 
   return (
     <Card
@@ -63,10 +75,7 @@ const BotInfo = ({ data }) => {
           }}
           src={data?.icon}
         />
-        <Chip
-          color="success"
-          label={data?.botStatus}
-        />
+        {getBotStatus(data?.botStatus)}
         <Typography
           sx={{
             pt: 2,

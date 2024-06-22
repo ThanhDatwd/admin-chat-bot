@@ -369,7 +369,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                   <TableCell>{t('Username')}</TableCell>
                   <TableCell>{t('Email')}</TableCell>
                   <TableCell>
-                    {t('Role chat')}
+                    {t('Quyền chat')}
                     <Checkbox
                       checked={selectedAllUserRoleQuery}
                       onChange={(event) => handleSelectAllRole(event, 'canQuery')}
@@ -377,7 +377,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
                     />{' '}
                   </TableCell>
                   <TableCell>
-                    {t('Role training')}
+                    {t('Quyền training')}
                     <Checkbox
                       checked={selectedAllUserRoleUpdate}
                       onChange={(event) => handleSelectAllRole(event, 'canUpdate')}
@@ -505,6 +505,7 @@ const DecentralizationTable = ({ users = [], fetchData, totalCount, botId }) => 
               onRowsPerPageChange={handleLimitChange}
               page={page}
               rowsPerPage={limit}
+              labelRowsPerPage="Số hàng mỗi trang"
               rowsPerPageOptions={[5, 15, 30, 50]}
               slotProps={{
                 select: {

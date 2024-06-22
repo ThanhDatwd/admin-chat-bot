@@ -9,7 +9,6 @@ import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import TableRowsTwoToneIcon from '@mui/icons-material/TableRowsTwoTone';
-import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import {
   alpha,
   Avatar,
@@ -43,6 +42,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import EmptyDataImage from '/src/assets/images/all-img/empty-data.png';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import * as qs from 'qs';
@@ -52,6 +52,7 @@ import { useSelector } from 'react-redux';
 import { knowledgesApi } from 'src/api/knowledges';
 import { ButtonIcon } from 'src/components/base/styles/button-icon';
 import { TabsShadow } from 'src/components/base/styles/tabs';
+import { BOT_STATUS } from 'src/constants/bot';
 import { useRouter } from 'src/hooks/use-router';
 import { setLoading } from 'src/slices/common';
 import { getKnowledge, setKnowledge } from 'src/slices/knowledge';
@@ -61,7 +62,6 @@ import { isVietnameseTones } from 'src/utils/validateString';
 import BulkDelete from '../common/bulk-delete';
 import AuthorizeChatbotQuery from './authorize-chatbot-query';
 import ChatbotFooterDropdown from './chatbot-footer-dropdown';
-import { BOT_STATUS } from 'src/constants/bot';
 
 export const CardWrapper = styled(Card)(
   ({ theme }) => `
@@ -98,7 +98,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
   const [searchByNameValue, setSearchByNameValue] = useState('');
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({
-    knowId: null,
+    botStatus: null,
   });
 
   const isLoading = useSelector((state) => state.common.loading);
@@ -109,25 +109,24 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
   const [openAuthorizeChatbotQuery, setOpenAuthorizeChatbotQuery] = useState(false);
 
   const getBotStatus = (status) => {
-    const botStatus= BOT_STATUS[status]
+    const botStatus = BOT_STATUS[status];
     return (
       <Chip
         style={{ maxWidth: '80%' }}
         color={botStatus.color}
         label={botStatus.label}
-        
       />
     );
   };
 
   const handleTabsChange = (_event, tabsValue) => {
     let value = null;
-    if (tabsValue !== 'all') {
+    if (tabsValue !== 'ALL') {
       value = tabsValue;
     }
     setFilters((prevFilters) => ({
       ...prevFilters,
-      knowId: value,
+      botStatus: value,
     }));
     setSelectedItems([]);
   };
@@ -136,7 +135,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
     const selectedValue = event.target.value;
     setFilters((prevFilters) => ({
       ...prevFilters,
-      knowId: selectedValue === 'all' ? null : selectedValue,
+      botStatus: selectedValue === 'ALL' ? null : selectedValue,
     }));
     setSelectedItems([]);
   };
@@ -171,7 +170,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
 
         const convertedKnowledges = [
           {
-            value: 'all',
+            value: 'ALL',
             label: t('All bots'),
             count: bots.length,
           },
@@ -258,6 +257,17 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
       handleFilter();
     }
   };
+  const botStatus = [
+    {
+      value: 'ALL',
+      label: 'Tất cả',
+    },
+    ...Object.entries(BOT_STATUS).map(([key, value]) => ({
+      value: key,
+      ...value,
+    })),
+  ];
+
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
@@ -289,10 +299,10 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
           onChange={handleTabsChange}
           scrollButtons="auto"
           textColor="secondary"
-          value={filters.knowId || 'all'}
+          value={filters.botStatus || 'ALL'}
           variant="scrollable"
         >
-          {knowledges.map((tab) => (
+          {botStatus.map((tab) => (
             <Tab
               key={tab.value}
               value={tab.value}
@@ -300,7 +310,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
                 <>
                   {tab.label}
                   <Chip
-                    label={tab.count}
+                    label={10}
                     size="small"
                   />
                 </>
@@ -310,12 +320,12 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
         </TabsShadow>
       ) : (
         <Select
-          value={filters.knowId || 'all'}
+          value={filters.botStatus || 'ALL'}
           //@ts-ignore
           onChange={handleSelectChange}
           fullWidth
         >
-          {knowledges.map((tab) => (
+          {botStatus.map((tab) => (
             <MenuItem
               key={tab.value}
               value={tab.value}
@@ -763,6 +773,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
                   onRowsPerPageChange={handleLimitChange}
                   page={page}
                   rowsPerPage={limit}
+                  labelRowsPerPage="Số hàng mỗi trang"
                   rowsPerPageOptions={[5, 15, 30, 50]}
                   slotProps={{
                     select: {

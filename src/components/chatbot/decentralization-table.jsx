@@ -21,7 +21,7 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
@@ -74,7 +74,6 @@ const BotUsersTable = ({ users = [], fetchData, totalCount }) => {
   const selectedSomeUser = selectedItems.length > 0 && selectedItems.length < users.length;
   const selectedAllUser = selectedItems.length === users.length;
 
-
   const handleQueryChange = (user) => (event) => {
     setQuery((prevQuery) => ({
       ...prevQuery,
@@ -107,12 +106,12 @@ const BotUsersTable = ({ users = [], fetchData, totalCount }) => {
 
   const handlePageChange = (_event, newPage) => {
     setPage(newPage);
-    fetchData&&fetchData({ pageNumber: newPage, pageSize: limit }, filters);
+    fetchData && fetchData({ pageNumber: newPage, pageSize: limit }, filters);
   };
 
   const handleLimitChange = (event) => {
     setLimit(parseInt(event.target.value));
-    fetchData&&fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
+    fetchData && fetchData({ pageNumber: page, pageSize: parseInt(event.target.value) }, filters);
   };
   const handleChangeFilter = (data) => {
     let newFilter = { ...filters, ...data };
@@ -144,9 +143,9 @@ const BotUsersTable = ({ users = [], fetchData, totalCount }) => {
     handleChangeFilter({ customerName: value });
   };
   const debounceHandleSearch = debounce(handleSearchByName, 900);
-  
+
   useEffect(() => {
-    fetchData&&fetchData({ pageNumber: page, pageSize: limit });
+    fetchData && fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
 
   return (
@@ -165,7 +164,6 @@ const BotUsersTable = ({ users = [], fetchData, totalCount }) => {
         <Divider />
         <CardContent>
           <Box
-            
             pb={2}
             display="flex"
             alignItems="center"
@@ -312,6 +310,7 @@ const BotUsersTable = ({ users = [], fetchData, totalCount }) => {
                   onRowsPerPageChange={handleLimitChange}
                   page={page}
                   rowsPerPage={limit}
+                  labelRowsPerPage="Số hàng mỗi trang"
                   rowsPerPageOptions={[6, 9, 15]}
                   slotProps={{
                     select: {

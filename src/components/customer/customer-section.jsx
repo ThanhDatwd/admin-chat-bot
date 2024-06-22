@@ -709,6 +709,7 @@ const CustomerSection = ({ users, fetchData, totalCount }) => {
           onRowsPerPageChange={handleLimitChange}
           page={page}
           rowsPerPage={limit}
+          labelRowsPerPage="Số hàng mỗi trang"
           rowsPerPageOptions={[5, 15, 30, 50]}
           slotProps={{
             select: {
