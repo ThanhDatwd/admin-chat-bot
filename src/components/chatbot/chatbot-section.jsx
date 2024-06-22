@@ -21,6 +21,7 @@ import {
   Unstable_Grid2 as Grid,
   IconButton,
   InputAdornment,
+  LinearProgress,
   Link,
   MenuItem,
   Select,
@@ -111,11 +112,24 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
   const getBotStatus = (status) => {
     const botStatus = BOT_STATUS[status];
     return (
-      <Chip
-        style={{ maxWidth: '80%' }}
-        color={botStatus.color}
-        label={botStatus.label}
-      />
+      <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexWrap: 'wrap',
+            alignContent: 'start',
+            width:'100%'
+          }}
+        >
+          <Chip
+            style={{ maxWidth: '80%' }}
+            color={botStatus?.color}
+            label={botStatus?.label}
+          />
+          {status === BOT_STATUS.SYNCING.value && (
+            <LinearProgress style={{ height: '2px', width: 'auto' }} />
+          )}
+        </Box>
     );
   };
 

@@ -121,7 +121,6 @@ const FieldTable = ({ fields = [], fetchData, totalCount }) => {
   useEffect(() => {
     fetchData({ pageNumber: page, pageSize: limit });
   }, [isRefresh]);
-  console.log('adad', fields);
 
   return (
     <>

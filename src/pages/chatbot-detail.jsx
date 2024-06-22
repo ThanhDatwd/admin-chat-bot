@@ -39,6 +39,8 @@ const ChatbotDetail = () => {
   const [tableData, setTableData] = useState([]);
   const currentAdmin = useSelector((state) => state.auth.admin);
   const isLoading = useSelector((state) => state.common.loading);
+  const isRefresh = useSelector((state) => state.common.refresh);
+
   const dispatch = useDispatch();
   const getBot = useCallback(async () => {
     try {
@@ -53,14 +55,14 @@ const ChatbotDetail = () => {
 
   useEffect(() => {
     let intervalId = null
-   if(botData.botStatus===BOT_STATUS.SYNCING.value){
+  //  if(botData.botStatus===BOT_STATUS.SYNCING.value){
     intervalId = setInterval(() => {
       getBot();
-    }, 3000);
-   }
+    }, 5000);
+  //  }
 
     return () => clearInterval(intervalId);
-  }, [botData]);
+  }, [botData,isRefresh]);
 
   const loadUserFilesData = async () => {
     try {
@@ -84,7 +86,7 @@ const ChatbotDetail = () => {
     } finally {
       dispatch(setLoading(false));
     }
-  }, [id]);
+  }, [id,isRefresh]);
 
   return (
     <>
