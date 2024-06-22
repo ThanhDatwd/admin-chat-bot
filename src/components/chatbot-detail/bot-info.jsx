@@ -2,12 +2,14 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import {
   Avatar,
   Box,
+  Button,
   Card,
   CardActions,
   CardContent,
   CardHeader,
   Chip,
   Divider,
+  LinearProgress,
   Tooltip,
   Typography,
   useTheme,
@@ -25,11 +27,25 @@ const BotInfo = ({ data }) => {
   const getBotStatus = (status) => {
     const botStatus = BOT_STATUS[status];
     return (
-      <Chip
-        style={{ maxWidth: '80%' }}
-        color={botStatus?.color}
-        label={botStatus?.label}
-      />
+      <>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexWrap: 'wrap',
+            alignContent: 'center',
+          }}
+        >
+          <Chip
+            style={{ maxWidth: '80%' }}
+            color={botStatus?.color}
+            label={botStatus?.label}
+          />
+          {status === BOT_STATUS.SYNCING.value && (
+            <LinearProgress style={{ height: '2px', width: 'auto' }} />
+          )}
+        </Box>
+      </>
     );
   };
 
@@ -76,6 +92,7 @@ const BotInfo = ({ data }) => {
           src={data?.icon}
         />
         {getBotStatus(data?.botStatus)}
+
         <Typography
           sx={{
             pt: 2,
