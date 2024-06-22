@@ -239,7 +239,7 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
                     />
                   </FormControl>
                 </Grid>
-                <Grid
+                {/* <Grid
                   item
                   xs={12}
                 >
@@ -307,7 +307,7 @@ const CreateFieldDialog = ({ open, onClose, onUpdate, field }) => {
                       }
                     />
                   </FormControl>
-                </Grid>
+                </Grid> */}
                 <Grid
                   item
                   xs={12}

@@ -61,6 +61,7 @@ import { isVietnameseTones } from 'src/utils/validateString';
 import BulkDelete from '../common/bulk-delete';
 import AuthorizeChatbotQuery from './authorize-chatbot-query';
 import ChatbotFooterDropdown from './chatbot-footer-dropdown';
+import { BOT_STATUS } from 'src/constants/bot';
 
 export const CardWrapper = styled(Card)(
   ({ theme }) => `
@@ -107,12 +108,14 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
   const { knowledges: knowledgeData } = useSelector((state) => state.knowledge);
   const [openAuthorizeChatbotQuery, setOpenAuthorizeChatbotQuery] = useState(false);
 
-  const getBotRoleLabel = (labelName) => {
+  const getBotStatus = (status) => {
+    const botStatus= BOT_STATUS[status]
     return (
       <Chip
         style={{ maxWidth: '80%' }}
-        color={'info'}
-        label={labelName}
+        color={botStatus.color}
+        label={botStatus.label}
+        
       />
     );
   };
@@ -550,7 +553,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
                               </Box>
                             </TableCell>
                             <TableCell>0</TableCell>
-                            <TableCell>{getBotRoleLabel(bot.botStatus)}</TableCell>
+                            <TableCell>{getBotStatus(bot.botStatus)}</TableCell>
                             <TableCell>
                               <Typography fontWeight={600}>{bot.botDescription}</Typography>
                             </TableCell>
@@ -651,7 +654,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
                                 alignItems="flex-start"
                                 justifyContent="space-between"
                               >
-                                {getBotRoleLabel(bot.botStatus)}
+                                {getBotStatus(bot.botStatus)}
                                 <ChatbotFooterDropdown
                                   onSelect={() => setSelectedBot(bot)}
                                   setOpenAuthorizeChatbotQuery={setOpenAuthorizeChatbotQuery}
@@ -677,7 +680,7 @@ const ChatbotSection = ({ bots, fetchData, totalCount }) => {
                                       md: 0,
                                     },
                                   }}
-                                  src={bot.avatar}
+                                  src={bot.icon}
                                 />
                                 <Box>
                                   <Box>

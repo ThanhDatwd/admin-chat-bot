@@ -111,7 +111,7 @@ function UpdateUserDialog({ open, onClose }) {
       const uploadResponse = await uploadFile({
         file: file,
         userId: currentAdmin.id,
-        isPublic: false,
+        isPublic: true,
         jsonData: json,
       });
 
