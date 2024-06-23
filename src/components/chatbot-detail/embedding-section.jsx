@@ -40,6 +40,7 @@ const EmbeddingSection = ({ onEmbed }) => {
         file: file,
         botId: id,
         userId: currentAdmin.id,
+        customerId:currentAdmin.customerId,
         isPublic: false,
       });
 
@@ -60,7 +61,6 @@ const EmbeddingSection = ({ onEmbed }) => {
           return await handleUploadFile(file?.file);
         })
       );
-      console.log('asdad', uploadFiles);
       try {
         const data = {
           botId: id,

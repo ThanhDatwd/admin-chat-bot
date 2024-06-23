@@ -12,11 +12,12 @@ export const fetchUserFiles = async ({ botId, customerId }) => {
   }
 };
 
-export const uploadFile = async ({ file, botId = undefined, userId, isPublic = false }) => {
+export const uploadFile = async ({ file, botId = undefined, userId,customerId= undefined, isPublic = false }) => {
   try {
     const formData = new FormData();
     formData.append('file', file);
     if (botId) formData.append('botId', botId);
+    if (customerId) formData.append('customerId', customerId);
     formData.append('userId', userId);
     formData.append('isPublic', isPublic);
 
