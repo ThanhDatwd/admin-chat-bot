@@ -204,7 +204,7 @@ export const Header = (props) => {
               ref={popover.anchorRef}
             >
                <Avatar
-                src={currentAmin.avatarUrl}
+                src={currentAmin?.avatarUrl}
                 sx={{
                   borderRadius: 'inherit',
                   height: 36,

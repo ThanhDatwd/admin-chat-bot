@@ -86,7 +86,7 @@ const DocumentsUploadList = ({ files, setFiles }) => {
     });
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
+  const { getRootProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     onDrop,
     accept: {
       'image/jpeg': ['.jpeg', '.jpg'],
@@ -296,7 +296,6 @@ const DocumentsUploadList = ({ files, setFiles }) => {
           pt={3}
           pb={2}
         >
-          <input {...getInputProps()} />
           <Box textAlign="center">
             <Typography
               variant="h5"

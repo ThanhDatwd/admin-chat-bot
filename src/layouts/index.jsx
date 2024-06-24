@@ -17,28 +17,28 @@ export const Layout = (props) => {
   const [currentRole, setCurrentRole] = useState([]);
   const dispatch = useDispatch();
 
-  if (!isAuth)
-    return (
-      <Navigate
-        replace
-        to="/login"
-      />
-    );
+  // if (!isAuth)
+  //   return (
+  //     <Navigate
+  //       replace
+  //       to="/login"
+  //     />
+  //   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
-        const response = await dispatch(getCurrentUser());
-        dispatch(setAdminRole(response?.data?.authorities.map((item) => item.role) ?? []));
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       await dispatch(getKnowledge({ pageNumber: 0, pageSize: 20 }));
+  //       const response = await dispatch(getCurrentUser());
+  //       dispatch(setAdminRole(response?.data?.authorities.map((item) => item.role) ?? []));
 
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   };
 
-    fetchData();
-  }, [dispatch]);
+  //   fetchData();
+  // }, [dispatch]);
 
   const menuItems = useMenuItems(adminRoles);
 
@@ -46,7 +46,7 @@ export const Layout = (props) => {
     default:
       return (
         <>
-          {currentAdmin ? (
+          {!currentAdmin ? (
             <VerticalShellsDark
               menuItems={menuItems}
               {...props}
