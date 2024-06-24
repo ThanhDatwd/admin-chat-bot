@@ -302,7 +302,7 @@ const DocumentsUploadList = ({ files, setFiles }) => {
               variant="h5"
               color="text.primary"
             >
-              Không có tệp nào được thêm vào
+              Không có tệp nào được thêm vào 
             </Typography>
             <Typography
               color="text.secondary"
