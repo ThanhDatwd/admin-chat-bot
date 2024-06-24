@@ -1,20 +1,8 @@
-import ChartBarIcon from '@heroicons/react/24/outline/ChartBarIcon';
-import CogIcon from '@heroicons/react/24/outline/CogIcon';
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import {
   Box,
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
   Container,
-  Divider,
-  Grid,
   Stack,
-  Typography,
-  useTheme,
+  useTheme
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +14,6 @@ import BotInfo from 'src/components/chatbot-detail/bot-info';
 import EmbeddingHistory from 'src/components/chatbot-detail/embedding-history';
 import EmbeddingSection from 'src/components/chatbot-detail/embedding-section';
 import UserAccessTable from 'src/components/chatbot-detail/user-access-table';
-import { BOT_STATUS } from 'src/constants/bot';
 import { useRefMounted } from 'src/hooks/use-ref-mounted';
 import { setLoading } from 'src/slices/common';
 
