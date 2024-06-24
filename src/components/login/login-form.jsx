@@ -33,6 +33,8 @@ import { setAmin } from 'src/slices/auth';
 import { setLoading } from 'src/slices/common';
 import { useSelector } from 'src/store';
 import { z } from 'zod';
+import DocumentsUploadList from '../chatbot-detail/documents-upload-list';
+import DocumentsUploadListNoInput from '../chatbot-detail/documents-upload-list-noinput';
 
 const schema = z.object({
   username: z.string().min(1, 'Invalid username '),
@@ -52,6 +54,8 @@ function LoginForm() {
       username: '',
     },
   });
+  const [files, setFiles] = useState([]);
+  const [uploadFiles, setUploadFiles] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const handlePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -256,6 +260,17 @@ function LoginForm() {
                 Sign up
               </Link>
             </Grid>
+            <DocumentsUploadList
+              files={files}
+              setFiles={setFiles}
+              setUploadFiles={setUploadFiles}
+            />
+            <DocumentsUploadListNoInput
+              files={files}
+              setFiles={setFiles}
+              setUploadFiles={setUploadFiles}
+            />
+            
           </Grid>
         </Container>
       </Stack>
