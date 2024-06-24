@@ -1,0 +1,1 @@
+import{j as t,bD as r,g as a}from"./index-xIXTO1Ty.js";const i=s=>{const{heading:e}=s,n=e?e+" - Katech":"Katech | Chatbot Admin";return t.jsx(r,{children:t.jsx("title",{children:n})})};i.propTypes={heading:a.string};export{i as H};
